@@ -1,6 +1,6 @@
-use tui::backend::Backend;
+use tui::{backend::Backend, widgets::Widget};
 
-pub struct WidgetBase<TProps, TState>
+pub struct ComponentBase<TProps, TState>
 where
     TProps: Clone + Copy,
     TState: Clone + Copy,
@@ -9,7 +9,7 @@ where
     state: TState,
 }
 
-impl<TProps: Clone + Copy, TState: Clone + Copy> WidgetBase<TProps, TState> {
+impl<TProps: Clone + Copy, TState: Clone + Copy> ComponentBase<TProps, TState> {
     pub fn get_props(&self) -> TProps {
         self.props
     }
@@ -20,7 +20,7 @@ impl<TProps: Clone + Copy, TState: Clone + Copy> WidgetBase<TProps, TState> {
 }
 
 pub struct Root<TState: Clone + Copy, TProps: Clone + Copy> {
-    base: WidgetBase<TState, TProps>,
+    base: ComponentBase<TState, TProps>,
 }
 
 pub trait Component<TBackend, TEvent>
@@ -28,5 +28,5 @@ where
     TBackend: Backend,
 {
     fn handle_event(event: TEvent) -> bool;
-    fn render(backend: TBackend);
+    fn render(backend: TBackend) -> dyn Widget;
 }
