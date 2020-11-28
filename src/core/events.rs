@@ -8,8 +8,7 @@ use std::{
     time::Instant,
 };
 
-use crate::config::Config;
-
+use super::config::CoreConfig;
 #[derive(Clone, Copy, Debug)]
 pub struct Size {
     pub width: u16,
@@ -47,10 +46,10 @@ pub struct EventQueue {
 
 impl EventQueue {
     pub fn start() -> Self {
-        EventQueue::start_with_config(Config::default())
+        EventQueue::start_with_config(CoreConfig::default())
     }
 
-    pub fn start_with_config(config: Config) -> Self {
+    pub fn start_with_config(config: CoreConfig) -> Self {
         let (sender, receiver) = channel();
         let tick_rate = Duration::from_millis(config.tick_rate);
         let runner_handle = thread::spawn(move || {

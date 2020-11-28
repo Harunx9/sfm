@@ -51,5 +51,5 @@ pub trait Command<TArgs>
 where
     TArgs: Sized,
 {
-    fn execute_on(file_system_item: &FileSystemItem, args: TArgs) {}
+    fn execute_on(&self, file_system_item: &FileSystemItem, args: TArgs) {}
 }

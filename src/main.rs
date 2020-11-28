@@ -1,7 +1,5 @@
 pub mod app;
-pub mod config;
-pub mod events;
-pub mod state;
+pub mod core;
 
 fn main() {
     println!("Hello, world!");

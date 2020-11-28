@@ -1,3 +1,6 @@
+pub mod config;
+pub mod state;
+
 use std::{
     error::Error,
     io::{stdout, Write},
@@ -10,7 +13,9 @@ use crossterm::{
 };
 use tui::{backend::CrosstermBackend, Terminal};
 
-use crate::{config::Config, events::EventQueue, state::State};
+use crate::core::events::EventQueue;
+
+use self::{config::Config, state::State};
 
 pub struct App {
     state: State,
@@ -32,8 +37,10 @@ impl App {
 
         let backend = CrosstermBackend::new(stdout);
 
-        let mut terminal = Terminal::new(backend);
-        let event_queue = EventQueue::start_with_config(self.config);
+        let mut terminal = Terminal::new(backend)?;
+        let event_queue = EventQueue::start_with_config(self.config.core_cfg);
+
+        terminal.clear()?;
 
         loop {
             if let Ok(event) = event_queue.pool() {}
