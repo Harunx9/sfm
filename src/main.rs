@@ -9,9 +9,10 @@ use app::{
     actions::FrActions, components::Root, config::Config, reducers::root_reducer, state::State,
 };
 use crossterm::{
-    event::EnableMouseCapture,
+    event::{DisableMouseCapture, EnableMouseCapture},
     execute,
-    terminal::{enable_raw_mode, EnterAlternateScreen},
+    terminal::disable_raw_mode,
+    terminal::{enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
 use tui::{backend::CrosstermBackend, Terminal};
 
@@ -40,6 +41,13 @@ fn main() -> Result<(), Box<dyn Error>> {
 
         let state = store.get_state();
         if state.app_exit {
+            disable_raw_mode()?;
+            execute!(
+                terminal.backend_mut(),
+                LeaveAlternateScreen,
+                DisableMouseCapture
+            )?;
+            terminal.show_cursor()?;
             break;
         }
     }
