@@ -6,6 +6,8 @@ use super::{
 pub fn root_reducer(state: State, action: FrActions) -> State {
     match action {
         FrActions::App(app) => app_reducer(state.clone(), app),
+        FrActions::File(_) => state,
+        FrActions::Directory(_) => state,
     }
 }
 
