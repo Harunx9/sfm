@@ -34,3 +34,5 @@ impl Component<Event, (), State, FrActions> for Root {
 
     fn render<TBackend: Backend>(&self, frame: &mut tui::Frame<TBackend>) {}
 }
+
+pub struct Tab {}

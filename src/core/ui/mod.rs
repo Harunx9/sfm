@@ -54,6 +54,7 @@ where
     }
     fn set_props(&mut self, _props: TProps) {}
     fn handle_event(&mut self, event: TEvent, store: &mut Store<TGlobalState, TAction>) -> bool;
+    fn on_tick(&mut self) {}
     fn render<TBackend: Backend>(&self, frame: &mut Frame<TBackend>);
 }
 

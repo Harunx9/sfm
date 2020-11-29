@@ -1,3 +1,4 @@
+use crate::core::events::Event;
 use crate::core::ui::Component;
 use crate::core::{events::EventQueue, store::Store};
 use std::{
@@ -35,7 +36,11 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut root_component = Root::new();
     loop {
         if let Ok(event) = event_queue.pool() {
-            root_component.handle_event(event, &mut store);
+            if let Event::Tick = event {
+                root_component.on_tick();
+            } else {
+                root_component.handle_event(event, &mut store);
+            }
         }
         terminal.draw(|f| root_component.render(f))?;
 
