@@ -1,6 +1,6 @@
 pub struct Store<TState, TAction>
 where
-    TState: Default + Clone + Copy,
+    TState: Default + Clone,
     TAction: Clone + Copy,
 {
     state: TState,
@@ -11,7 +11,7 @@ where
 
 impl<TState, TAction> Store<TState, TAction>
 where
-    TState: Default + Copy + Clone,
+    TState: Default + Clone,
     TAction: Clone + Copy,
 {
     pub fn new(root_reducer: RootReducer<TState, TAction>) -> Self {
@@ -25,6 +25,10 @@ where
             listeners: Vec::new(),
             middlewares: Vec::new(),
         }
+    }
+
+    pub fn get_state(&self) -> TState {
+        self.state.clone()
     }
 
     pub fn dispatch(&mut self, action: TAction) {
@@ -44,7 +48,7 @@ where
     }
 
     fn dispatch_reducer(&self, action: TAction) -> TState {
-        (self.root_reducer)(self.state, action)
+        (self.root_reducer)(self.state.clone(), action)
     }
 
     fn dispatch_middlewares(&mut self, action: TAction) {

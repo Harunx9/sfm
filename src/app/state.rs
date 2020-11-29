@@ -1,3 +1,4 @@
+#[derive(Clone, Debug)]
 pub struct State {
     left_tab: Tab,
     right_tab: Tab,
@@ -14,6 +15,7 @@ impl Default for State {
     }
 }
 
+#[derive(Clone, Debug)]
 pub struct Tab {
     title: String,
     items: Vec<FileSystemItem>,
@@ -28,11 +30,13 @@ impl Default for Tab {
     }
 }
 
+#[derive(Clone, Debug)]
 pub enum FileSystemItem {
     Directory(DirectoryItem),
     File(FileItem),
 }
 
+#[derive(Clone, Debug)]
 pub struct DirectoryItem {
     is_visible: bool,
     name: String,
@@ -40,16 +44,10 @@ pub struct DirectoryItem {
     icon: char,
 }
 
+#[derive(Clone, Debug)]
 pub struct FileItem {
     is_visible: bool,
     name: String,
     path: String,
     icon: char,
-}
-
-pub trait Command<TArgs>
-where
-    TArgs: Sized,
-{
-    fn execute_on(&self, file_system_item: &FileSystemItem, args: TArgs) {}
 }
