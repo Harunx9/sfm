@@ -1,7 +1,7 @@
 pub struct Store<TState, TAction>
 where
     TState: Default + Clone,
-    TAction: Clone + Copy,
+    TAction: Clone,
 {
     state: TState,
     root_reducer: RootReducer<TState, TAction>,
@@ -12,7 +12,7 @@ where
 impl<TState, TAction> Store<TState, TAction>
 where
     TState: Default + Clone,
-    TAction: Clone + Copy,
+    TAction: Clone,
 {
     pub fn new(root_reducer: RootReducer<TState, TAction>) -> Self {
         Store::with_state(root_reducer, TState::default())
@@ -53,7 +53,7 @@ where
 
     fn dispatch_middlewares(&mut self, action: TAction) {
         while let Some(middleware) = self.middlewares.iter().next() {
-            if let Some(middleware_action) = middleware(self, action) {
+            if let Some(middleware_action) = middleware(self, action.clone()) {
                 self.state = self.dispatch_reducer(middleware_action);
             }
         }

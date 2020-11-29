@@ -1,7 +1,7 @@
 #[derive(Clone, Debug)]
 pub struct State {
-    left_tab: Tab,
-    right_tab: Tab,
+    pub left_tab: Tab,
+    pub right_tab: Tab,
     pub app_exit: bool,
 }
 
@@ -17,8 +17,8 @@ impl Default for State {
 
 #[derive(Clone, Debug)]
 pub struct Tab {
-    title: String,
-    items: Vec<FileSystemItem>,
+    pub title: String,
+    pub items: Vec<FileSystemItem>,
 }
 
 impl Default for Tab {
