@@ -1,29 +1,29 @@
 #[derive(Clone, Debug)]
-pub struct State {
-    pub left_tab: Tab,
-    pub right_tab: Tab,
+pub struct AppState {
+    pub left_tab: TabState,
+    pub right_tab: TabState,
     pub app_exit: bool,
 }
 
-impl Default for State {
+impl Default for AppState {
     fn default() -> Self {
-        State {
-            left_tab: Tab::default(),
-            right_tab: Tab::default(),
+        AppState {
+            left_tab: TabState::default(),
+            right_tab: TabState::default(),
             app_exit: false,
         }
     }
 }
 
 #[derive(Clone, Debug)]
-pub struct Tab {
+pub struct TabState {
     pub title: String,
     pub items: Vec<FileSystemItem>,
 }
 
-impl Default for Tab {
+impl Default for TabState {
     fn default() -> Self {
-        Tab {
+        TabState {
             title: String::new(),
             items: Vec::new(),
         }

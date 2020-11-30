@@ -9,19 +9,19 @@ use crate::core::{
 
 use super::{
     actions::{AppActions, FrActions},
-    state::State,
+    state::{AppState, TabState},
 };
 
-pub struct Root;
+pub struct RootComponent;
 
-impl Root {
+impl RootComponent {
     pub fn new() -> Self {
-        Root {}
+        RootComponent {}
     }
 }
 
-impl Component<Event, (), State, FrActions> for Root {
-    fn handle_event(&mut self, event: Event, store: &mut Store<State, FrActions>) -> bool {
+impl Component<Event, (), AppState, FrActions> for RootComponent {
+    fn handle_event(&mut self, event: Event, store: &mut Store<AppState, FrActions>) -> bool {
         if let Event::Keyboard(key_evt) = event {
             if let KeyCode::Char('q') = key_evt.code {
                 store.dispatch(FrActions::App(AppActions::Exit));
@@ -35,4 +35,24 @@ impl Component<Event, (), State, FrActions> for Root {
     fn render<TBackend: Backend>(&self, frame: &mut tui::Frame<TBackend>) {}
 }
 
-pub struct Tab {}
+pub struct TabComponent {
+    base: ComponentBase<TabState, ()>,
+}
+
+impl TabComponent {
+    pub fn new(props: TabState) -> Self {
+        TabComponent {
+            base: ComponentBase::new(Some(props), None),
+        }
+    }
+}
+
+impl Component<Event, TabState, AppState, FrActions> for TabComponent {
+    fn handle_event(&mut self, event: Event, store: &mut Store<AppState, FrActions>) -> bool {
+        todo!()
+    }
+
+    fn render<TBackend: Backend>(&self, frame: &mut tui::Frame<TBackend>) {
+        todo!()
+    }
+}

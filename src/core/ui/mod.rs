@@ -29,6 +29,10 @@ where
     TProps: Default + Clone,
     TState: Default + Clone,
 {
+    pub fn new(props: Option<TProps>, state: Option<TState>) -> Self {
+        ComponentBase { props, state }
+    }
+
     pub fn get_props(&self) -> Option<TProps> {
         self.props.clone()
     }
@@ -49,10 +53,6 @@ where
     TGlobalState: Default + Clone,
     TAction: Clone,
 {
-    fn get_props(&self) -> Option<TProps> {
-        None
-    }
-    fn set_props(&mut self, _props: TProps) {}
     fn handle_event(&mut self, event: TEvent, store: &mut Store<TGlobalState, TAction>) -> bool;
     fn on_tick(&mut self) {}
     fn render<TBackend: Backend>(&self, frame: &mut Frame<TBackend>);

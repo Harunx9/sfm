@@ -7,7 +7,8 @@ use std::{
 };
 
 use app::{
-    actions::FrActions, components::Root, config::Config, reducers::root_reducer, state::State,
+    actions::FrActions, components::RootComponent, config::Config, reducers::root_reducer,
+    state::AppState,
 };
 use crossterm::{
     event::{DisableMouseCapture, EnableMouseCapture},
@@ -30,10 +31,10 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let mut terminal = Terminal::new(backend)?;
     let event_queue = EventQueue::start_with_config(cfg.core_cfg);
-    let mut store = Store::<State, FrActions>::new(root_reducer);
+    let mut store = Store::<AppState, FrActions>::new(root_reducer);
 
     terminal.clear()?;
-    let mut root_component = Root::new();
+    let mut root_component = RootComponent::new();
     loop {
         if let Ok(event) = event_queue.pool() {
             if let Event::Tick = event {
