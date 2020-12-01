@@ -7,7 +7,7 @@ use std::{
 };
 
 use app::{
-    actions::FrActions, components::RootComponent, config::Config, reducers::root_reducer,
+    actions::FileManagerActions, components::RootComponent, config::Config, reducers::root_reducer,
     state::AppState,
 };
 use crossterm::{
@@ -31,7 +31,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let mut terminal = Terminal::new(backend)?;
     let event_queue = EventQueue::start_with_config(cfg.core_cfg);
-    let mut store = Store::<AppState, FrActions>::new(root_reducer);
+    let mut store = Store::<AppState, FileManagerActions>::new(root_reducer);
 
     terminal.clear()?;
     let mut root_component = RootComponent::new();
@@ -43,7 +43,8 @@ fn main() -> Result<(), Box<dyn Error>> {
                 root_component.handle_event(event, &mut store);
             }
         }
-        terminal.draw(|f| root_component.render(f))?;
+
+        terminal.draw(|f| root_component.render(f, None))?;
 
         let state = store.get_state();
         if state.app_exit {

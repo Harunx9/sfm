@@ -1,4 +1,4 @@
-use tui::{backend::Backend, Frame};
+use tui::{backend::Backend, layout::Rect, Frame};
 
 use super::store::Store;
 
@@ -55,7 +55,7 @@ where
 {
     fn handle_event(&mut self, event: TEvent, store: &mut Store<TGlobalState, TAction>) -> bool;
     fn on_tick(&mut self) {}
-    fn render<TBackend: Backend>(&self, frame: &mut Frame<TBackend>);
+    fn render<TBackend: Backend>(&self, frame: &mut Frame<TBackend>, area: Option<Rect>);
 }
 
 type StateSetter<TState> = fn(Option<TState>) -> Option<TState>;

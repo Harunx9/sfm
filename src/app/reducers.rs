@@ -1,13 +1,13 @@
 use super::{
-    actions::{AppActions, FrActions},
+    actions::{AppActions, FileManagerActions},
     state::AppState,
 };
 
-pub fn root_reducer(state: AppState, action: FrActions) -> AppState {
+pub fn root_reducer(state: AppState, action: FileManagerActions) -> AppState {
     match action {
-        FrActions::App(app) => app_reducer(state.clone(), app),
-        FrActions::File(_) => state,
-        FrActions::Directory(_) => state,
+        FileManagerActions::App(app) => app_reducer(state.clone(), app),
+        FileManagerActions::File(_) => state,
+        FileManagerActions::Directory(_) => state,
     }
 }
 

@@ -1,5 +1,5 @@
 #[derive(Clone, Debug)]
-pub enum FrActions {
+pub enum FileManagerActions {
     File(FileAction),
     Directory(DirectoryAction),
     App(AppActions),
