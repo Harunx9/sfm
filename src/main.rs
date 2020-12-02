@@ -1,5 +1,5 @@
 use crate::core::events::Event;
-use crate::core::ui::Component;
+use crate::core::ui::component::Component;
 use crate::core::{events::EventQueue, store::Store};
 use std::{
     error::Error,
@@ -7,8 +7,8 @@ use std::{
 };
 
 use app::{
-    actions::FileManagerActions, components::RootComponent, config::Config, reducers::root_reducer,
-    state::AppState,
+    actions::FileManagerActions, components::root::RootComponent, config::Config,
+    reducers::root_reducer, state::AppState,
 };
 use crossterm::{
     event::{DisableMouseCapture, EnableMouseCapture},
