@@ -36,6 +36,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     terminal.clear()?;
     let mut root_component = RootComponent::new();
     loop {
+        terminal.draw(|f| root_component.render(f, None))?;
+
         if let Ok(event) = event_queue.pool() {
             if let Event::Tick = event {
                 root_component.on_tick();
@@ -44,9 +46,8 @@ fn main() -> Result<(), Box<dyn Error>> {
             }
         }
 
-        terminal.draw(|f| root_component.render(f, None))?;
-
         let state = store.get_state();
+
         if state.app_exit {
             disable_raw_mode()?;
             execute!(

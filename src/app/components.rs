@@ -2,6 +2,8 @@ use crossterm::event::KeyCode;
 use tui::{
     backend::Backend,
     layout::{Constraint, Direction, Layout, Rect},
+    style::Style,
+    widgets::{Block, Borders},
 };
 
 use crate::core::{
@@ -54,7 +56,7 @@ impl Component<Event, (), AppState, FileManagerActions> for RootComponent {
 
     fn render<TBackend: Backend>(&self, frame: &mut tui::Frame<TBackend>, area: Option<Rect>) {
         let layout = Layout::default()
-            .direction(Direction::Vertical)
+            .direction(Direction::Horizontal)
             .constraints([Constraint::Percentage(50), Constraint::Percentage(50)])
             .split(frame.size());
         self.left_tab.render(frame, Some(layout[0]));
@@ -97,5 +99,12 @@ impl Component<Event, TabState, AppState, FileManagerActions> for TabComponent {
         false
     }
 
-    fn render<TBackend: Backend>(&self, frame: &mut tui::Frame<TBackend>, area: Option<Rect>) {}
+    fn render<TBackend: Backend>(&self, frame: &mut tui::Frame<TBackend>, area: Option<Rect>) {
+        let block = Block::default()
+            .borders(Borders::ALL)
+            .border_style(Style::default())
+            .border_type(tui::widgets::BorderType::Thick)
+            .style(Style::default());
+        frame.render_widget(block, area.unwrap())
+    }
 }
