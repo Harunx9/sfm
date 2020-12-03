@@ -14,12 +14,12 @@ use crate::{
 
 use super::tab::TabComponent;
 
-pub struct RootComponent {
-    left_tab: TabComponent,
-    right_tab: TabComponent,
+pub struct RootComponent<'component> {
+    left_tab: TabComponent<'component>,
+    right_tab: TabComponent<'component>,
 }
 
-impl RootComponent {
+impl<'component> RootComponent<'component> {
     pub fn new() -> Self {
         RootComponent {
             left_tab: TabComponent::empty(),
@@ -28,7 +28,7 @@ impl RootComponent {
     }
 }
 
-impl Component<Event, AppState<'_>, FileManagerActions> for RootComponent {
+impl<'component> Component<Event, AppState<'_>, FileManagerActions> for RootComponent<'component> {
     fn handle_event(
         &mut self,
         event: Event,
