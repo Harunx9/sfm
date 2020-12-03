@@ -1,11 +1,13 @@
+use super::file_system::FileSystemItem;
+
 #[derive(Clone, Debug)]
-pub struct AppState {
-    pub left_tab: TabState,
-    pub right_tab: TabState,
+pub struct AppState<'state> {
+    pub left_tab: TabState<'state>,
+    pub right_tab: TabState<'state>,
     pub app_exit: bool,
 }
 
-impl Default for AppState {
+impl<'state> Default for AppState<'state> {
     fn default() -> Self {
         AppState {
             left_tab: TabState::default(),
@@ -16,38 +18,16 @@ impl Default for AppState {
 }
 
 #[derive(Clone, Debug)]
-pub struct TabState {
+pub struct TabState<'tab> {
     pub title: String,
-    pub items: Vec<FileSystemItem>,
+    pub items: Vec<FileSystemItem<'tab>>,
 }
 
-impl Default for TabState {
+impl<'tab> Default for TabState<'tab> {
     fn default() -> Self {
         TabState {
             title: String::new(),
             items: Vec::new(),
         }
     }
-}
-
-#[derive(Clone, Debug)]
-pub enum FileSystemItem {
-    Directory(DirectoryItem),
-    File(FileItem),
-}
-
-#[derive(Clone, Debug)]
-pub struct DirectoryItem {
-    is_visible: bool,
-    name: String,
-    path: String,
-    icon: char,
-}
-
-#[derive(Clone, Debug)]
-pub struct FileItem {
-    is_visible: bool,
-    name: String,
-    path: String,
-    icon: char,
 }

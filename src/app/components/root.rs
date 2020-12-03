@@ -28,7 +28,7 @@ impl RootComponent {
     }
 }
 
-impl Component<Event, AppState, FileManagerActions> for RootComponent {
+impl Component<Event, AppState<'_>, FileManagerActions> for RootComponent {
     fn handle_event(
         &mut self,
         event: Event,

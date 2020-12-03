@@ -17,7 +17,7 @@ use crate::{
     },
 };
 
-type TabComponentProps = TabState;
+type TabComponentProps<'props> = TabState<'props>;
 
 #[derive(Clone, Copy, Debug)]
 pub struct TabComponentState {
@@ -40,18 +40,21 @@ impl TabComponentState {
     }
 }
 
-pub struct TabComponent {
-    base: ComponentBase<TabComponentProps, TabComponentState>,
+pub struct TabComponent<'component> {
+    base: ComponentBase<TabComponentProps<'component>, TabComponentState>,
 }
 
-impl TabComponent {
-    pub fn new(props: Option<TabComponentProps>, state: Option<TabComponentState>) -> Self {
+impl<'component> TabComponent<'component> {
+    pub fn new(
+        props: Option<TabComponentProps<'component>>,
+        state: Option<TabComponentState>,
+    ) -> Self {
         TabComponent {
             base: ComponentBase::new(props, state),
         }
     }
 
-    pub fn with_props(props: TabComponentProps) -> Self {
+    pub fn with_props(props: TabComponentProps<'component>) -> Self {
         TabComponent::new(Some(props), None)
     }
 
@@ -60,7 +63,7 @@ impl TabComponent {
     }
 }
 
-impl Component<Event, AppState, FileManagerActions> for TabComponent {
+impl<'component> Component<Event, AppState<'_>, FileManagerActions> for TabComponent<'component> {
     fn handle_event(
         &mut self,
         event: Event,
