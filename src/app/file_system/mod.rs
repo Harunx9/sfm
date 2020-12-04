@@ -3,41 +3,77 @@ use chrono::{DateTime, Local};
 pub mod directory;
 
 #[derive(Clone, Debug)]
-pub enum FileSystemItem<'item> {
-    Directory(DirectoryItem<'item>),
-    File(FileItem<'item>),
+pub enum FileSystemItem {
+    Directory(DirectoryItem),
+    File(FileItem),
     Unknown,
 }
 
-impl<'item> ToString for FileSystemItem<'item> {
+impl ToString for FileSystemItem {
     fn to_string(&self) -> String {
-        todo!()
+        match self {
+            FileSystemItem::Directory(dir) => dir.to_string(),
+            FileSystemItem::File(file) => file.to_string(),
+            FileSystemItem::Unknown => "".to_string(),
+        }
     }
 }
 
 #[derive(Clone, Debug)]
-pub struct DirectoryItem<'item> {
+pub struct DirectoryItem {
     is_visible: bool,
-    name: &'item str,
-    path: &'item str,
+    name: String,
+    path: String,
     last_modification: DateTime<Local>,
 }
 
-impl<'item> ToString for DirectoryItem<'item> {
+impl DirectoryItem {
+    pub fn new(
+        name: String,
+        path: String,
+        is_visible: bool,
+        last_modification: DateTime<Local>,
+    ) -> Self {
+        DirectoryItem {
+            is_visible,
+            name,
+            path,
+            last_modification,
+        }
+    }
+}
+
+impl ToString for DirectoryItem {
     fn to_string(&self) -> String {
         format!("{} {}", self.name, self.last_modification)
     }
 }
 
 #[derive(Clone, Debug)]
-pub struct FileItem<'item> {
+pub struct FileItem {
     is_visible: bool,
-    name: &'item str,
-    path: &'item str,
+    name: String,
+    path: String,
     last_modification: DateTime<Local>,
 }
 
-impl<'item> ToString for FileItem<'item> {
+impl FileItem {
+    pub fn new(
+        name: String,
+        path: String,
+        is_visible: bool,
+        last_modification: DateTime<Local>,
+    ) -> Self {
+        FileItem {
+            is_visible,
+            name,
+            path,
+            last_modification,
+        }
+    }
+}
+
+impl ToString for FileItem {
     fn to_string(&self) -> String {
         format!("{} {}", self.name, self.last_modification)
     }

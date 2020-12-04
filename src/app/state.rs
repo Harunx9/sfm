@@ -1,13 +1,13 @@
 use super::file_system::FileSystemItem;
 
 #[derive(Clone, Debug)]
-pub struct AppState<'state> {
-    pub left_tab: TabState<'state>,
-    pub right_tab: TabState<'state>,
+pub struct AppState {
+    pub left_tab: TabState,
+    pub right_tab: TabState,
     pub app_exit: bool,
 }
 
-impl<'state> Default for AppState<'state> {
+impl Default for AppState {
     fn default() -> Self {
         AppState {
             left_tab: TabState::default(),
@@ -18,15 +18,19 @@ impl<'state> Default for AppState<'state> {
 }
 
 #[derive(Clone, Debug)]
-pub struct TabState<'tab> {
-    pub title: String,
-    pub items: Vec<FileSystemItem<'tab>>,
+pub struct TabState {
+    pub name: String,
+    pub path: String,
+    pub items: Vec<FileSystemItem>,
+    pub is_focused: bool,
 }
 
-impl<'tab> Default for TabState<'tab> {
+impl Default for TabState {
     fn default() -> Self {
         TabState {
-            title: String::new(),
+            name: String::default(),
+            path: String::default(),
+            is_focused: false,
             items: Vec::new(),
         }
     }

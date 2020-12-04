@@ -2,12 +2,14 @@
 pub enum FileManagerActions {
     File(FileAction),
     Directory(DirectoryAction),
-    App(AppActions),
+    App(AppAction),
 }
 
 #[derive(Clone, Debug)]
-pub enum AppActions {
+pub enum AppAction {
     Exit,
+    FocusLeft,
+    FocusRight,
 }
 
 #[derive(Clone, Debug)]

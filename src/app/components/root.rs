@@ -6,7 +6,7 @@ use tui::{
 
 use crate::{
     app::{
-        actions::{AppActions, FileManagerActions},
+        actions::{AppAction, FileManagerActions},
         state::AppState,
     },
     core::{events::Event, store::Store, ui::component::Component},
@@ -14,12 +14,12 @@ use crate::{
 
 use super::tab::TabComponent;
 
-pub struct RootComponent<'component> {
-    left_tab: TabComponent<'component>,
-    right_tab: TabComponent<'component>,
+pub struct RootComponent {
+    left_tab: TabComponent,
+    right_tab: TabComponent,
 }
 
-impl<'component> RootComponent<'component> {
+impl RootComponent {
     pub fn new() -> Self {
         RootComponent {
             left_tab: TabComponent::empty(),
@@ -28,7 +28,7 @@ impl<'component> RootComponent<'component> {
     }
 }
 
-impl<'component> Component<Event, AppState<'_>, FileManagerActions> for RootComponent<'component> {
+impl Component<Event, AppState, FileManagerActions> for RootComponent {
     fn handle_event(
         &mut self,
         event: Event,
@@ -37,7 +37,7 @@ impl<'component> Component<Event, AppState<'_>, FileManagerActions> for RootComp
         let mut result = false;
         if let Event::Keyboard(key_evt) = event {
             if let KeyCode::Char('q') = key_evt.code {
-                store.dispatch(FileManagerActions::App(AppActions::Exit));
+                store.dispatch(FileManagerActions::App(AppAction::Exit));
                 result = true
             }
         }
