@@ -34,8 +34,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut store = Store::<AppState, FileManagerActions>::new(root_reducer);
 
     terminal.clear()?;
+
     let mut root_component = RootComponent::new();
     root_component.on_init(&store);
+
     loop {
         terminal.draw(|f| root_component.render(f, None))?;
 

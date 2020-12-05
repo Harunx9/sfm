@@ -72,13 +72,6 @@ impl Component<Event, AppState, FileManagerActions> for TabComponent {
     }
 
     fn render<TBackend: Backend>(&self, frame: &mut tui::Frame<TBackend>, area: Option<Rect>) {
-        let block = Block::default()
-            .borders(Borders::ALL)
-            .border_style(Style::default())
-            .border_type(tui::widgets::BorderType::Thick)
-            .style(Style::default());
-        frame.render_widget(block, area.unwrap());
-
         if let Some(tab_props) = self.base.get_props() {
             let list_items: Vec<ListItem> = tab_props
                 .items
@@ -86,7 +79,13 @@ impl Component<Event, AppState, FileManagerActions> for TabComponent {
                 .map(|item| ListItem::new(item.to_string()))
                 .collect();
 
-            let list = List::new(list_items);
+            let list = List::new(list_items).block(
+                Block::default()
+                    .borders(Borders::ALL)
+                    .border_style(Style::default())
+                    .border_type(tui::widgets::BorderType::Thick)
+                    .style(Style::default()),
+            );
             frame.render_widget(list, area.unwrap());
         }
     }
