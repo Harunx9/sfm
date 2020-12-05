@@ -1,11 +1,35 @@
 use chrono::{DateTime, Local};
 use fs::Metadata;
 
-use super::{FileItem, FileSystemItem};
+use super::{DirectoryItem, FileItem, FileSystemItem};
 use std::{
     fs::{self, DirEntry},
     time::SystemTime,
 };
+
+#[derive(Clone, Debug)]
+pub struct DirInfo {
+    pub name: String,
+    pub path: String,
+}
+
+impl DirInfo {
+    pub fn new(path: &str) -> Option<Self> {
+        if let Ok(path_buffer) = fs::canonicalize(path) {
+            let name = if let Some(file_name) = path_buffer.file_name() {
+                file_name.to_str().unwrap_or("")
+            } else {
+                ""
+            };
+            let path = path_buffer.as_path().to_str().unwrap_or("");
+            return Some(DirInfo {
+                name: name.to_string(),
+                path: path.to_string(),
+            });
+        }
+        None
+    }
+}
 
 pub fn get_items_from_dir(dir: &str) -> Vec<FileSystemItem> {
     match fs::read_dir(dir) {
@@ -36,8 +60,8 @@ fn map_dir_entry_to_file_system_item(dir_entry: DirEntry) -> FileSystemItem {
             ));
         }
 
-        if metadata.is_file() {
-            return FileSystemItem::File(FileItem::new(
+        if metadata.is_dir() {
+            return FileSystemItem::Directory(DirectoryItem::new(
                 name.to_string(),
                 path.to_string(),
                 true,

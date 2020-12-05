@@ -1,4 +1,9 @@
-use super::file_system::FileSystemItem;
+use std::fs;
+
+use super::file_system::{
+    directory::{get_items_from_dir, DirInfo},
+    FileSystemItem,
+};
 
 #[derive(Clone, Debug)]
 pub struct AppState {
@@ -18,6 +23,12 @@ impl Default for AppState {
 }
 
 #[derive(Clone, Debug)]
+pub struct PaneState {
+    tabs: Vec<TabState>,
+    is_focused: bool,
+}
+
+#[derive(Clone, Debug)]
 pub struct TabState {
     pub name: String,
     pub path: String,
@@ -27,11 +38,19 @@ pub struct TabState {
 
 impl Default for TabState {
     fn default() -> Self {
+        TabState::from_dir(".")
+    }
+}
+
+impl TabState {
+    pub fn from_dir(dir_path: &str) -> Self {
+        let dir_info = DirInfo::new(dir_path).unwrap();
+        let items = get_items_from_dir(dir_path);
         TabState {
-            name: String::default(),
-            path: String::default(),
+            name: dir_info.name,
+            path: dir_info.path,
+            items,
             is_focused: false,
-            items: Vec::new(),
         }
     }
 }

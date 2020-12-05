@@ -62,3 +62,9 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     Ok(())
 }
+
+//fn main() {
+//    let store = Store::<AppState, FileManagerActions>::new(root_reducer);
+//
+//    println!("{:#?}", store.get_state());
+//}
