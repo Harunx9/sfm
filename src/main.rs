@@ -35,6 +35,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     terminal.clear()?;
     let mut root_component = RootComponent::new();
+    root_component.on_init(&store);
     loop {
         terminal.draw(|f| root_component.render(f, None))?;
 

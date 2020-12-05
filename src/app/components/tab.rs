@@ -2,6 +2,8 @@ use tui::{
     backend::Backend,
     layout::Rect,
     style::Style,
+    widgets::List,
+    widgets::ListItem,
     widgets::{Block, Borders},
 };
 
@@ -75,6 +77,17 @@ impl Component<Event, AppState, FileManagerActions> for TabComponent {
             .border_style(Style::default())
             .border_type(tui::widgets::BorderType::Thick)
             .style(Style::default());
-        frame.render_widget(block, area.unwrap())
+        frame.render_widget(block, area.unwrap());
+
+        if let Some(tab_props) = self.base.get_props() {
+            let list_items: Vec<ListItem> = tab_props
+                .items
+                .iter()
+                .map(|item| ListItem::new(item.to_string()))
+                .collect();
+
+            let list = List::new(list_items);
+            frame.render_widget(list, area.unwrap());
+        }
     }
 }
