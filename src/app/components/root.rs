@@ -7,16 +7,16 @@ use tui::{
 use crate::{
     app::{
         actions::{AppAction, FileManagerActions},
-        state::AppState,
+        state::{AppState, PanelState},
     },
     core::{events::Event, store::Store, ui::component::Component},
 };
 
-use super::tab::TabComponent;
+use super::{panel::PanelComponent, tab::TabComponent};
 
 pub struct RootComponent {
-    left_tab: TabComponent,
-    right_tab: TabComponent,
+    left_panel: PanelComponent,
+    right_panel: PanelComponent,
 }
 
 impl RootComponent {
@@ -31,8 +31,6 @@ impl RootComponent {
 impl Component<Event, AppState, FileManagerActions> for RootComponent {
     fn on_init(&mut self, store: &Store<AppState, FileManagerActions>) {
         let state = store.get_state();
-        self.left_tab = TabComponent::with_props(state.left_tab);
-        self.right_tab = TabComponent::with_props(state.right_tab);
     }
 
     fn handle_event(

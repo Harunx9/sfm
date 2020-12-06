@@ -1,5 +1,3 @@
-use std::fs;
-
 use super::file_system::{
     directory::{get_items_from_dir, DirInfo},
     FileSystemItem,
@@ -7,25 +5,36 @@ use super::file_system::{
 
 #[derive(Clone, Debug)]
 pub struct AppState {
-    pub left_tab: TabState,
-    pub right_tab: TabState,
+    pub left_panel: PanelState,
+    pub right_panel: PanelState,
     pub app_exit: bool,
 }
 
 impl Default for AppState {
     fn default() -> Self {
         AppState {
-            left_tab: TabState::default(),
-            right_tab: TabState::default(),
+            left_panel: PanelState::default(),
+            right_panel: PanelState::default(),
             app_exit: false,
         }
     }
 }
 
 #[derive(Clone, Debug)]
-pub struct PaneState {
-    tabs: Vec<TabState>,
-    is_focused: bool,
+pub struct PanelState {
+    pub tabs: Vec<TabState>,
+    pub is_focused: bool,
+    pub current_tab: usize,
+}
+
+impl Default for PanelState {
+    fn default() -> Self {
+        PanelState {
+            tabs: vec![TabState::default()],
+            is_focused: false,
+            current_tab: 0,
+        }
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -33,7 +42,6 @@ pub struct TabState {
     pub name: String,
     pub path: String,
     pub items: Vec<FileSystemItem>,
-    pub is_focused: bool,
 }
 
 impl Default for TabState {
@@ -50,7 +58,6 @@ impl TabState {
             name: dir_info.name,
             path: dir_info.path,
             items,
-            is_focused: false,
         }
     }
 }

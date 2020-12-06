@@ -19,7 +19,7 @@ use crate::{
     },
 };
 
-type TabComponentProps = TabState;
+pub type TabComponentProps = TabState;
 
 #[derive(Clone, Copy, Debug)]
 pub struct TabComponentState {
@@ -63,14 +63,6 @@ impl TabComponent {
 }
 
 impl Component<Event, AppState, FileManagerActions> for TabComponent {
-    fn handle_event(
-        &mut self,
-        event: Event,
-        store: &mut Store<AppState, FileManagerActions>,
-    ) -> bool {
-        false
-    }
-
     fn render<TBackend: Backend>(&self, frame: &mut tui::Frame<TBackend>, area: Option<Rect>) {
         if let Some(tab_props) = self.base.get_props() {
             let list_items: Vec<ListItem> = tab_props
