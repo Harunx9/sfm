@@ -1,7 +1,7 @@
 use super::{
     actions::{AppAction, DirectoryAction, FileAction, FileManagerActions},
     file_system::directory::get_items_from_dir,
-    state::{AppState, TabState},
+    state::{AppState, PanelState, TabState},
 };
 
 pub fn root_reducer(state: AppState, action: FileManagerActions) -> AppState {
@@ -15,36 +15,32 @@ pub fn root_reducer(state: AppState, action: FileManagerActions) -> AppState {
 fn app_reducer(state: AppState, app_action: AppAction) -> AppState {
     match app_action {
         AppAction::Exit => AppState {
-            left_tab: state.left_tab,
-            right_tab: state.right_tab,
+            left_panel: state.left_panel,
+            right_panel: state.right_panel,
             app_exit: true,
         },
         AppAction::FocusLeft => AppState {
-            left_tab: TabState {
-                name: state.left_tab.name,
-                path: state.left_tab.path,
-                items: state.left_tab.items,
+            left_panel: PanelState {
+                tabs: state.left_panel.tabs,
+                current_tab: state.left_panel.current_tab,
                 is_focused: true,
             },
-            right_tab: TabState {
-                name: state.right_tab.name,
-                path: state.right_tab.path,
-                items: state.right_tab.items,
+            right_panel: PanelState {
+                tabs: state.right_panel.tabs,
+                current_tab: state.right_panel.current_tab,
                 is_focused: false,
             },
             app_exit: false,
         },
         AppAction::FocusRight => AppState {
-            left_tab: TabState {
-                name: state.left_tab.name,
-                path: state.left_tab.path,
-                items: state.left_tab.items,
+            left_panel: PanelState {
+                tabs: state.left_panel.tabs,
+                current_tab: state.left_panel.current_tab,
                 is_focused: false,
             },
-            right_tab: TabState {
-                name: state.right_tab.name,
-                path: state.right_tab.path,
-                items: state.right_tab.items,
+            right_panel: PanelState {
+                tabs: state.right_panel.tabs,
+                current_tab: state.right_panel.current_tab,
                 is_focused: true,
             },
             app_exit: false,

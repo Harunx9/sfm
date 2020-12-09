@@ -42,22 +42,24 @@ pub struct TabState {
     pub name: String,
     pub path: String,
     pub items: Vec<FileSystemItem>,
+    pub current_item: usize,
 }
 
 impl Default for TabState {
     fn default() -> Self {
-        TabState::from_dir(".")
+        TabState::with_dir(".")
     }
 }
 
 impl TabState {
-    pub fn from_dir(dir_path: &str) -> Self {
+    pub fn with_dir(dir_path: &str) -> Self {
         let dir_info = DirInfo::new(dir_path).unwrap();
         let items = get_items_from_dir(dir_path);
         TabState {
             name: dir_info.name,
             path: dir_info.path,
             items,
+            current_item: 0,
         }
     }
 }

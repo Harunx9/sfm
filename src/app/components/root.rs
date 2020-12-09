@@ -22,8 +22,8 @@ pub struct RootComponent {
 impl RootComponent {
     pub fn new() -> Self {
         RootComponent {
-            left_tab: TabComponent::empty(),
-            right_tab: TabComponent::empty(),
+            left_panel: PanelComponent::empty(),
+            right_panel: PanelComponent::empty(),
         }
     }
 }
@@ -46,11 +46,11 @@ impl Component<Event, AppState, FileManagerActions> for RootComponent {
             }
         }
 
-        result = self.left_tab.handle_event(event, store);
+        result = self.left_panel.handle_event(event, store);
         if result == true {
             return result;
         }
-        result = self.right_tab.handle_event(event, store);
+        result = self.right_panel.handle_event(event, store);
 
         result
     }
@@ -60,7 +60,7 @@ impl Component<Event, AppState, FileManagerActions> for RootComponent {
             .direction(Direction::Horizontal)
             .constraints([Constraint::Percentage(50), Constraint::Percentage(50)])
             .split(frame.size());
-        self.left_tab.render(frame, Some(layout[0]));
-        self.right_tab.render(frame, Some(layout[1]));
+        self.left_panel.render(frame, Some(layout[0]));
+        self.right_panel.render(frame, Some(layout[1]));
     }
 }
