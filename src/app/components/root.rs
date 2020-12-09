@@ -31,6 +31,8 @@ impl RootComponent {
 impl Component<Event, AppState, FileManagerActions> for RootComponent {
     fn on_init(&mut self, store: &Store<AppState, FileManagerActions>) {
         let state = store.get_state();
+        self.left_panel = PanelComponent::from(state.left_panel);
+        self.right_panel = PanelComponent::from(state.right_panel);
     }
 
     fn handle_event(
