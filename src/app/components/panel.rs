@@ -10,7 +10,7 @@ use tui::{
 use crate::{
     app::{
         actions::FileManagerActions,
-        state::{AppState, PanelState, TabState},
+        state::{AppState, PanelState},
     },
     core::{
         events::Event,
@@ -102,17 +102,5 @@ impl Component<Event, AppState, FileManagerActions> for PanelComponent {
         } else {
             self.tab.render(frame, area);
         }
-    }
-}
-
-pub fn map_global_state_to_panel_props(gloal_state: PanelState) -> PanelComponentProps {
-    let tabs = gloal_state
-        .tabs
-        .iter()
-        .map(|tab| tab.name.clone())
-        .collect();
-    PanelComponentProps {
-        tabs,
-        current_tab: gloal_state.current_tab,
     }
 }

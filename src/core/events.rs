@@ -41,7 +41,7 @@ impl ToString for Error {
 
 pub struct EventQueue {
     receiver: Receiver<Event>,
-    runner_handle: JoinHandle<()>,
+    _runner_handle: JoinHandle<()>,
 }
 
 impl EventQueue {
@@ -92,7 +92,7 @@ impl EventQueue {
 
         EventQueue {
             receiver,
-            runner_handle,
+            _runner_handle: runner_handle,
         }
     }
 

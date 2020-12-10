@@ -7,12 +7,12 @@ use tui::{
 use crate::{
     app::{
         actions::{AppAction, FileManagerActions},
-        state::{AppState, PanelState},
+        state::AppState,
     },
     core::{events::Event, store::Store, ui::component::Component},
 };
 
-use super::{panel::PanelComponent, tab::TabComponent};
+use super::panel::PanelComponent;
 
 pub struct RootComponent {
     left_panel: PanelComponent,
@@ -57,7 +57,7 @@ impl Component<Event, AppState, FileManagerActions> for RootComponent {
         result
     }
 
-    fn render<TBackend: Backend>(&self, frame: &mut tui::Frame<TBackend>, area: Option<Rect>) {
+    fn render<TBackend: Backend>(&self, frame: &mut tui::Frame<TBackend>, _area: Option<Rect>) {
         let layout = Layout::default()
             .direction(Direction::Horizontal)
             .constraints([Constraint::Percentage(50), Constraint::Percentage(50)])
@@ -65,4 +65,6 @@ impl Component<Event, AppState, FileManagerActions> for RootComponent {
         self.left_panel.render(frame, Some(layout[0]));
         self.right_panel.render(frame, Some(layout[1]));
     }
+
+    fn on_tick(&mut self) {}
 }
