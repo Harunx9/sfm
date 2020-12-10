@@ -10,7 +10,7 @@ use tui::{
 use crate::{
     app::{
         actions::FileManagerActions,
-        state::{AppState, PanelState},
+        state::{AppState, PanelState, TabState},
     },
     core::{
         events::Event,
@@ -35,7 +35,7 @@ impl PanelComponent {
     pub fn new(props: PanelComponentProps, tab_props: TabComponentProps) -> Self {
         PanelComponent {
             base: ComponentBase::new(Some(props), None),
-            tab: TabComponent::with_props(tab_props),
+            tab: TabComponent::new(Some(tab_props)),
         }
     }
 
@@ -49,11 +49,12 @@ impl PanelComponent {
 
 impl From<PanelState> for PanelComponent {
     fn from(panel_state: PanelState) -> Self {
-        let tabs = panel_state
+        let tabs: Vec<String> = panel_state
             .tabs
             .iter()
             .map(|tab| tab.name.clone())
             .collect();
+        let has_displayed_tabs = tabs.is_empty() == false;
         let panel_props = PanelComponentProps {
             tabs,
             current_tab: panel_state.current_tab,
@@ -61,7 +62,10 @@ impl From<PanelState> for PanelComponent {
 
         PanelComponent::new(
             panel_props,
-            panel_state.tabs[panel_state.current_tab].clone(),
+            TabComponentProps::new(
+                panel_state.tabs[panel_state.current_tab].clone(),
+                has_displayed_tabs,
+            ),
         )
     }
 }

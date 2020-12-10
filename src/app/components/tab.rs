@@ -14,71 +14,70 @@ use crate::{
     },
     core::{
         events::Event,
-        store::Store,
         ui::{component::Component, component_base::ComponentBase},
     },
 };
 
-pub type TabComponentProps = TabState;
-
-#[derive(Clone, Copy, Debug)]
-pub struct TabComponentState {
-    current_selected: usize,
-    max_lenght: usize,
+#[derive(Clone, Debug)]
+pub struct TabComponentProps {
+    state: Option<TabState>,
+    has_displayed_tabs: bool,
 }
 
-impl Default for TabComponentState {
+impl Default for TabComponentProps {
     fn default() -> Self {
-        TabComponentState::new(0, 0)
+        TabComponentProps {
+            state: None,
+            has_displayed_tabs: false,
+        }
     }
 }
 
-impl TabComponentState {
-    pub fn new(current_selected: usize, max_lenght: usize) -> Self {
-        TabComponentState {
-            current_selected,
-            max_lenght,
+impl TabComponentProps {
+    pub fn new(state: TabState, has_displayed_tabs: bool) -> Self {
+        TabComponentProps {
+            state: Some(state),
+            has_displayed_tabs,
         }
     }
 }
 
 pub struct TabComponent {
-    base: ComponentBase<TabComponentProps, TabComponentState>,
+    base: ComponentBase<TabComponentProps, ()>,
 }
 
 impl TabComponent {
-    pub fn new(props: Option<TabComponentProps>, state: Option<TabComponentState>) -> Self {
+    pub fn new(props: Option<TabComponentProps>) -> Self {
         TabComponent {
-            base: ComponentBase::new(props, state),
+            base: ComponentBase::new(props, None),
         }
     }
 
-    pub fn with_props(props: TabComponentProps) -> Self {
-        TabComponent::new(Some(props), None)
-    }
-
     pub fn empty() -> Self {
-        TabComponent::new(None, None)
+        TabComponent::new(None)
     }
 }
 
 impl Component<Event, AppState, FileManagerActions> for TabComponent {
     fn render<TBackend: Backend>(&self, frame: &mut tui::Frame<TBackend>, area: Option<Rect>) {
         if let Some(tab_props) = self.base.get_props() {
-            let list_items: Vec<ListItem> = tab_props
-                .items
-                .iter()
-                .map(|item| ListItem::new(item.to_string()))
-                .collect();
+            if let Some(state) = tab_props.state {
+                let list_items: Vec<ListItem> = state
+                    .items
+                    .iter()
+                    .map(|item| ListItem::new(item.to_string()))
+                    .collect();
 
-            let list = List::new(list_items).block(
-                Block::default()
+                let block = Block::default()
+                    .title(state.name)
                     .borders(Borders::ALL)
                     .border_style(Style::default())
                     .border_type(tui::widgets::BorderType::Thick)
-                    .style(Style::default()),
-            );
-            frame.render_widget(list, area.unwrap());
+                    .style(Style::default());
+
+                let list = List::new(list_items).block(block);
+                frame.render_widget(list, area.unwrap());
+            }
         }
     }
 }
