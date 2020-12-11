@@ -65,6 +65,4 @@ impl Component<Event, AppState, FileManagerActions> for RootComponent {
         self.left_panel.render(frame, Some(layout[0]));
         self.right_panel.render(frame, Some(layout[1]));
     }
-
-    fn on_tick(&mut self) {}
 }

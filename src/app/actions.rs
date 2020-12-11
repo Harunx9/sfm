@@ -13,6 +13,19 @@ pub enum AppAction {
 }
 
 #[derive(Clone, Debug)]
+pub enum PanelAction {
+    Next,
+    Previous,
+}
+
+#[derive(Clone, Debug)]
+pub enum TabAction {
+    Next,
+    Previous,
+    Select,
+}
+
+#[derive(Clone, Debug)]
 pub enum FileAction {
     Delete { path: String },
     Rename { from: String, to: String },
