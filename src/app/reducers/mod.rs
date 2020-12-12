@@ -1,8 +1,12 @@
 use super::{
-    actions::{AppAction, DirectoryAction, FileAction, FileManagerActions, PanelAction, TabAction},
+    actions::{AppAction, DirectoryAction, FileAction, FileManagerActions, PanelAction},
     file_system::directory::get_items_from_dir,
-    state::{AppState, PanelState, TabState},
+    state::{AppState, PanelState},
 };
+
+mod tab_reducer;
+
+use tab_reducer::tab_reducer;
 
 pub fn root_reducer(state: AppState, action: FileManagerActions) -> AppState {
     match action {
@@ -11,14 +15,6 @@ pub fn root_reducer(state: AppState, action: FileManagerActions) -> AppState {
         FileManagerActions::Directory(dir_action) => dir_reducer(state.clone(), dir_action),
         FileManagerActions::Panel(panel_action) => panel_reducer(state, panel_action),
         FileManagerActions::Tab(tab_action) => tab_reducer(state, tab_action),
-    }
-}
-
-fn tab_reducer(state: AppState, tab_action: TabAction) -> AppState {
-    match tab_action {
-        TabAction::Next => state,
-        TabAction::Previous => state,
-        TabAction::Select => state,
     }
 }
 

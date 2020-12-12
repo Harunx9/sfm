@@ -1,3 +1,5 @@
+use tui::widgets::ListState;
+
 use super::{
     config::Config,
     file_system::{
@@ -48,7 +50,7 @@ pub struct TabState {
     pub path: String,
     pub items: Vec<FileSystemItem>,
     pub selected: Vec<usize>,
-    pub current_item: usize,
+    pub tab_state: ListState,
 }
 
 impl Default for TabState {
@@ -66,7 +68,7 @@ impl TabState {
             path: dir_info.path,
             items,
             selected: Vec::new(),
-            current_item: 0,
+            tab_state: ListState::default(),
         }
     }
 }
