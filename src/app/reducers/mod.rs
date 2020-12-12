@@ -4,8 +4,10 @@ use super::{
     state::{AppState, PanelState},
 };
 
+mod panel_reducer;
 mod tab_reducer;
 
+use panel_reducer::panel_reducer;
 use tab_reducer::tab_reducer;
 
 pub fn root_reducer(state: AppState, action: FileManagerActions) -> AppState {
@@ -54,13 +56,6 @@ fn app_reducer(state: AppState, app_action: AppAction) -> AppState {
             config: state.config,
             app_exit: false,
         },
-    }
-}
-
-fn panel_reducer(state: AppState, panel_action: PanelAction) -> AppState {
-    match panel_action {
-        PanelAction::Next => state,
-        PanelAction::Previous => state,
     }
 }
 

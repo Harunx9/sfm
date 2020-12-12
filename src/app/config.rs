@@ -22,12 +22,20 @@ impl Default for Config {
 #[derive(Debug, Clone, Copy)]
 pub struct KeyboardConfig {
     pub quit: KeyBinging,
+    pub focus_left_panel: KeyBinging,
+    pub focus_right_panel: KeyBinging,
+    pub next_tab_item: KeyBinging,
+    pub prev_tab_item: KeyBinging,
 }
 
 impl Default for KeyboardConfig {
     fn default() -> Self {
         KeyboardConfig {
             quit: KeyBinging::new(KeyCode::Char('q'), None),
+            focus_left_panel: KeyBinging::new(KeyCode::Char('h'), None),
+            focus_right_panel: KeyBinging::new(KeyCode::Char('l'), None),
+            next_tab_item: KeyBinging::new(KeyCode::Char('j'), None),
+            prev_tab_item: KeyBinging::new(KeyCode::Char('k'), None),
         }
     }
 }
