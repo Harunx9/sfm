@@ -31,6 +31,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let mut terminal = Terminal::new(backend)?;
     let event_queue = EventQueue::start_with_config(cfg.core_cfg);
+
     let mut store = Store::<AppState, FileManagerActions>::new(root_reducer);
 
     terminal.clear()?;
@@ -65,9 +66,3 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     Ok(())
 }
-
-//fn main() {
-//    let store = Store::<AppState, FileManagerActions>::new(root_reducer);
-//
-//    println!("{:#?}", store.get_state());
-//}

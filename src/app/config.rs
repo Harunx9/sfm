@@ -6,6 +6,7 @@ use crate::core::config::CoreConfig;
 pub struct Config {
     pub core_cfg: CoreConfig,
     pub enchanced_graphics: bool,
+    pub keyboard_cfg: KeyboardConfig,
 }
 
 impl Default for Config {
@@ -13,10 +14,25 @@ impl Default for Config {
         Config {
             core_cfg: CoreConfig::default(),
             enchanced_graphics: false,
+            keyboard_cfg: KeyboardConfig::default(),
         }
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+pub struct KeyboardConfig {
+    pub quit: KeyBinging,
+}
+
+impl Default for KeyboardConfig {
+    fn default() -> Self {
+        KeyboardConfig {
+            quit: KeyBinging::new(KeyCode::Char('q'), None),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
 pub struct KeyBinging {
     key: KeyCode,
     modifier: Option<KeyModifiers>,

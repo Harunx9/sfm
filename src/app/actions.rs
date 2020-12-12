@@ -3,6 +3,8 @@ pub enum FileManagerActions {
     File(FileAction),
     Directory(DirectoryAction),
     App(AppAction),
+    Panel(PanelAction),
+    Tab(TabAction),
 }
 
 #[derive(Clone, Debug)]

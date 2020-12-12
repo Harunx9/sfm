@@ -1,4 +1,3 @@
-use crossterm::event::KeyCode;
 use tui::{
     backend::Backend,
     layout::{Constraint, Direction, Layout, Rect},
@@ -40,15 +39,15 @@ impl Component<Event, AppState, FileManagerActions> for RootComponent {
         event: Event,
         store: &mut Store<AppState, FileManagerActions>,
     ) -> bool {
-        let mut result = false;
+        let state = store.get_state();
         if let Event::Keyboard(key_evt) = event {
-            if let KeyCode::Char('q') = key_evt.code {
+            if state.config.keyboard_cfg.quit.is_pressed(key_evt) {
                 store.dispatch(FileManagerActions::App(AppAction::Exit));
-                result = true
+                return true;
             }
         }
 
-        result = self.left_panel.handle_event(event, store);
+        let mut result = self.left_panel.handle_event(event, store);
         if result == true {
             return result;
         }

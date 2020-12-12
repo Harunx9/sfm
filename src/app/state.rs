@@ -1,6 +1,9 @@
-use super::file_system::{
-    directory::{get_items_from_dir, DirInfo},
-    FileSystemItem,
+use super::{
+    config::Config,
+    file_system::{
+        directory::{get_items_from_dir, DirInfo},
+        FileSystemItem,
+    },
 };
 
 #[derive(Clone, Debug)]
@@ -8,6 +11,7 @@ pub struct AppState {
     pub left_panel: PanelState,
     pub right_panel: PanelState,
     pub app_exit: bool,
+    pub config: Config,
 }
 
 impl Default for AppState {
@@ -16,6 +20,7 @@ impl Default for AppState {
             left_panel: PanelState::default(),
             right_panel: PanelState::default(),
             app_exit: false,
+            config: Config::default(),
         }
     }
 }
@@ -42,6 +47,7 @@ pub struct TabState {
     pub name: String,
     pub path: String,
     pub items: Vec<FileSystemItem>,
+    pub selected: Vec<usize>,
     pub current_item: usize,
 }
 
@@ -59,6 +65,7 @@ impl TabState {
             name: dir_info.name,
             path: dir_info.path,
             items,
+            selected: Vec::new(),
             current_item: 0,
         }
     }

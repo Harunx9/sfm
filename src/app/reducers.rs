@@ -1,5 +1,5 @@
 use super::{
-    actions::{AppAction, DirectoryAction, FileAction, FileManagerActions},
+    actions::{AppAction, DirectoryAction, FileAction, FileManagerActions, PanelAction, TabAction},
     file_system::directory::get_items_from_dir,
     state::{AppState, PanelState, TabState},
 };
@@ -9,6 +9,16 @@ pub fn root_reducer(state: AppState, action: FileManagerActions) -> AppState {
         FileManagerActions::App(app_action) => app_reducer(state.clone(), app_action),
         FileManagerActions::File(file_action) => file_reducer(state.clone(), file_action),
         FileManagerActions::Directory(dir_action) => dir_reducer(state.clone(), dir_action),
+        FileManagerActions::Panel(panel_action) => panel_reducer(state, panel_action),
+        FileManagerActions::Tab(tab_action) => tab_reducer(state, tab_action),
+    }
+}
+
+fn tab_reducer(state: AppState, tab_action: TabAction) -> AppState {
+    match tab_action {
+        TabAction::Next => state,
+        TabAction::Previous => state,
+        TabAction::Select => state,
     }
 }
 
@@ -17,6 +27,7 @@ fn app_reducer(state: AppState, app_action: AppAction) -> AppState {
         AppAction::Exit => AppState {
             left_panel: state.left_panel,
             right_panel: state.right_panel,
+            config: state.config,
             app_exit: true,
         },
         AppAction::FocusLeft => AppState {
@@ -30,6 +41,7 @@ fn app_reducer(state: AppState, app_action: AppAction) -> AppState {
                 current_tab: state.right_panel.current_tab,
                 is_focused: false,
             },
+            config: state.config,
             app_exit: false,
         },
         AppAction::FocusRight => AppState {
@@ -43,8 +55,16 @@ fn app_reducer(state: AppState, app_action: AppAction) -> AppState {
                 current_tab: state.right_panel.current_tab,
                 is_focused: true,
             },
+            config: state.config,
             app_exit: false,
         },
+    }
+}
+
+fn panel_reducer(state: AppState, panel_action: PanelAction) -> AppState {
+    match panel_action {
+        PanelAction::Next => state,
+        PanelAction::Previous => state,
     }
 }
 
