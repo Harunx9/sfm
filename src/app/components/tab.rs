@@ -9,11 +9,12 @@ use tui::{
 
 use crate::{
     app::{
-        actions::FileManagerActions,
+        actions::{FileManagerActions, TabAction},
         state::{AppState, TabState},
     },
     core::{
         events::Event,
+        store::Store,
         ui::{component::Component, component_base::ComponentBase},
     },
 };
@@ -22,6 +23,7 @@ use crate::{
 pub struct TabComponentProps {
     state: Option<TabState>,
     has_displayed_tabs: bool,
+    is_focused: bool,
 }
 
 impl Default for TabComponentProps {
@@ -29,15 +31,17 @@ impl Default for TabComponentProps {
         TabComponentProps {
             state: None,
             has_displayed_tabs: false,
+            is_focused: false,
         }
     }
 }
 
 impl TabComponentProps {
-    pub fn new(state: TabState, has_displayed_tabs: bool) -> Self {
+    pub fn new(state: TabState, has_displayed_tabs: bool, is_focused: bool) -> Self {
         TabComponentProps {
             state: Some(state),
             has_displayed_tabs,
+            is_focused,
         }
     }
 }
@@ -59,9 +63,31 @@ impl TabComponent {
 }
 
 impl Component<Event, AppState, FileManagerActions> for TabComponent {
+    fn handle_event(
+        &mut self,
+        event: Event,
+        store: &mut Store<AppState, FileManagerActions>,
+    ) -> bool {
+        let state = store.get_state();
+
+        if let Event::Keyboard(key_evt) = event {
+            if state.config.keyboard_cfg.next_tab_item.is_pressed(key_evt) {
+                store.dispatch(FileManagerActions::Tab(TabAction::Next));
+                return true;
+            }
+
+            if state.config.keyboard_cfg.prev_tab_item.is_pressed(key_evt) {
+                store.dispatch(FileManagerActions::Tab(TabAction::Previous));
+                return true;
+            }
+        }
+
+        false
+    }
+
     fn render<TBackend: Backend>(&self, frame: &mut tui::Frame<TBackend>, area: Option<Rect>) {
         if let Some(tab_props) = self.base.get_props() {
-            if let Some(state) = tab_props.state {
+            if let Some(mut state) = tab_props.state {
                 let list_items: Vec<ListItem> = state
                     .items
                     .iter()
@@ -76,7 +102,16 @@ impl Component<Event, AppState, FileManagerActions> for TabComponent {
                     .style(Style::default());
 
                 let list = List::new(list_items).block(block);
-                frame.render_widget(list, area.unwrap());
+
+                if tab_props.is_focused {
+                    let focused_list = List::from(list)
+                        .highlight_style(Style::default())
+                        .highlight_symbol(">>");
+
+                    frame.render_stateful_widget(focused_list, area.unwrap(), &mut state.tab_state);
+                } else {
+                    frame.render_widget(list, area.unwrap());
+                }
             }
         }
     }

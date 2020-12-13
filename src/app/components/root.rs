@@ -25,13 +25,17 @@ impl RootComponent {
             right_panel: PanelComponent::empty(),
         }
     }
+
+    fn map_state(&mut self, store: &Store<AppState, FileManagerActions>) {
+        let state = store.get_state();
+        self.left_panel = PanelComponent::from(state.left_panel);
+        self.right_panel = PanelComponent::from(state.right_panel);
+    }
 }
 
 impl Component<Event, AppState, FileManagerActions> for RootComponent {
     fn on_init(&mut self, store: &Store<AppState, FileManagerActions>) {
-        let state = store.get_state();
-        self.left_panel = PanelComponent::from(state.left_panel);
-        self.right_panel = PanelComponent::from(state.right_panel);
+        self.map_state(store);
     }
 
     fn handle_event(
@@ -45,13 +49,37 @@ impl Component<Event, AppState, FileManagerActions> for RootComponent {
                 store.dispatch(FileManagerActions::App(AppAction::Exit));
                 return true;
             }
+
+            if state
+                .config
+                .keyboard_cfg
+                .focus_left_panel
+                .is_pressed(key_evt)
+            {
+                store.dispatch(FileManagerActions::App(AppAction::FocusLeft));
+                self.map_state(store);
+                return true;
+            }
+
+            if state
+                .config
+                .keyboard_cfg
+                .focus_right_panel
+                .is_pressed(key_evt)
+            {
+                store.dispatch(FileManagerActions::App(AppAction::FocusRight));
+                self.map_state(store);
+                return true;
+            }
         }
 
         let mut result = self.left_panel.handle_event(event, store);
         if result == true {
+            self.map_state(store);
             return result;
         }
         result = self.right_panel.handle_event(event, store);
+        self.map_state(store);
 
         result
     }

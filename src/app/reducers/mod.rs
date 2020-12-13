@@ -15,8 +15,8 @@ pub fn root_reducer(state: AppState, action: FileManagerActions) -> AppState {
         FileManagerActions::App(app_action) => app_reducer(state.clone(), app_action),
         FileManagerActions::File(file_action) => file_reducer(state.clone(), file_action),
         FileManagerActions::Directory(dir_action) => dir_reducer(state.clone(), dir_action),
-        FileManagerActions::Panel(panel_action) => panel_reducer(state, panel_action),
-        FileManagerActions::Tab(tab_action) => tab_reducer(state, tab_action),
+        FileManagerActions::Panel(panel_action) => panel_reducer(state.clone(), panel_action),
+        FileManagerActions::Tab(tab_action) => tab_reducer(state.clone(), tab_action),
     }
 }
 

@@ -9,11 +9,12 @@ use tui::{
 
 use crate::{
     app::{
-        actions::FileManagerActions,
+        actions::{AppAction, FileManagerActions},
         state::{AppState, PanelState},
     },
     core::{
         events::Event,
+        store::Store,
         ui::{component::Component, component_base::ComponentBase},
     },
 };
@@ -65,12 +66,24 @@ impl From<PanelState> for PanelComponent {
             TabComponentProps::new(
                 panel_state.tabs[panel_state.current_tab].clone(),
                 has_displayed_tabs,
+                panel_state.is_focused,
             ),
         )
     }
 }
 
 impl Component<Event, AppState, FileManagerActions> for PanelComponent {
+    fn handle_event(
+        &mut self,
+        event: Event,
+        store: &mut Store<AppState, FileManagerActions>,
+    ) -> bool {
+        let state = store.get_state();
+        if let Event::Keyboard(key_evt) = event {}
+
+        self.tab.handle_event(event, store)
+    }
+
     fn render<TBackend: Backend>(&self, frame: &mut Frame<TBackend>, area: Option<Rect>) {
         let props = self.base.get_props().unwrap();
         if props.tabs.len() > 1 {
