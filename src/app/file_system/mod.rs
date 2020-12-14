@@ -1,5 +1,7 @@
 use chrono::{DateTime, Local};
 
+use super::config::Config;
+
 pub mod directory;
 
 #[derive(Clone, Debug)]
@@ -7,6 +9,16 @@ pub enum FileSystemItem {
     Directory(DirectoryItem),
     File(FileItem),
     Unknown,
+}
+
+impl FileSystemItem {
+    pub fn get_name(&self) -> String {
+        match self {
+            FileSystemItem::Directory(dir) => dir.name.clone(),
+            FileSystemItem::File(file) => file.name.clone(),
+            FileSystemItem::Unknown => "".to_string(),
+        }
+    }
 }
 
 impl ToString for FileSystemItem {
@@ -25,6 +37,7 @@ pub struct DirectoryItem {
     name: String,
     path: String,
     last_modification: DateTime<Local>,
+    icon: String,
 }
 
 impl DirectoryItem {
@@ -33,19 +46,21 @@ impl DirectoryItem {
         path: String,
         is_visible: bool,
         last_modification: DateTime<Local>,
+        icon: String,
     ) -> Self {
         DirectoryItem {
             is_visible,
             name,
             path,
             last_modification,
+            icon,
         }
     }
 }
 
 impl ToString for DirectoryItem {
     fn to_string(&self) -> String {
-        format!("{} {}", self.name, self.last_modification)
+        format!("{} {} {}", self.name, self.last_modification.format()
     }
 }
 
