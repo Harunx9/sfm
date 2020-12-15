@@ -16,6 +16,7 @@ use crate::{
         events::Event,
         store::Store,
         ui::{component::Component, component_base::ComponentBase},
+        ToSpans,
     },
 };
 
@@ -91,7 +92,7 @@ impl Component<Event, AppState, FileManagerActions> for TabComponent {
                 let list_items: Vec<ListItem> = state
                     .items
                     .iter()
-                    .map(|item| ListItem::new(item.to_string()))
+                    .map(|item| ListItem::new(item.to_spans(area.unwrap_or(frame.size()))))
                     .collect();
 
                 let block = Block::default()

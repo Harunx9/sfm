@@ -1,7 +1,7 @@
 use tui::widgets::ListState;
 
 use super::{
-    config::Config,
+    config::{Config, IconsConfig},
     file_system::{
         directory::{get_items_from_dir, DirInfo},
         FileSystemItem,
@@ -55,14 +55,14 @@ pub struct TabState {
 
 impl Default for TabState {
     fn default() -> Self {
-        TabState::with_dir(".")
+        TabState::with_dir(".", &IconsConfig::default())
     }
 }
 
 impl TabState {
-    pub fn with_dir(dir_path: &str) -> Self {
+    pub fn with_dir(dir_path: &str, icons: &IconsConfig) -> Self {
         let dir_info = DirInfo::new(dir_path).unwrap();
-        let items = get_items_from_dir(dir_path);
+        let items = get_items_from_dir(dir_path, icons);
         TabState {
             name: dir_info.name,
             path: dir_info.path,

@@ -1,6 +1,8 @@
 use chrono::{DateTime, Local};
 use fs::Metadata;
 
+use crate::app::config::IconsConfig;
+
 use super::{DirectoryItem, FileItem, FileSystemItem};
 use std::{
     fs::{self, DirEntry},
@@ -31,13 +33,13 @@ impl DirInfo {
     }
 }
 
-pub fn get_items_from_dir(dir: &str) -> Vec<FileSystemItem> {
+pub fn get_items_from_dir(dir: &str, icons: &IconsConfig) -> Vec<FileSystemItem> {
     match fs::read_dir(dir) {
         Ok(mut iter) => {
             let mut result = Vec::new();
             while let Some(load_result) = iter.next() {
                 if let Ok(dir_entry) = load_result {
-                    result.push(map_dir_entry_to_file_system_item(dir_entry));
+                    result.push(map_dir_entry_to_file_system_item(dir_entry, icons));
                 }
             }
 
@@ -47,16 +49,18 @@ pub fn get_items_from_dir(dir: &str) -> Vec<FileSystemItem> {
     }
 }
 
-fn map_dir_entry_to_file_system_item(dir_entry: DirEntry) -> FileSystemItem {
+fn map_dir_entry_to_file_system_item(dir_entry: DirEntry, icons: &IconsConfig) -> FileSystemItem {
     if let Ok(metadata) = dir_entry.metadata() {
         let (name, path, modified) = get_file_system_item_props(dir_entry, &metadata);
 
         if metadata.is_file() {
+            let file_extensions = name.split('.').last().unwrap_or("");
             return FileSystemItem::File(FileItem::new(
                 name.to_string(),
                 path.to_string(),
                 true,
                 modified,
+                icons.get_file_icon(file_extensions.to_string()),
             ));
         }
 
@@ -66,6 +70,7 @@ fn map_dir_entry_to_file_system_item(dir_entry: DirEntry) -> FileSystemItem {
                 path.to_string(),
                 true,
                 modified,
+                icons.get_dir_icon(name),
             ));
         }
 

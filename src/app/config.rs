@@ -4,12 +4,12 @@ use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 
 use crate::core::config::CoreConfig;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct Config {
     pub core_cfg: CoreConfig,
     pub enchanced_graphics: bool,
     pub keyboard_cfg: KeyboardConfig,
-    pub icons: Icons,
+    pub icons: IconsConfig,
 }
 
 impl Default for Config {
@@ -18,12 +18,12 @@ impl Default for Config {
             core_cfg: CoreConfig::default(),
             enchanced_graphics: false,
             keyboard_cfg: KeyboardConfig::default(),
-            icons: Icons::default(),
+            icons: IconsConfig::default(),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct KeyboardConfig {
     pub quit: KeyBinging,
     pub focus_left_panel: KeyBinging,
@@ -44,14 +44,15 @@ impl Default for KeyboardConfig {
     }
 }
 
-pub struct Icons {
+#[derive(Debug, Clone)]
+pub struct IconsConfig {
     dir_icons: HashMap<String, String>,
     files_icon: HashMap<String, String>,
 }
 
-impl Default for Icons {
+impl Default for IconsConfig {
     fn default() -> Self {
-        Icons {
+        IconsConfig {
             dir_icons: get_default_dir_icons(),
             files_icon: get_default_files_icons(),
         }
@@ -59,51 +60,57 @@ impl Default for Icons {
 }
 
 fn get_default_dir_icons() -> HashMap<String, String> {
-    let icon_map = HashMap::new();
-    icon_map.insert(".git", "");
-    icon_map.insert("node_modules", "");
-    icon_map.insert("default", "");
+    let mut icon_map = HashMap::new();
+    icon_map.insert(".git".to_string(), "".to_string());
+    icon_map.insert("node_modules".to_string(), "".to_string());
+    icon_map.insert("default".to_string(), "".to_string());
 
     icon_map
 }
 
 fn get_default_files_icons() -> HashMap<String, String> {
-    let icon_map = HashMap::new();
+    let mut icon_map = HashMap::new();
     //GIT
-    icon_map.insert(".gitignore", "");
-    icon_map.insert(".gitmodules", "");
+    icon_map.insert(".gitignore".to_string(), "".to_string());
+    icon_map.insert(".gitmodules".to_string(), "".to_string());
 
     //PROGRAMMING LANGUAGES
-    icon_map.insert("rs", "");
-    icon_map.insert("cs", "");
-    icon_map.insert("cpp", "ﭱ");
-    icon_map.insert("hpp", "");
-    icon_map.insert("h", "");
-    icon_map.insert("js", "");
-    icon_map.insert("ts", "");
-    icon_map.insert("jsx", "");
-    icon_map.insert("tsx", "ﰆ");
-    icon_map.insert("html", "");
-    icon_map.insert("css", "");
-    icon_map.insert("sass", "");
-    icon_map.insert("toml", "");
-    icon_map.insert("yaml", "");
-    icon_map.insert("php", "");
-    icon_map.insert("py", "");
-    icon_map.insert("rb", "");
-    icon_map.insert("java", "");
-    icon_map.insert("default", "");
+    icon_map.insert("rs".to_string(), "".to_string());
+    icon_map.insert("cs".to_string(), "".to_string());
+    icon_map.insert("cpp".to_string(), "ﭱ".to_string());
+    icon_map.insert("hpp".to_string(), "".to_string());
+    icon_map.insert("h".to_string(), "".to_string());
+    icon_map.insert("js".to_string(), "".to_string());
+    icon_map.insert("ts".to_string(), "".to_string());
+    icon_map.insert("jsx".to_string(), "".to_string());
+    icon_map.insert("tsx".to_string(), "ﰆ".to_string());
+    icon_map.insert("html".to_string(), "".to_string());
+    icon_map.insert("css".to_string(), "".to_string());
+    icon_map.insert("sass".to_string(), "".to_string());
+    icon_map.insert("toml".to_string(), "".to_string());
+    icon_map.insert("yaml".to_string(), "".to_string());
+    icon_map.insert("php".to_string(), "".to_string());
+    icon_map.insert("py".to_string(), "".to_string());
+    icon_map.insert("rb".to_string(), "".to_string());
+    icon_map.insert("java".to_string(), "".to_string());
+    icon_map.insert("default".to_string(), "".to_string());
 
     icon_map
 }
 
-impl Icons {
-    pub fn get_dir_icon(&self, dir_name: String) -> Option<&str> {
-        &self.dir_icons.get(dir_name)
+impl IconsConfig {
+    pub fn get_dir_icon(&self, dir_name: String) -> String {
+        match self.dir_icons.get(&dir_name) {
+            Some(icon) => icon.clone(),
+            None => self.dir_icons["default"].clone(),
+        }
     }
 
-    pub fn get_file_icon(&self, file_name: String) -> Option<&str> {
-        &self.files_icon.get(file_name)
+    pub fn get_file_icon(&self, file_name: String) -> String {
+        match self.files_icon.get(&file_name) {
+            Some(icon) => icon.clone(),
+            None => self.files_icon["default"].clone(),
+        }
     }
 }
 

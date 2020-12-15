@@ -1,6 +1,10 @@
 use chrono::{DateTime, Local};
+use tui::{
+    layout::Rect,
+    text::{Span, Spans},
+};
 
-use super::config::Config;
+use crate::core::ToSpans;
 
 pub mod directory;
 
@@ -21,12 +25,12 @@ impl FileSystemItem {
     }
 }
 
-impl ToString for FileSystemItem {
-    fn to_string(&self) -> String {
+impl ToSpans for FileSystemItem {
+    fn to_spans(&self, area: Rect) -> Spans {
         match self {
-            FileSystemItem::Directory(dir) => dir.to_string(),
-            FileSystemItem::File(file) => file.to_string(),
-            FileSystemItem::Unknown => "".to_string(),
+            FileSystemItem::Directory(dir) => dir.to_spans(area),
+            FileSystemItem::File(file) => file.to_spans(area),
+            FileSystemItem::Unknown => Spans::default(),
         }
     }
 }
@@ -58,9 +62,16 @@ impl DirectoryItem {
     }
 }
 
-impl ToString for DirectoryItem {
-    fn to_string(&self) -> String {
-        format!("{} {} {}", self.name, self.last_modification.format()
+impl ToSpans for DirectoryItem {
+    fn to_spans(&self, area: Rect) -> Spans {
+        let width = area.width;
+
+        Spans::from(vec![
+            Span::from("  "),
+            Span::from(self.icon.clone()),
+            Span::from("  "),
+            Span::from(self.name.clone()),
+        ])
     }
 }
 
@@ -70,6 +81,7 @@ pub struct FileItem {
     name: String,
     path: String,
     last_modification: DateTime<Local>,
+    icon: String,
 }
 
 impl FileItem {
@@ -78,18 +90,27 @@ impl FileItem {
         path: String,
         is_visible: bool,
         last_modification: DateTime<Local>,
+        icon: String,
     ) -> Self {
         FileItem {
             is_visible,
             name,
             path,
             last_modification,
+            icon,
         }
     }
 }
 
-impl ToString for FileItem {
-    fn to_string(&self) -> String {
-        format!("{} {}", self.name, self.last_modification)
+impl ToSpans for FileItem {
+    fn to_spans(&self, area: Rect) -> Spans {
+        let width = area.width;
+
+        Spans::from(vec![
+            Span::from("  "),
+            Span::from(self.icon.clone()),
+            Span::from("  "),
+            Span::from(self.name.clone()),
+        ])
     }
 }
