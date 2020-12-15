@@ -78,6 +78,7 @@ fn get_default_files_icons() -> HashMap<String, String> {
     icon_map.insert("rs".to_string(), "".to_string());
     icon_map.insert("cs".to_string(), "".to_string());
     icon_map.insert("cpp".to_string(), "ﭱ".to_string());
+    icon_map.insert("c".to_string(), "".to_string());
     icon_map.insert("hpp".to_string(), "".to_string());
     icon_map.insert("h".to_string(), "".to_string());
     icon_map.insert("js".to_string(), "".to_string());
@@ -93,6 +94,7 @@ fn get_default_files_icons() -> HashMap<String, String> {
     icon_map.insert("py".to_string(), "".to_string());
     icon_map.insert("rb".to_string(), "".to_string());
     icon_map.insert("java".to_string(), "".to_string());
+    icon_map.insert("lock".to_string(), "".to_string());
     icon_map.insert("default".to_string(), "".to_string());
 
     icon_map

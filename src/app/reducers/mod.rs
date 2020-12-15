@@ -4,9 +4,13 @@ use super::{
     state::{AppState, PanelState},
 };
 
+mod dir_reducer;
+mod file_reducer;
 mod panel_reducer;
 mod tab_reducer;
 
+use dir_reducer::dir_reducer;
+use file_reducer::file_reducer;
 use panel_reducer::panel_reducer;
 use tab_reducer::tab_reducer;
 
@@ -56,24 +60,5 @@ fn app_reducer(state: AppState, app_action: AppAction) -> AppState {
             config: state.config,
             app_exit: false,
         },
-    }
-}
-
-fn dir_reducer(state: AppState, dir_action: DirectoryAction) -> AppState {
-    match dir_action {
-        DirectoryAction::Delete { path } => state,
-        DirectoryAction::Rename { from, to } => state,
-        DirectoryAction::Move { from, to } => state,
-        DirectoryAction::Open { path } => state,
-        DirectoryAction::Navigate { to } => state,
-    }
-}
-
-fn file_reducer(state: AppState, file_action: FileAction) -> AppState {
-    match file_action {
-        FileAction::Delete { path } => state,
-        FileAction::Rename { from, to } => state,
-        FileAction::Move { from, to } => state,
-        FileAction::Open { path } => state,
     }
 }
