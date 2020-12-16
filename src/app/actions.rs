@@ -24,22 +24,62 @@ pub enum PanelAction {
 pub enum TabAction {
     Next,
     Previous,
-    Select,
+}
+
+#[derive(Clone, Debug)]
+pub enum PanelSide {
+    Left,
+    Right,
 }
 
 #[derive(Clone, Debug)]
 pub enum FileAction {
-    Delete { path: String },
-    Rename { from: String, to: String },
-    Move { from: String, to: String },
-    Open { path: String },
+    Delete {
+        path: String,
+        tab: String,
+        panel: PanelSide,
+    },
+    Rename {
+        from: String,
+        to: String,
+        tab: String,
+        panel: PanelSide,
+    },
+    Move {
+        from: String,
+        to: String,
+        tab: String,
+        panel: PanelSide,
+    },
+    Open {
+        path: String,
+        tab: String,
+        panel: PanelSide,
+    },
 }
 
 #[derive(Clone, Debug)]
 pub enum DirectoryAction {
-    Delete { path: String },
-    Rename { from: String, to: String },
-    Move { from: String, to: String },
-    Open { path: String },
-    Navigate { to: String },
+    Delete {
+        path: String,
+        tab: String,
+        panel: PanelSide,
+    },
+    Rename {
+        from: String,
+        to: String,
+        tab: String,
+        panel: PanelSide,
+    },
+    Move {
+        from: String,
+        to: String,
+        tab: String,
+        panel: PanelSide,
+    },
+    Open {
+        path: String,
+        tab: String,
+        panel: PanelSide,
+    },
 }

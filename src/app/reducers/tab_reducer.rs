@@ -7,7 +7,6 @@ pub fn tab_reducer(state: AppState, tab_action: TabAction) -> AppState {
     match tab_action {
         TabAction::Next => select_next(state),
         TabAction::Previous => select_previous(state),
-        TabAction::Select => state,
     }
 }
 
