@@ -33,7 +33,7 @@ where
 
     pub fn dispatch(&mut self, action: TAction) {
         if self.middlewares.is_empty() == false {
-            self.dispatch_middlewares(action);
+            self.dispatch_middlewares(0, action);
         } else {
             self.state = self.dispatch_reducer(action);
         }
@@ -51,11 +51,14 @@ where
         (self.root_reducer)(self.state.clone(), action)
     }
 
-    fn dispatch_middlewares(&mut self, action: TAction) {
-        while let Some(middleware) = self.middlewares.iter().next() {
-            if let Some(middleware_action) = middleware(self, action.clone()) {
-                self.state = self.dispatch_reducer(middleware_action);
-            }
+    fn dispatch_middlewares(&mut self, order: usize, action: TAction) {
+        if order == self.middlewares.len() {
+            self.dispatch_reducer(action.clone());
+            return;
+        }
+
+        if let Some(middleware_action) = self.middlewares[order](self, action.clone()) {
+            self.dispatch_middlewares(order + 1, middleware_action.clone());
         }
     }
 }
