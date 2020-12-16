@@ -10,6 +10,7 @@ pub struct Config {
     pub enchanced_graphics: bool,
     pub keyboard_cfg: KeyboardConfig,
     pub icons: IconsConfig,
+    pub default_editor: String,
 }
 
 impl Default for Config {
@@ -19,6 +20,7 @@ impl Default for Config {
             enchanced_graphics: false,
             keyboard_cfg: KeyboardConfig::default(),
             icons: IconsConfig::default(),
+            default_editor: "nvim".to_string(),
         }
     }
 }
@@ -30,6 +32,11 @@ pub struct KeyboardConfig {
     pub focus_right_panel: KeyBinging,
     pub next_tab_item: KeyBinging,
     pub prev_tab_item: KeyBinging,
+    pub open: KeyBinging,
+    pub delete: KeyBinging,
+    pub move_left: KeyBinging,
+    pub move_right: KeyBinging,
+    pub rename: KeyBinging,
 }
 
 impl Default for KeyboardConfig {
@@ -40,6 +47,11 @@ impl Default for KeyboardConfig {
             focus_right_panel: KeyBinging::new(KeyCode::Char('l'), None),
             next_tab_item: KeyBinging::new(KeyCode::Char('j'), None),
             prev_tab_item: KeyBinging::new(KeyCode::Char('k'), None),
+            open: KeyBinging::new(KeyCode::Enter, None),
+            delete: KeyBinging::new(KeyCode::Char('d'), Some(KeyModifiers::CONTROL)),
+            move_left: KeyBinging::new(KeyCode::Char('l'), Some(KeyModifiers::CONTROL)),
+            move_right: KeyBinging::new(KeyCode::Char('l'), Some(KeyModifiers::CONTROL)),
+            rename: KeyBinging::new(KeyCode::Char('r'), Some(KeyModifiers::CONTROL)),
         }
     }
 }
