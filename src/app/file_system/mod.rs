@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use chrono::{DateTime, Local};
 use tui::{
     layout::Rect,
@@ -16,11 +18,43 @@ pub enum FileSystemItem {
 }
 
 impl FileSystemItem {
+    pub fn get_path(&self) -> PathBuf {
+        match self {
+            FileSystemItem::Directory(dir) => dir.path.clone(),
+            FileSystemItem::File(file) => file.path.clone(),
+            FileSystemItem::Unknown => PathBuf::new(),
+        }
+    }
+
     pub fn get_name(&self) -> String {
         match self {
             FileSystemItem::Directory(dir) => dir.name.clone(),
             FileSystemItem::File(file) => file.name.clone(),
             FileSystemItem::Unknown => "".to_string(),
+        }
+    }
+
+    pub fn is_file(&self) -> bool {
+        match self {
+            FileSystemItem::Directory(_) => false,
+            FileSystemItem::File(_) => true,
+            FileSystemItem::Unknown => false,
+        }
+    }
+
+    pub fn is_dir(&self) -> bool {
+        match self {
+            FileSystemItem::Directory(_) => true,
+            FileSystemItem::File(_) => false,
+            FileSystemItem::Unknown => false,
+        }
+    }
+
+    pub fn is_visible(&self) -> bool {
+        match self {
+            FileSystemItem::Directory(dir) => dir.is_visible(),
+            FileSystemItem::File(file) => file.is_visible(),
+            FileSystemItem::Unknown => false,
         }
     }
 }
@@ -37,9 +71,8 @@ impl ToSpans for FileSystemItem {
 
 #[derive(Clone, Debug)]
 pub struct DirectoryItem {
-    is_visible: bool,
     name: String,
-    path: String,
+    path: PathBuf,
     last_modification: DateTime<Local>,
     icon: String,
 }
@@ -47,18 +80,28 @@ pub struct DirectoryItem {
 impl DirectoryItem {
     pub fn new(
         name: String,
-        path: String,
-        is_visible: bool,
+        path: PathBuf,
         last_modification: DateTime<Local>,
         icon: String,
     ) -> Self {
         DirectoryItem {
-            is_visible,
             name,
             path,
             last_modification,
             icon,
         }
+    }
+
+    pub fn get_name(&self) -> String {
+        self.name.clone()
+    }
+
+    pub fn get_path(&self) -> PathBuf {
+        self.path.clone()
+    }
+
+    pub fn is_visible(&self) -> bool {
+        self.name.starts_with('.')
     }
 }
 
@@ -77,9 +120,8 @@ impl ToSpans for DirectoryItem {
 
 #[derive(Clone, Debug)]
 pub struct FileItem {
-    is_visible: bool,
     name: String,
-    path: String,
+    path: PathBuf,
     last_modification: DateTime<Local>,
     icon: String,
 }
@@ -87,18 +129,28 @@ pub struct FileItem {
 impl FileItem {
     pub fn new(
         name: String,
-        path: String,
-        is_visible: bool,
+        path: PathBuf,
         last_modification: DateTime<Local>,
         icon: String,
     ) -> Self {
         FileItem {
-            is_visible,
             name,
             path,
             last_modification,
             icon,
         }
+    }
+
+    pub fn get_name(&self) -> String {
+        self.name.clone()
+    }
+
+    pub fn get_path(&self) -> PathBuf {
+        self.path.clone()
+    }
+
+    pub fn is_visible(&self) -> bool {
+        self.name.starts_with('.')
     }
 }
 

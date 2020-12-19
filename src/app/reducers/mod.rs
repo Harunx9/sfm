@@ -1,6 +1,5 @@
 use super::{
-    actions::{AppAction, DirectoryAction, FileAction, FileManagerActions, PanelAction},
-    file_system::directory::get_items_from_dir,
+    actions::{AppAction, FileManagerActions},
     state::{AppState, PanelState},
 };
 
@@ -27,38 +26,30 @@ pub fn root_reducer(state: AppState, action: FileManagerActions) -> AppState {
 fn app_reducer(state: AppState, app_action: AppAction) -> AppState {
     match app_action {
         AppAction::Exit => AppState {
-            left_panel: state.left_panel,
-            right_panel: state.right_panel,
-            config: state.config,
             app_exit: true,
+            ..state
         },
         AppAction::FocusLeft => AppState {
             left_panel: PanelState {
-                tabs: state.left_panel.tabs,
-                current_tab: state.left_panel.current_tab,
                 is_focused: true,
+                ..state.left_panel
             },
             right_panel: PanelState {
-                tabs: state.right_panel.tabs,
-                current_tab: state.right_panel.current_tab,
                 is_focused: false,
+                ..state.right_panel
             },
-            config: state.config,
-            app_exit: false,
+            ..state
         },
         AppAction::FocusRight => AppState {
             left_panel: PanelState {
-                tabs: state.left_panel.tabs,
-                current_tab: state.left_panel.current_tab,
                 is_focused: false,
+                ..state.left_panel
             },
             right_panel: PanelState {
-                tabs: state.right_panel.tabs,
-                current_tab: state.right_panel.current_tab,
                 is_focused: true,
+                ..state.right_panel
             },
-            config: state.config,
-            app_exit: false,
+            ..state
         },
     }
 }

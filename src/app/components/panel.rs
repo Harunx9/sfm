@@ -9,7 +9,7 @@ use tui::{
 
 use crate::{
     app::{
-        actions::{AppAction, FileManagerActions},
+        actions::FileManagerActions,
         state::{AppState, PanelState},
     },
     core::{

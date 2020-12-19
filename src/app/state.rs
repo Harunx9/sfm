@@ -1,3 +1,5 @@
+use std::path::{Path, PathBuf};
+
 use tui::widgets::ListState;
 
 use super::{
@@ -7,6 +9,8 @@ use super::{
         FileSystemItem,
     },
 };
+
+pub type TabIdx = usize;
 
 #[derive(Clone, Debug)]
 pub struct AppState {
@@ -31,7 +35,7 @@ impl Default for AppState {
 pub struct PanelState {
     pub tabs: Vec<TabState>,
     pub is_focused: bool,
-    pub current_tab: usize,
+    pub current_tab: TabIdx,
 }
 
 impl Default for PanelState {
@@ -47,7 +51,7 @@ impl Default for PanelState {
 #[derive(Clone, Debug)]
 pub struct TabState {
     pub name: String,
-    pub path: String,
+    pub path: PathBuf,
     pub items: Vec<FileSystemItem>,
     pub selected: Vec<usize>,
     pub tab_state: ListState,
@@ -55,12 +59,12 @@ pub struct TabState {
 
 impl Default for TabState {
     fn default() -> Self {
-        TabState::with_dir(".", &IconsConfig::default())
+        TabState::with_dir(&Path::new("."), &IconsConfig::default())
     }
 }
 
 impl TabState {
-    pub fn with_dir(dir_path: &str, icons: &IconsConfig) -> Self {
+    pub fn with_dir(dir_path: &Path, icons: &IconsConfig) -> Self {
         let dir_info = DirInfo::new(dir_path).unwrap();
         let items = get_items_from_dir(dir_path, icons);
         TabState {

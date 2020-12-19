@@ -15,26 +15,20 @@ fn select_next(state: AppState) -> AppState {
         AppState {
             left_panel: PanelState {
                 tabs: select_next_element(state.left_panel.current_tab, state.left_panel.tabs),
-                current_tab: state.left_panel.current_tab,
-                is_focused: true,
+                ..state.left_panel
             },
-            right_panel: state.right_panel,
-            config: state.config,
-            app_exit: false,
+            ..state
         }
     } else if state.right_panel.is_focused {
         AppState {
-            left_panel: state.left_panel,
             right_panel: PanelState {
                 tabs: select_next_element(state.right_panel.current_tab, state.right_panel.tabs),
-                current_tab: state.right_panel.current_tab,
-                is_focused: true,
+                ..state.right_panel
             },
-            config: state.config,
-            app_exit: false,
+            ..state
         }
     } else {
-        state
+        AppState { ..state }
     }
 }
 
@@ -43,26 +37,20 @@ fn select_previous(state: AppState) -> AppState {
         AppState {
             left_panel: PanelState {
                 tabs: select_prev_element(state.left_panel.current_tab, state.left_panel.tabs),
-                current_tab: state.left_panel.current_tab,
-                is_focused: true,
+                ..state.left_panel
             },
-            right_panel: state.right_panel,
-            config: state.config,
-            app_exit: false,
+            ..state
         }
     } else if state.right_panel.is_focused {
         AppState {
-            left_panel: state.left_panel,
             right_panel: PanelState {
                 tabs: select_prev_element(state.right_panel.current_tab, state.right_panel.tabs),
-                current_tab: state.right_panel.current_tab,
-                is_focused: true,
+                ..state.right_panel
             },
-            config: state.config,
-            app_exit: false,
+            ..state
         }
     } else {
-        state
+        AppState { ..state }
     }
 }
 

@@ -2,6 +2,7 @@ use tui::{layout::Rect, text::Spans};
 
 pub mod config;
 pub mod events;
+pub mod key_binding;
 pub mod store;
 pub mod ui;
 

@@ -1,3 +1,7 @@
+use std::path::PathBuf;
+
+use super::state::TabIdx;
+
 #[derive(Clone, Debug)]
 pub enum FileManagerActions {
     File(FileAction),
@@ -35,25 +39,25 @@ pub enum PanelSide {
 #[derive(Clone, Debug)]
 pub enum FileAction {
     Delete {
-        path: String,
-        tab: String,
+        path: PathBuf,
+        tab: TabIdx,
         panel: PanelSide,
     },
     Rename {
-        from: String,
-        to: String,
-        tab: String,
+        from: PathBuf,
+        to: PathBuf,
+        tab: TabIdx,
         panel: PanelSide,
     },
     Move {
-        from: String,
-        to: String,
-        tab: String,
+        from: PathBuf,
+        to: PathBuf,
+        tab: TabIdx,
         panel: PanelSide,
     },
     Open {
-        path: String,
-        tab: String,
+        path: PathBuf,
+        tab: TabIdx,
         panel: PanelSide,
     },
 }
@@ -61,25 +65,25 @@ pub enum FileAction {
 #[derive(Clone, Debug)]
 pub enum DirectoryAction {
     Delete {
-        path: String,
-        tab: String,
+        path: PathBuf,
+        tab: TabIdx,
         panel: PanelSide,
     },
     Rename {
-        from: String,
-        to: String,
-        tab: String,
+        from: PathBuf,
+        to: PathBuf,
+        tab: TabIdx,
         panel: PanelSide,
     },
     Move {
-        from: String,
-        to: String,
-        tab: String,
+        from: PathBuf,
+        to: PathBuf,
+        tab: TabIdx,
         panel: PanelSide,
     },
     Open {
-        path: String,
-        tab: String,
+        path: PathBuf,
+        tab: TabIdx,
         panel: PanelSide,
     },
 }

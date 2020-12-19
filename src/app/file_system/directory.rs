@@ -6,17 +6,18 @@ use crate::app::config::IconsConfig;
 use super::{DirectoryItem, FileItem, FileSystemItem};
 use std::{
     fs::{self, DirEntry},
+    path::{Path, PathBuf},
     time::SystemTime,
 };
 
 #[derive(Clone, Debug)]
 pub struct DirInfo {
     pub name: String,
-    pub path: String,
+    pub path: PathBuf,
 }
 
 impl DirInfo {
-    pub fn new(path: &str) -> Option<Self> {
+    pub fn new(path: &Path) -> Option<Self> {
         if let Ok(path_buffer) = fs::canonicalize(path) {
             let name = if let Some(file_name) = path_buffer.file_name() {
                 file_name.to_str().unwrap_or("")
@@ -26,14 +27,14 @@ impl DirInfo {
             let path = path_buffer.as_path().to_str().unwrap_or("");
             return Some(DirInfo {
                 name: name.to_string(),
-                path: path.to_string(),
+                path: PathBuf::from(path),
             });
         }
         None
     }
 }
 
-pub fn get_items_from_dir(dir: &str, icons: &IconsConfig) -> Vec<FileSystemItem> {
+pub fn get_items_from_dir(dir: &Path, icons: &IconsConfig) -> Vec<FileSystemItem> {
     match fs::read_dir(dir) {
         Ok(mut iter) => {
             let mut result = Vec::new();
@@ -57,8 +58,7 @@ fn map_dir_entry_to_file_system_item(dir_entry: DirEntry, icons: &IconsConfig) -
             let file_extensions = name.split('.').last().unwrap_or("");
             return FileSystemItem::File(FileItem::new(
                 name.to_string(),
-                path.to_string(),
-                true,
+                PathBuf::from(path),
                 modified,
                 icons.get_file_icon(file_extensions.to_string()),
             ));
@@ -67,8 +67,7 @@ fn map_dir_entry_to_file_system_item(dir_entry: DirEntry, icons: &IconsConfig) -
         if metadata.is_dir() {
             return FileSystemItem::Directory(DirectoryItem::new(
                 name.to_string(),
-                path.to_string(),
-                true,
+                PathBuf::from(path),
                 modified,
                 icons.get_dir_icon(name),
             ));

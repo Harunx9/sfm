@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
-use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
+use crossterm::event::{KeyCode, KeyModifiers};
 
-use crate::core::config::CoreConfig;
+use crate::core::{config::CoreConfig, key_binding::KeyBinging};
 
 #[derive(Debug, Clone)]
 pub struct Config {
@@ -10,7 +10,7 @@ pub struct Config {
     pub enchanced_graphics: bool,
     pub keyboard_cfg: KeyboardConfig,
     pub icons: IconsConfig,
-    pub default_editor: String,
+    pub files_program_associations: ProgramBindings,
 }
 
 impl Default for Config {
@@ -20,8 +20,22 @@ impl Default for Config {
             enchanced_graphics: false,
             keyboard_cfg: KeyboardConfig::default(),
             icons: IconsConfig::default(),
-            default_editor: "nvim".to_string(),
+            files_program_associations: ProgramBindings::default(),
         }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct ProgramBindings {
+    bindings: HashMap<String, String>,
+}
+
+impl Default for ProgramBindings {
+    fn default() -> Self {
+        let mut bindings = HashMap::new();
+        bindings.insert("default".to_string(), "nvim".to_string());
+
+        ProgramBindings { bindings }
     }
 }
 
@@ -124,25 +138,6 @@ impl IconsConfig {
         match self.files_icon.get(&file_name) {
             Some(icon) => icon.clone(),
             None => self.files_icon["default"].clone(),
-        }
-    }
-}
-
-#[derive(Debug, Clone, Copy)]
-pub struct KeyBinging {
-    key: KeyCode,
-    modifier: Option<KeyModifiers>,
-}
-
-impl KeyBinging {
-    pub fn new(key: KeyCode, modifier: Option<KeyModifiers>) -> Self {
-        KeyBinging { key, modifier }
-    }
-
-    pub fn is_pressed(&self, key_evt: KeyEvent) -> bool {
-        match self.modifier {
-            Some(modifier) => modifier == key_evt.modifiers && self.key == key_evt.code,
-            None => self.key == key_evt.code,
         }
     }
 }
