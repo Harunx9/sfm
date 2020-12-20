@@ -9,7 +9,7 @@ use tui::{
 
 use crate::{
     app::{
-        actions::FileManagerActions,
+        actions::{FileManagerActions, PanelSide},
         state::{AppState, PanelState},
     },
     core::{
@@ -27,16 +27,27 @@ pub struct PanelComponentProps {
     current_tab: usize,
 }
 
+#[derive(Clone, Debug)]
+pub struct PanelComponentState {
+    side: Option<PanelSide>,
+}
+
+impl Default for PanelComponentState {
+    fn default() -> Self {
+        PanelComponentState { side: None }
+    }
+}
+
 pub struct PanelComponent {
-    base: ComponentBase<PanelComponentProps, ()>,
+    base: ComponentBase<PanelComponentProps, PanelComponentState>,
     tab: TabComponent,
 }
 
 impl PanelComponent {
-    pub fn new(props: PanelComponentProps, tab_props: TabComponentProps) -> Self {
+    pub fn new(props: PanelComponentProps, state: PanelComponentState, tab: TabComponent) -> Self {
         PanelComponent {
-            base: ComponentBase::new(Some(props), None),
-            tab: TabComponent::new(Some(tab_props)),
+            base: ComponentBase::new(Some(props), Some(state)),
+            tab,
         }
     }
 
@@ -46,10 +57,8 @@ impl PanelComponent {
             tab: TabComponent::empty(),
         }
     }
-}
 
-impl From<PanelState> for PanelComponent {
-    fn from(panel_state: PanelState) -> Self {
+    pub fn with_panel_state(panel_state: PanelState, side: PanelSide) -> Self {
         let tabs: Vec<String> = panel_state
             .tabs
             .iter()
@@ -61,14 +70,18 @@ impl From<PanelState> for PanelComponent {
             current_tab: panel_state.current_tab,
         };
 
-        PanelComponent::new(
-            panel_props,
-            TabComponentProps::new(
-                panel_state.tabs[panel_state.current_tab].clone(),
-                has_displayed_tabs,
-                panel_state.is_focused,
-            ),
-        )
+        let state = PanelComponentState {
+            side: Some(side.clone()),
+        };
+
+        let tab = TabComponent::new(Some(TabComponentProps::new(
+            panel_state.tabs[panel_state.current_tab].clone(),
+            has_displayed_tabs,
+            panel_state.is_focused,
+            side,
+        )));
+
+        PanelComponent::new(panel_props, state, tab)
     }
 }
 

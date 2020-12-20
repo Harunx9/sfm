@@ -5,7 +5,7 @@ use tui::{
 
 use crate::{
     app::{
-        actions::{AppAction, FileManagerActions},
+        actions::{AppAction, FileManagerActions, PanelSide},
         state::AppState,
     },
     core::{events::Event, store::Store, ui::component::Component},
@@ -28,8 +28,8 @@ impl RootComponent {
 
     fn map_state(&mut self, store: &Store<AppState, FileManagerActions>) {
         let state = store.get_state();
-        self.left_panel = PanelComponent::from(state.left_panel);
-        self.right_panel = PanelComponent::from(state.right_panel);
+        self.left_panel = PanelComponent::with_panel_state(state.left_panel, PanelSide::Left);
+        self.right_panel = PanelComponent::with_panel_state(state.right_panel, PanelSide::Right);
     }
 }
 

@@ -9,7 +9,7 @@ use tui::{
 
 use crate::{
     app::{
-        actions::{FileManagerActions, TabAction},
+        actions::{FileManagerActions, PanelSide, TabAction},
         state::{AppState, TabState},
     },
     core::{
@@ -25,6 +25,7 @@ pub struct TabComponentProps {
     state: Option<TabState>,
     has_displayed_tabs: bool,
     is_focused: bool,
+    panel_side: Option<PanelSide>,
 }
 
 impl Default for TabComponentProps {
@@ -33,16 +34,23 @@ impl Default for TabComponentProps {
             state: None,
             has_displayed_tabs: false,
             is_focused: false,
+            panel_side: None,
         }
     }
 }
 
 impl TabComponentProps {
-    pub fn new(state: TabState, has_displayed_tabs: bool, is_focused: bool) -> Self {
+    pub fn new(
+        state: TabState,
+        has_displayed_tabs: bool,
+        is_focused: bool,
+        panel_side: PanelSide,
+    ) -> Self {
         TabComponentProps {
             state: Some(state),
             has_displayed_tabs,
             is_focused,
+            panel_side: Some(panel_side),
         }
     }
 }
@@ -81,6 +89,8 @@ impl Component<Event, AppState, FileManagerActions> for TabComponent {
                 store.dispatch(FileManagerActions::Tab(TabAction::Previous));
                 return true;
             }
+
+            if state.config.keyboard_cfg.open.is_pressed(key_evt) {}
         }
 
         false
