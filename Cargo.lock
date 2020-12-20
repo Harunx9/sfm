@@ -78,15 +78,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "filer"
-version = "0.0.1-alpha"
-dependencies = [
- "chrono",
- "crossterm",
- "tui",
-]
-
-[[package]]
 name = "instant"
 version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -207,6 +198,15 @@ name = "redox_syscall"
 version = "0.1.57"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "41cc0f7e4d5d4544e8861606a285bb08d3e70712ccc7d2b84d7c0ccfaf4b05ce"
+
+[[package]]
+name = "sFm"
+version = "0.0.1-alpha"
+dependencies = [
+ "chrono",
+ "crossterm",
+ "tui",
+]
 
 [[package]]
 name = "scopeguard"

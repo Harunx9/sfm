@@ -30,7 +30,7 @@ pub enum TabAction {
     Previous,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, PartialOrd)]
 pub enum PanelSide {
     Left,
     Right,

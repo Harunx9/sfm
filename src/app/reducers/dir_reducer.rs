@@ -103,8 +103,8 @@ fn open_dir_in_tab(
                 .items
                 .iter()
                 .find(|item| item.is_dir() && item.get_path().eq(path.as_path()));
-            if let Some(_item) = dir_to_open {
-                result.push(TabState::with_dir(val.path.as_path(), icons));
+            if let Some(item) = dir_to_open {
+                result.push(TabState::with_dir(item.get_path().as_path(), icons));
             } else {
                 result.push(val.clone());
             }

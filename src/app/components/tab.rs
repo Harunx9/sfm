@@ -9,7 +9,8 @@ use tui::{
 
 use crate::{
     app::{
-        actions::{FileManagerActions, PanelSide, TabAction},
+        actions::{DirectoryAction, FileAction, FileManagerActions, PanelSide, TabAction},
+        file_system::FileSystemItem,
         state::{AppState, TabState},
     },
     core::{
@@ -69,6 +70,15 @@ impl TabComponent {
     pub fn empty() -> Self {
         TabComponent::new(None)
     }
+
+    fn current_item(&self) -> Option<FileSystemItem> {
+        let props = self.base.get_props().unwrap();
+        let state = props.state.unwrap();
+        match state.tab_state.selected() {
+            Some(idx) => Some(state.items[idx].clone()),
+            None => None,
+        }
+    }
 }
 
 impl Component<Event, AppState, FileManagerActions> for TabComponent {
@@ -78,6 +88,12 @@ impl Component<Event, AppState, FileManagerActions> for TabComponent {
         store: &mut Store<AppState, FileManagerActions>,
     ) -> bool {
         let state = store.get_state();
+        let props = self.base.get_props().unwrap();
+        let tab_side = props.panel_side.unwrap();
+        let tab_idx = match tab_side {
+            PanelSide::Left => state.left_panel.current_tab,
+            PanelSide::Right => state.right_panel.current_tab,
+        };
 
         if let Event::Keyboard(key_evt) = event {
             if state.config.keyboard_cfg.next_tab_item.is_pressed(key_evt) {
@@ -89,8 +105,63 @@ impl Component<Event, AppState, FileManagerActions> for TabComponent {
                 store.dispatch(FileManagerActions::Tab(TabAction::Previous));
                 return true;
             }
+            if let Some(current_item) = self.current_item() {
+                if state.config.keyboard_cfg.open.is_pressed(key_evt) && props.is_focused {
+                    match current_item {
+                        FileSystemItem::Directory(dir) => {
+                            store.dispatch(FileManagerActions::Directory(DirectoryAction::Open {
+                                path: dir.get_path(),
+                                tab: tab_idx,
+                                panel: tab_side.clone(),
+                            }));
+                        }
+                        FileSystemItem::File(file) => {
+                            store.dispatch(FileManagerActions::File(FileAction::Open {
+                                path: file.get_path(),
+                                tab: tab_idx,
+                                panel: tab_side.clone(),
+                            }))
+                        }
+                        FileSystemItem::Unknown => {}
+                    };
 
-            if state.config.keyboard_cfg.open.is_pressed(key_evt) {}
+                    return true;
+                }
+
+                if state.config.keyboard_cfg.delete.is_pressed(key_evt) && props.is_focused {
+                    match current_item {
+                        FileSystemItem::Directory(dir) => {
+                            store.dispatch(FileManagerActions::Directory(
+                                DirectoryAction::Delete {
+                                    path: dir.get_path(),
+                                    tab: tab_idx,
+                                    panel: tab_side.clone(),
+                                },
+                            ));
+                        }
+                        FileSystemItem::File(file) => {
+                            store.dispatch(FileManagerActions::File(FileAction::Delete {
+                                path: file.get_path(),
+                                tab: tab_idx,
+                                panel: tab_side.clone(),
+                            }))
+                        }
+                        FileSystemItem::Unknown => {}
+                    };
+
+                    return true;
+                }
+
+                if state.config.keyboard_cfg.move_left.is_pressed(key_evt)
+                    && props.is_focused
+                    && tab_side == PanelSide::Right
+                {}
+
+                if state.config.keyboard_cfg.move_right.is_pressed(key_evt)
+                    && props.is_focused
+                    && tab_side == PanelSide::Left
+                {}
+            }
         }
 
         false
