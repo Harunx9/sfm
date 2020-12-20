@@ -71,7 +71,7 @@ impl TabState {
         TabState {
             name: dir_info.name.clone(),
             icon: icons.get_dir_icon(dir_info.name.clone()),
-            path: dir_info.path,
+            path: dir_info.path.clone(),
             items,
             selected: Vec::new(),
             tab_state: ListState::default(),

@@ -1,8 +1,6 @@
-use std::collections::HashMap;
-
-use crossterm::event::{KeyCode, KeyModifiers};
-
 use crate::core::{config::CoreConfig, key_binding::KeyBinging};
+use crossterm::event::{KeyCode, KeyModifiers};
+use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
 pub struct Config {
@@ -46,7 +44,10 @@ pub struct KeyboardConfig {
     pub focus_right_panel: KeyBinging,
     pub next_tab_item: KeyBinging,
     pub prev_tab_item: KeyBinging,
+    pub next_tab: KeyBinging,
+    pub prev_tab: KeyBinging,
     pub open: KeyBinging,
+    pub open_as_tab: KeyBinging,
     pub navigate_up: KeyBinging,
     pub delete: KeyBinging,
     pub move_left: KeyBinging,
@@ -62,7 +63,10 @@ impl Default for KeyboardConfig {
             focus_right_panel: KeyBinging::new(KeyCode::Char('l'), None),
             next_tab_item: KeyBinging::new(KeyCode::Char('j'), None),
             prev_tab_item: KeyBinging::new(KeyCode::Char('k'), None),
+            next_tab: KeyBinging::new(KeyCode::Tab, None),
+            prev_tab: KeyBinging::new(KeyCode::Tab, Some(KeyModifiers::CONTROL)),
             open: KeyBinging::new(KeyCode::Enter, None),
+            open_as_tab: KeyBinging::new(KeyCode::Enter, Some(KeyModifiers::CONTROL)),
             navigate_up: KeyBinging::new(KeyCode::Backspace, None),
             delete: KeyBinging::new(KeyCode::Char('d'), Some(KeyModifiers::CONTROL)),
             move_left: KeyBinging::new(KeyCode::Char('l'), Some(KeyModifiers::CONTROL)),

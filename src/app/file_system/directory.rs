@@ -44,6 +44,8 @@ pub fn get_items_from_dir(dir: &Path, icons: &IconsConfig) -> Vec<FileSystemItem
                 }
             }
 
+            result.sort_by(|one, two| one.get_name().cmp(&two.get_name()));
+
             result
         }
         Err(_) => Vec::new(),

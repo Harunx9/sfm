@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use tui::{
     backend::Backend,
     layout::Rect,
@@ -126,9 +128,21 @@ impl Component<Event, AppState, FileManagerActions> for TabComponent {
                 store.dispatch(FileManagerActions::Tab(TabAction::Previous));
                 return true;
             }
-            if let Some(current_item) = self.current_item() {
-                if state.config.keyboard_cfg.navigate_up.is_pressed(key_evt) && props.is_focused {}
 
+            if state.config.keyboard_cfg.navigate_up.is_pressed(key_evt) && props.is_focused {
+                let current_path = props.state.unwrap().path;
+                if let Some(parent) = current_path.parent() {
+                    store.dispatch(FileManagerActions::Directory(DirectoryAction::Open {
+                        path: parent.into(),
+                        tab: tab_idx,
+                        panel: tab_side.clone(),
+                    }));
+                }
+
+                return true;
+            }
+
+            if let Some(current_item) = self.current_item() {
                 if state.config.keyboard_cfg.open.is_pressed(key_evt) && props.is_focused {
                     match current_item {
                         FileSystemItem::Directory(dir) => {
@@ -145,7 +159,7 @@ impl Component<Event, AppState, FileManagerActions> for TabComponent {
                                 panel: tab_side.clone(),
                             }))
                         }
-                        FileSystemItem::Unknown => {}
+                        _ => {}
                     };
 
                     return true;
@@ -169,7 +183,7 @@ impl Component<Event, AppState, FileManagerActions> for TabComponent {
                                 panel: tab_side.clone(),
                             }))
                         }
-                        FileSystemItem::Unknown => {}
+                        _ => {}
                     };
 
                     return true;

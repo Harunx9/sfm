@@ -38,7 +38,11 @@ impl Default for PanelComponentState {
     }
 }
 
-pub struct PanelStyle {}
+pub struct PanelStyle {
+    boarder_color: Color,
+    active_tab_bg: Color,
+    active_tab_fg: Color,
+}
 
 pub struct PanelComponent {
     base: ComponentBase<PanelComponentProps, PanelComponentState>,
