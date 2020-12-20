@@ -51,6 +51,7 @@ impl Default for PanelState {
 #[derive(Clone, Debug)]
 pub struct TabState {
     pub name: String,
+    pub icon: String,
     pub path: PathBuf,
     pub items: Vec<FileSystemItem>,
     pub selected: Vec<usize>,
@@ -68,7 +69,8 @@ impl TabState {
         let dir_info = DirInfo::new(dir_path).unwrap();
         let items = get_items_from_dir(dir_path, icons);
         TabState {
-            name: dir_info.name,
+            name: dir_info.name.clone(),
+            icon: icons.get_dir_icon(dir_info.name.clone()),
             path: dir_info.path,
             items,
             selected: Vec::new(),

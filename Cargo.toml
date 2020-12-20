@@ -1,5 +1,5 @@
 [package]
-name = "sFm"
+name = "sfm"
 version = "0.0.1-alpha"
 authors = ["Szymon <szwanot@gmail.com>"]
 edition = "2018"

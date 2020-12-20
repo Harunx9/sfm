@@ -47,6 +47,7 @@ pub struct KeyboardConfig {
     pub next_tab_item: KeyBinging,
     pub prev_tab_item: KeyBinging,
     pub open: KeyBinging,
+    pub navigate_up: KeyBinging,
     pub delete: KeyBinging,
     pub move_left: KeyBinging,
     pub move_right: KeyBinging,
@@ -62,6 +63,7 @@ impl Default for KeyboardConfig {
             next_tab_item: KeyBinging::new(KeyCode::Char('j'), None),
             prev_tab_item: KeyBinging::new(KeyCode::Char('k'), None),
             open: KeyBinging::new(KeyCode::Enter, None),
+            navigate_up: KeyBinging::new(KeyCode::Backspace, None),
             delete: KeyBinging::new(KeyCode::Char('d'), Some(KeyModifiers::CONTROL)),
             move_left: KeyBinging::new(KeyCode::Char('l'), Some(KeyModifiers::CONTROL)),
             move_right: KeyBinging::new(KeyCode::Char('l'), Some(KeyModifiers::CONTROL)),
@@ -72,6 +74,7 @@ impl Default for KeyboardConfig {
 
 #[derive(Debug, Clone)]
 pub struct IconsConfig {
+    pub use_icons: bool,
     dir_icons: HashMap<String, String>,
     files_icon: HashMap<String, String>,
 }
@@ -79,6 +82,7 @@ pub struct IconsConfig {
 impl Default for IconsConfig {
     fn default() -> Self {
         IconsConfig {
+            use_icons: true,
             dir_icons: get_default_dir_icons(),
             files_icon: get_default_files_icons(),
         }

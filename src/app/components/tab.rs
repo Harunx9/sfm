@@ -1,7 +1,8 @@
 use tui::{
     backend::Backend,
     layout::Rect,
-    style::Style,
+    style::{Color, Style},
+    text::{Span, Spans},
     widgets::List,
     widgets::ListItem,
     widgets::{Block, Borders},
@@ -56,19 +57,39 @@ impl TabComponentProps {
     }
 }
 
+pub struct TabStyle {
+    active_border_color: Color,
+    selected_element_background: Color,
+    selected_element_foregound: Color,
+    selected_element_indicator: String,
+}
+
+impl Default for TabStyle {
+    fn default() -> Self {
+        TabStyle {
+            active_border_color: Color::Blue,
+            selected_element_background: Color::Red,
+            selected_element_foregound: Color::Black,
+            selected_element_indicator: ">>".to_string(),
+        }
+    }
+}
+
 pub struct TabComponent {
     base: ComponentBase<TabComponentProps, ()>,
+    style: TabStyle,
 }
 
 impl TabComponent {
-    pub fn new(props: Option<TabComponentProps>) -> Self {
+    pub fn new(props: Option<TabComponentProps>, style: Option<TabStyle>) -> Self {
         TabComponent {
             base: ComponentBase::new(props, None),
+            style: style.unwrap_or(TabStyle::default()),
         }
     }
 
     pub fn empty() -> Self {
-        TabComponent::new(None)
+        TabComponent::new(None, None)
     }
 
     fn current_item(&self) -> Option<FileSystemItem> {
@@ -106,6 +127,8 @@ impl Component<Event, AppState, FileManagerActions> for TabComponent {
                 return true;
             }
             if let Some(current_item) = self.current_item() {
+                if state.config.keyboard_cfg.navigate_up.is_pressed(key_evt) && props.is_focused {}
+
                 if state.config.keyboard_cfg.open.is_pressed(key_evt) && props.is_focused {
                     match current_item {
                         FileSystemItem::Directory(dir) => {
@@ -176,10 +199,22 @@ impl Component<Event, AppState, FileManagerActions> for TabComponent {
                     .map(|item| ListItem::new(item.to_spans(area.unwrap_or(frame.size()))))
                     .collect();
 
+                let border_style = if tab_props.is_focused {
+                    Style::default().fg(self.style.active_border_color)
+                } else {
+                    Style::default()
+                };
+
                 let block = Block::default()
-                    .title(state.name)
+                    .title(Spans::from(vec![
+                        Span::from("| "),
+                        Span::from(state.icon),
+                        Span::from(" "),
+                        Span::from(state.name),
+                        Span::from(" |"),
+                    ]))
                     .borders(Borders::ALL)
-                    .border_style(Style::default())
+                    .border_style(border_style)
                     .border_type(tui::widgets::BorderType::Thick)
                     .style(Style::default());
 
@@ -187,8 +222,12 @@ impl Component<Event, AppState, FileManagerActions> for TabComponent {
 
                 if tab_props.is_focused {
                     let focused_list = List::from(list)
-                        .highlight_style(Style::default())
-                        .highlight_symbol(">>");
+                        .highlight_style(
+                            Style::default()
+                                .bg(self.style.selected_element_background)
+                                .fg(self.style.selected_element_foregound),
+                        )
+                        .highlight_symbol(self.style.selected_element_indicator.as_str());
 
                     frame.render_stateful_widget(focused_list, area.unwrap(), &mut state.tab_state);
                 } else {

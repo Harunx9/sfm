@@ -38,6 +38,8 @@ impl Default for PanelComponentState {
     }
 }
 
+pub struct PanelStyle {}
+
 pub struct PanelComponent {
     base: ComponentBase<PanelComponentProps, PanelComponentState>,
     tab: TabComponent,
@@ -74,12 +76,15 @@ impl PanelComponent {
             side: Some(side.clone()),
         };
 
-        let tab = TabComponent::new(Some(TabComponentProps::new(
-            panel_state.tabs[panel_state.current_tab].clone(),
-            has_displayed_tabs,
-            panel_state.is_focused,
-            side,
-        )));
+        let tab = TabComponent::new(
+            Some(TabComponentProps::new(
+                panel_state.tabs[panel_state.current_tab].clone(),
+                has_displayed_tabs,
+                panel_state.is_focused,
+                side,
+            )),
+            None,
+        );
 
         PanelComponent::new(panel_props, state, tab)
     }
