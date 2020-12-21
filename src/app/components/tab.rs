@@ -136,6 +136,7 @@ impl Component<Event, AppState, FileManagerActions> for TabComponent {
                         path: parent.into(),
                         tab: tab_idx,
                         panel: tab_side.clone(),
+                        in_new_tab: false,
                     }));
                 }
 
@@ -143,6 +144,19 @@ impl Component<Event, AppState, FileManagerActions> for TabComponent {
             }
 
             if let Some(current_item) = self.current_item() {
+                if state.config.keyboard_cfg.open_as_tab.is_pressed(key_evt) && props.is_focused {
+                    if let FileSystemItem::Directory(dir) = current_item {
+                        store.dispatch(FileManagerActions::Directory(DirectoryAction::Open {
+                            path: dir.get_path(),
+                            tab: tab_idx,
+                            panel: tab_side.clone(),
+                            in_new_tab: true,
+                        }));
+                    }
+
+                    return true;
+                }
+
                 if state.config.keyboard_cfg.open.is_pressed(key_evt) && props.is_focused {
                     match current_item {
                         FileSystemItem::Directory(dir) => {
@@ -150,6 +164,7 @@ impl Component<Event, AppState, FileManagerActions> for TabComponent {
                                 path: dir.get_path(),
                                 tab: tab_idx,
                                 panel: tab_side.clone(),
+                                in_new_tab: false,
                             }));
                         }
                         FileSystemItem::File(file) => {

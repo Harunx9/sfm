@@ -22,22 +22,47 @@ pub fn dir_reducer(state: AppState, dir_action: DirectoryAction) -> AppState {
             tab,
             panel,
         } => rename_dir(state, from, to, tab, panel),
-        DirectoryAction::Open { path, tab, panel } => open_dir(state, path, tab, panel),
+        DirectoryAction::Open {
+            path,
+            tab,
+            panel,
+            in_new_tab,
+        } => open_dir(state, path, tab, panel, in_new_tab),
     }
 }
 
-fn open_dir(state: AppState, path: PathBuf, tab: TabIdx, panel: PanelSide) -> AppState {
+fn open_dir(
+    state: AppState,
+    path: PathBuf,
+    tab: TabIdx,
+    panel: PanelSide,
+    in_new_tab: bool,
+) -> AppState {
     match panel {
         PanelSide::Left => AppState {
             left_panel: PanelState {
-                tabs: open_dir_in_tab(path, tab, state.left_panel.tabs, &state.config.icons),
+                tabs: if in_new_tab {
+                    let mut current_tabs = state.left_panel.tabs.clone();
+                    current_tabs.push(TabState::with_dir(path.as_path(), &state.config.icons));
+
+                    current_tabs
+                } else {
+                    open_dir_in_tab(path, tab, state.left_panel.tabs, &state.config.icons)
+                },
                 ..state.left_panel
             },
             ..state
         },
         PanelSide::Right => AppState {
             right_panel: PanelState {
-                tabs: open_dir_in_tab(path, tab, state.right_panel.tabs, &state.config.icons),
+                tabs: if in_new_tab {
+                    let mut current_tabs = state.right_panel.tabs.clone();
+                    current_tabs.push(TabState::with_dir(path.as_path(), &state.config.icons));
+
+                    current_tabs
+                } else {
+                    open_dir_in_tab(path, tab, state.right_panel.tabs, &state.config.icons)
+                },
                 ..state.right_panel
             },
             ..state

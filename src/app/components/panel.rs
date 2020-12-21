@@ -9,7 +9,8 @@ use tui::{
 
 use crate::{
     app::{
-        actions::{FileManagerActions, PanelSide},
+        actions::{FileManagerActions, PanelAction, PanelSide},
+        config::IconsConfig,
         state::{AppState, PanelState},
     },
     core::{
@@ -23,8 +24,15 @@ use super::tab::{TabComponent, TabComponentProps};
 
 #[derive(Clone, Default, Debug)]
 pub struct PanelComponentProps {
-    tabs: Vec<String>,
+    tabs: Vec<TabInfo>,
     current_tab: usize,
+    is_focused: bool,
+}
+
+#[derive(Clone, Default, Debug)]
+struct TabInfo {
+    pub name: String,
+    pub icon: String,
 }
 
 #[derive(Clone, Debug)]
@@ -39,14 +47,25 @@ impl Default for PanelComponentState {
 }
 
 pub struct PanelStyle {
-    boarder_color: Color,
+    active_border_color: Color,
     active_tab_bg: Color,
     active_tab_fg: Color,
+}
+
+impl Default for PanelStyle {
+    fn default() -> Self {
+        PanelStyle {
+            active_border_color: Color::Blue,
+            active_tab_bg: Color::Red,
+            active_tab_fg: Color::Black,
+        }
+    }
 }
 
 pub struct PanelComponent {
     base: ComponentBase<PanelComponentProps, PanelComponentState>,
     tab: TabComponent,
+    style: PanelStyle,
 }
 
 impl PanelComponent {
@@ -54,6 +73,7 @@ impl PanelComponent {
         PanelComponent {
             base: ComponentBase::new(Some(props), Some(state)),
             tab,
+            style: PanelStyle::default(),
         }
     }
 
@@ -61,19 +81,24 @@ impl PanelComponent {
         PanelComponent {
             base: ComponentBase::new(None, None),
             tab: TabComponent::empty(),
+            style: PanelStyle::default(),
         }
     }
 
-    pub fn with_panel_state(panel_state: PanelState, side: PanelSide) -> Self {
-        let tabs: Vec<String> = panel_state
+    pub fn with_panel_state(panel_state: PanelState, side: PanelSide, icons: &IconsConfig) -> Self {
+        let tabs: Vec<_> = panel_state
             .tabs
             .iter()
-            .map(|tab| tab.name.clone())
+            .map(|tab| TabInfo {
+                name: tab.name.clone(),
+                icon: icons.get_dir_icon(tab.name.clone()),
+            })
             .collect();
         let has_displayed_tabs = tabs.is_empty() == false;
         let panel_props = PanelComponentProps {
             tabs,
             current_tab: panel_state.current_tab,
+            is_focused: panel_state.is_focused,
         };
 
         let state = PanelComponentState {
@@ -101,7 +126,40 @@ impl Component<Event, AppState, FileManagerActions> for PanelComponent {
         store: &mut Store<AppState, FileManagerActions>,
     ) -> bool {
         let state = store.get_state();
-        if let Event::Keyboard(key_evt) = event {}
+        let props = self.base.get_props().unwrap();
+        let panel_side = self.base.get_state().unwrap().side.unwrap();
+        if let Event::Keyboard(key_evt) = event {
+            if state.config.keyboard_cfg.next_tab.is_pressed(key_evt)
+                && props.is_focused
+                && props.tabs.len() > 1
+            {
+                store.dispatch(FileManagerActions::Panel(PanelAction::Next {
+                    panel: panel_side,
+                }));
+                return true;
+            }
+
+            if state.config.keyboard_cfg.prev_tab.is_pressed(key_evt)
+                && props.is_focused
+                && props.tabs.len() > 1
+            {
+                store.dispatch(FileManagerActions::Panel(PanelAction::Previous {
+                    panel: panel_side,
+                }));
+                return true;
+            }
+
+            if state.config.keyboard_cfg.close_tab.is_pressed(key_evt)
+                && props.is_focused
+                && props.tabs.len() > 1
+            {
+                store.dispatch(FileManagerActions::Panel(PanelAction::CloseTab {
+                    panel: panel_side,
+                    tab: props.current_tab,
+                }));
+                return true;
+            }
+        }
 
         self.tab.handle_event(event, store)
     }
@@ -115,21 +173,34 @@ impl Component<Event, AppState, FileManagerActions> for PanelComponent {
                 .enumerate()
                 .map(|(idx, val)| {
                     if idx == props.current_tab {
-                        Spans::from(vec![Span::styled(val, Style::default().fg(Color::Blue))])
+                        let style = Style::default()
+                            .fg(self.style.active_tab_fg)
+                            .bg(self.style.active_tab_bg);
+                        Spans::from(vec![
+                            Span::styled(val.icon.clone(), style),
+                            Span::styled(" ", style),
+                            Span::styled(val.name.clone(), style),
+                        ])
                     } else {
-                        Spans::from(vec![Span::styled(val, Style::default())])
+                        Spans::from(vec![
+                            Span::styled(val.icon.clone(), Style::default()),
+                            Span::styled(" ", Style::default()),
+                            Span::styled(val.name.clone(), Style::default()),
+                        ])
                     }
                 })
                 .collect();
 
-            let tabs = Tabs::new(tabs_items).block(
-                Block::default()
-                    .borders(Borders::ALL)
-                    .title(props.tabs[props.current_tab].clone()),
-            );
+            let style = Style::default();
+            if props.is_focused {
+                style.fg(self.style.active_border_color);
+            }
+
+            let tabs =
+                Tabs::new(tabs_items).block(Block::default().style(style).borders(Borders::ALL));
 
             let layout = Layout::default()
-                .constraints([Constraint::Percentage(20), Constraint::Percentage(80)])
+                .constraints([Constraint::Length(3), Constraint::Min(0)])
                 .split(area.unwrap());
 
             frame.render_widget(tabs, layout[0]);

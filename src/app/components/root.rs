@@ -28,8 +28,16 @@ impl RootComponent {
 
     fn map_state(&mut self, store: &Store<AppState, FileManagerActions>) {
         let state = store.get_state();
-        self.left_panel = PanelComponent::with_panel_state(state.left_panel, PanelSide::Left);
-        self.right_panel = PanelComponent::with_panel_state(state.right_panel, PanelSide::Right);
+        self.left_panel = PanelComponent::with_panel_state(
+            state.left_panel,
+            PanelSide::Left,
+            &state.config.icons,
+        );
+        self.right_panel = PanelComponent::with_panel_state(
+            state.right_panel,
+            PanelSide::Right,
+            &state.config.icons,
+        );
     }
 }
 

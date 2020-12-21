@@ -20,8 +20,9 @@ pub enum AppAction {
 
 #[derive(Clone, Debug)]
 pub enum PanelAction {
-    Next,
-    Previous,
+    Next { panel: PanelSide },
+    Previous { panel: PanelSide },
+    CloseTab { tab: TabIdx, panel: PanelSide },
 }
 
 #[derive(Clone, Debug)]
@@ -85,5 +86,6 @@ pub enum DirectoryAction {
         path: PathBuf,
         tab: TabIdx,
         panel: PanelSide,
+        in_new_tab: bool,
     },
 }
