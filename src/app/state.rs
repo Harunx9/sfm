@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 use tui::widgets::ListState;
 
 use super::{
-    config::{Config, IconsConfig},
+    config::{icon_cfg::IconsConfig, Config},
     file_system::{
         directory::{get_items_from_dir, DirInfo},
         FileSystemItem,
@@ -78,3 +78,8 @@ impl TabState {
         }
     }
 }
+
+pub struct Error {
+    pub message: String,
+}
+

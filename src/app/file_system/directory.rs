@@ -1,7 +1,7 @@
 use chrono::{DateTime, Local};
 use fs::Metadata;
 
-use crate::app::config::IconsConfig;
+use crate::app::config::icon_cfg::IconsConfig;
 
 use super::{DirectoryItem, FileItem, FileSystemItem};
 use std::{

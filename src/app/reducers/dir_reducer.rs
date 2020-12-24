@@ -1,8 +1,8 @@
-use std::path::PathBuf;
+use std::{fs, path::PathBuf};
 
 use crate::app::{
     actions::{DirectoryAction, PanelSide},
-    config::IconsConfig,
+    config::icon_cfg::IconsConfig,
     file_system::FileSystemItem,
     state::{AppState, PanelState, TabIdx, TabState},
 };
@@ -28,6 +28,49 @@ pub fn dir_reducer(state: AppState, dir_action: DirectoryAction) -> AppState {
             panel,
             in_new_tab,
         } => open_dir(state, path, tab, panel, in_new_tab),
+        DirectoryAction::Create {
+            dir_name,
+            parent_path,
+            tab,
+            panel,
+        } => create_directory(state, dir_name, parent_path, tab, panel),
+    }
+}
+
+fn create_directory(
+    state: AppState,
+    dir_name: String,
+    path: PathBuf,
+    tab: TabIdx,
+    panel: PanelSide,
+) -> AppState {
+    match panel {
+        PanelSide::Left => AppState {
+            left_panel: PanelState {
+                tabs: create_directory_in_tab(
+                    dir_name,
+                    path,
+                    tab,
+                    state.left_panel.tabs,
+                    &state.config.icons,
+                ),
+                ..state.left_panel
+            },
+            ..state
+        },
+        PanelSide::Right => AppState {
+            right_panel: PanelState {
+                tabs: create_directory_in_tab(
+                    dir_name,
+                    path,
+                    tab,
+                    state.right_panel.tabs,
+                    &state.config.icons,
+                ),
+                ..state.right_panel
+            },
+            ..state
+        },
     }
 }
 
@@ -207,5 +250,31 @@ fn delete_dir_from_tab(
         }
     }
 
+    result
+}
+
+fn create_directory_in_tab(
+    dir_name: String,
+    parent_path: PathBuf,
+    tab: TabIdx,
+    mut tabs: Vec<TabState>,
+    icons: &IconsConfig,
+) -> Vec<TabState> {
+    let mut result = Vec::<TabState>::new();
+    for (idx, val) in tabs.iter_mut().enumerate() {
+        if idx == tab {
+            if parent_path.exists() {
+                let dir_path = parent_path.with_extension(dir_name.clone());
+                match fs::create_dir(dir_path) {
+                    Ok(_) => result.push(TabState::with_dir(parent_path.as_path(), icons)),
+                    Err(_) => {}
+                };
+            } else {
+                result.push(val.clone());
+            }
+        } else {
+            result.push(val.clone());
+        }
+    }
     result
 }

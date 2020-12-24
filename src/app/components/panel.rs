@@ -10,7 +10,7 @@ use tui::{
 use crate::{
     app::{
         actions::{FileManagerActions, PanelAction, PanelSide},
-        config::IconsConfig,
+        config::icon_cfg::IconsConfig,
         state::{AppState, PanelState},
     },
     core::{

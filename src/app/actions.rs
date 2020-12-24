@@ -61,6 +61,12 @@ pub enum FileAction {
         tab: TabIdx,
         panel: PanelSide,
     },
+    Create {
+        file_name: String,
+        dir_path: PathBuf,
+        tab: TabIdx,
+        panel: PanelSide,
+    },
 }
 
 #[derive(Clone, Debug)]
@@ -87,5 +93,11 @@ pub enum DirectoryAction {
         tab: TabIdx,
         panel: PanelSide,
         in_new_tab: bool,
+    },
+    Create {
+        dir_name: String,
+        parent_path: PathBuf,
+        tab: TabIdx,
+        panel: PanelSide,
     },
 }

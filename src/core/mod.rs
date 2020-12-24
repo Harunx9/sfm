@@ -1,5 +1,6 @@
 use tui::{layout::Rect, text::Spans};
 
+pub mod color_scheme;
 pub mod config;
 pub mod events;
 pub mod key_binding;
