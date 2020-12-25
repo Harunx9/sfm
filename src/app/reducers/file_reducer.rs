@@ -1,54 +1,37 @@
 use std::{
+    ffi::OsStr,
     fs::{self, File},
     path::PathBuf,
+    process::{Command, Stdio},
 };
 
 use crate::app::{
-    actions::{FileAction, PanelSide},
-    config::icon_cfg::IconsConfig,
+    actions::{FileAction, PanelInfo, PanelSide},
+    config::{icon_cfg::IconsConfig, program_associations::FileAssociatedPrograms},
     file_system::FileSystemItem,
-    state::{AppState, PanelState, TabIdx, TabState},
+    state::{AppState, ChildProgramDesc, PanelState, TabIdx, TabState},
 };
+
+use super::reload_tab;
 
 pub fn file_reducer(state: AppState, file_action: FileAction) -> AppState {
     match file_action {
-        FileAction::Delete { path, tab, panel } => delete_file(state, path, tab, panel),
-        FileAction::Rename {
-            from,
-            to,
-            tab,
-            panel,
-        } => rename_file(state, from, to, tab, panel),
-        FileAction::Move {
-            from,
-            to,
-            tab,
-            panel,
-        } => rename_file(state, from, to, tab, panel),
-        FileAction::Open { path, tab, panel } => open_file(state, path, tab, panel),
-        FileAction::Create {
-            file_name,
-            dir_path,
-            tab,
-            panel,
-        } => create_file(state, file_name, dir_path, tab, panel),
+        FileAction::Delete { panel } => delete_file(state, panel),
+        FileAction::Rename { from, to } => rename_file(state, from, to),
+        FileAction::Move { from, to } => rename_file(state, from, to),
+        FileAction::Open { panel } => open_file(state, panel),
+        FileAction::Create { file_name, panel } => create_file(state, file_name, panel),
     }
 }
 
-fn create_file(
-    state: AppState,
-    file_name: String,
-    dir_path: PathBuf,
-    tab: TabIdx,
-    panel: PanelSide,
-) -> AppState {
-    match panel {
+fn create_file(state: AppState, file_name: String, panel: PanelInfo) -> AppState {
+    match panel.side {
         PanelSide::Left => AppState {
             left_panel: PanelState {
                 tabs: create_file_in_tab(
                     file_name,
-                    dir_path,
-                    tab,
+                    panel.path,
+                    panel.tab,
                     state.left_panel.tabs,
                     &state.config.icons,
                 ),
@@ -60,8 +43,8 @@ fn create_file(
             right_panel: PanelState {
                 tabs: create_file_in_tab(
                     file_name,
-                    dir_path,
-                    tab,
+                    panel.path,
+                    panel.tab,
                     state.right_panel.tabs,
                     &state.config.icons,
                 ),
@@ -72,22 +55,35 @@ fn create_file(
     }
 }
 
-fn open_file(state: AppState, path: PathBuf, tab: TabIdx, panel: PanelSide) -> AppState {
-    state
+fn open_file(state: AppState, panel: PanelInfo) -> AppState {
+    AppState {
+        child_program: open_file_from_tab(panel.path, &state.config.file_associated_programs),
+        ..state
+    }
 }
 
-fn delete_file(state: AppState, path: PathBuf, tab: TabIdx, panel: PanelSide) -> AppState {
-    match panel {
+fn delete_file(state: AppState, panel: PanelInfo) -> AppState {
+    match panel.side {
         PanelSide::Left => AppState {
             left_panel: PanelState {
-                tabs: delete_file_from_tab(path, tab, state.left_panel.tabs, &state.config.icons),
+                tabs: delete_file_from_tab(
+                    panel.path,
+                    panel.tab,
+                    state.left_panel.tabs,
+                    &state.config.icons,
+                ),
                 ..state.left_panel
             },
             ..state
         },
         PanelSide::Right => AppState {
             right_panel: PanelState {
-                tabs: delete_file_from_tab(path, tab, state.right_panel.tabs, &state.config.icons),
+                tabs: delete_file_from_tab(
+                    panel.path,
+                    panel.tab,
+                    state.right_panel.tabs,
+                    &state.config.icons,
+                ),
                 ..state.right_panel
             },
             ..state
@@ -95,30 +91,38 @@ fn delete_file(state: AppState, path: PathBuf, tab: TabIdx, panel: PanelSide) ->
     }
 }
 
-fn rename_file(
-    state: AppState,
-    from: PathBuf,
-    to: PathBuf,
-    tab: TabIdx,
-    panel: PanelSide,
-) -> AppState {
-    match panel {
+fn rename_file(state: AppState, from: PanelInfo, to: PanelInfo) -> AppState {
+    match to.side {
         PanelSide::Left => AppState {
             left_panel: PanelState {
-                tabs: rename_file_in_tab(from, to, tab, state.left_panel.tabs, &state.config.icons),
+                tabs: rename_file_in_tab(
+                    from.path,
+                    to.path,
+                    to.tab,
+                    state.left_panel.tabs,
+                    &state.config.icons,
+                ),
                 ..state.left_panel
+            },
+            right_panel: PanelState {
+                tabs: reload_tab(from.tab, state.right_panel.tabs, &state.config.icons),
+                ..state.right_panel
             },
             ..state
         },
         PanelSide::Right => AppState {
             right_panel: PanelState {
                 tabs: rename_file_in_tab(
-                    from,
-                    to,
-                    tab,
+                    from.path,
+                    to.path,
+                    to.tab,
                     state.right_panel.tabs,
                     &state.config.icons,
                 ),
+                ..state.right_panel
+            },
+            left_panel: PanelState {
+                tabs: reload_tab(from.tab, state.left_panel.tabs, &state.config.icons),
                 ..state.right_panel
             },
             ..state
@@ -153,8 +157,20 @@ fn create_file_in_tab(
     result
 }
 
-fn open_file_from_tab(path: PathBuf, current_tab: TabIdx, tabs: Vec<TabState>) -> Vec<TabState> {
-    tabs
+fn open_file_from_tab(
+    path: PathBuf,
+    file_associated_programs: &FileAssociatedPrograms,
+) -> Option<ChildProgramDesc> {
+    if path.is_file() && path.exists() {
+        let file_extension = path.extension().unwrap_or(OsStr::new(""));
+        Some(ChildProgramDesc {
+            program_name: file_associated_programs
+                .get_program_name(String::from(file_extension.to_str().unwrap())),
+            args: vec![String::from(path.to_str().unwrap())],
+        })
+    } else {
+        None
+    }
 }
 
 fn delete_file_from_tab(
@@ -165,26 +181,26 @@ fn delete_file_from_tab(
 ) -> Vec<TabState> {
     let mut result = Vec::<TabState>::new();
 
-    for (idx, val) in tabs.iter_mut().enumerate() {
+    for (idx, tab_state) in tabs.iter_mut().enumerate() {
         if idx == current_tab {
-            let item_to_delete = val
+            let item_to_delete = tab_state
                 .items
                 .iter()
                 .find(|item| item.is_file() && item.get_path().eq(&path));
             if let Some(item) = item_to_delete {
                 if let FileSystemItem::File(file) = item {
                     match fs::remove_file(file.get_path()) {
-                        Ok(_) => result.push(TabState::with_dir(val.path.as_path(), icons)),
+                        Ok(_) => result.push(TabState::with_dir(tab_state.path.as_path(), icons)),
                         Err(_) => {} //TODO: add error handling to state
                     }
                 } else {
-                    result.push(val.clone());
+                    result.push(tab_state.clone());
                 }
             } else {
-                result.push(val.clone());
+                result.push(tab_state.clone());
             }
         } else {
-            result.push(val.clone());
+            result.push(tab_state.clone());
         }
     }
 
@@ -200,26 +216,26 @@ fn rename_file_in_tab(
 ) -> Vec<TabState> {
     let mut result = Vec::<TabState>::new();
 
-    for (idx, val) in tabs.iter_mut().enumerate() {
+    for (idx, tab_state) in tabs.iter_mut().enumerate() {
         if idx == current_tab {
-            let item_to_delete = val
+            let item_to_delete = tab_state
                 .items
                 .iter()
                 .find(|item| item.is_file() && item.get_path().eq(&from));
             if let Some(item) = item_to_delete {
                 if let FileSystemItem::File(file) = item {
                     match fs::rename(file.get_path(), to.as_path()) {
-                        Ok(_) => result.push(TabState::with_dir(val.path.as_path(), icons)),
+                        Ok(_) => result.push(TabState::with_dir(tab_state.path.as_path(), icons)),
                         Err(_) => {} //TODO: add error handling to state
                     }
                 } else {
-                    result.push(val.clone());
+                    result.push(tab_state.clone());
                 }
             } else {
-                result.push(val.clone());
+                result.push(tab_state.clone());
             }
         } else {
-            result.push(val.clone());
+            result.push(tab_state.clone());
         }
     }
 

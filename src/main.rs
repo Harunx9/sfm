@@ -4,6 +4,7 @@ use crate::core::{events::EventQueue, store::Store};
 use std::{
     error::Error,
     io::{stdout, Write},
+    process::Command,
 };
 
 use app::{
@@ -30,7 +31,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let backend = CrosstermBackend::new(stdout);
 
     let mut terminal = Terminal::new(backend)?;
-    let event_queue = EventQueue::start_with_config(cfg.core_cfg);
+    let mut event_queue = EventQueue::start_with_config(cfg.core_cfg);
 
     let mut store = Store::<AppState, FileManagerActions>::new(root_reducer);
 
@@ -39,8 +40,11 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut root_component = RootComponent::new();
     root_component.on_init(&store);
 
+    store.dispatch(FileManagerActions::App(app::actions::AppAction::FocusLeft));
     loop {
         terminal.draw(|f| root_component.render(f, None))?;
+
+        let state = store.get_state();
 
         if let Ok(event) = event_queue.pool() {
             if let Event::Tick = event {
@@ -50,9 +54,27 @@ fn main() -> Result<(), Box<dyn Error>> {
             }
         }
 
-        let state = store.get_state();
+        if let Some(program_desc) = state.child_program {
+            event_queue.lock_event_read();
+            match Command::new(program_desc.program_name)
+                .args(program_desc.args.as_slice())
+                .spawn()
+            {
+                Ok(mut child) => {
+                    child.wait().expect("");
+                    store.dispatch(FileManagerActions::App(
+                        app::actions::AppAction::ChildProgramClosed,
+                    ));
+                    terminal.clear()?;
+                    terminal.draw(|f| root_component.render(f, None))?;
+                    event_queue.unlock_event_read();
+                }
+                Err(_) => {}
+            };
+        }
 
         if state.app_exit {
+            terminal.clear()?;
             disable_raw_mode()?;
             execute!(
                 terminal.backend_mut(),

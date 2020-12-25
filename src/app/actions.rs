@@ -14,6 +14,7 @@ pub enum FileManagerActions {
 #[derive(Clone, Debug)]
 pub enum AppAction {
     Exit,
+    ChildProgramClosed,
     FocusLeft,
     FocusRight,
 }
@@ -38,66 +39,32 @@ pub enum PanelSide {
 }
 
 #[derive(Clone, Debug)]
+pub struct PanelInfo {
+    pub path: PathBuf,
+    pub tab: TabIdx,
+    pub side: PanelSide,
+}
+
+impl PartialEq for PanelInfo {
+    fn eq(&self, other: &PanelInfo) -> bool {
+        self.side == other.side && self.tab == other.tab
+    }
+}
+
+#[derive(Clone, Debug)]
 pub enum FileAction {
-    Delete {
-        path: PathBuf,
-        tab: TabIdx,
-        panel: PanelSide,
-    },
-    Rename {
-        from: PathBuf,
-        to: PathBuf,
-        tab: TabIdx,
-        panel: PanelSide,
-    },
-    Move {
-        from: PathBuf,
-        to: PathBuf,
-        tab: TabIdx,
-        panel: PanelSide,
-    },
-    Open {
-        path: PathBuf,
-        tab: TabIdx,
-        panel: PanelSide,
-    },
-    Create {
-        file_name: String,
-        dir_path: PathBuf,
-        tab: TabIdx,
-        panel: PanelSide,
-    },
+    Delete { panel: PanelInfo },
+    Rename { from: PanelInfo, to: PanelInfo },
+    Move { from: PanelInfo, to: PanelInfo },
+    Open { panel: PanelInfo },
+    Create { file_name: String, panel: PanelInfo },
 }
 
 #[derive(Clone, Debug)]
 pub enum DirectoryAction {
-    Delete {
-        path: PathBuf,
-        tab: TabIdx,
-        panel: PanelSide,
-    },
-    Rename {
-        from: PathBuf,
-        to: PathBuf,
-        tab: TabIdx,
-        panel: PanelSide,
-    },
-    Move {
-        from: PathBuf,
-        to: PathBuf,
-        tab: TabIdx,
-        panel: PanelSide,
-    },
-    Open {
-        path: PathBuf,
-        tab: TabIdx,
-        panel: PanelSide,
-        in_new_tab: bool,
-    },
-    Create {
-        dir_name: String,
-        parent_path: PathBuf,
-        tab: TabIdx,
-        panel: PanelSide,
-    },
+    Delete { panel: PanelInfo },
+    Rename { from: PanelInfo, to: PanelInfo },
+    Move { from: PanelInfo, to: PanelInfo },
+    Open { panel: PanelInfo, in_new_tab: bool },
+    Create { dir_name: String, panel: PanelInfo },
 }

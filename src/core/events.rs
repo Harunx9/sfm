@@ -1,7 +1,11 @@
 use crossterm::event::{self, KeyEvent, MouseEvent};
 use std::{
     sync::mpsc::RecvError,
-    sync::mpsc::{channel, Receiver},
+    sync::{
+        atomic::{AtomicBool, Ordering},
+        mpsc::{channel, Receiver},
+        Arc,
+    },
     thread,
     thread::JoinHandle,
     time::Duration,
@@ -41,6 +45,7 @@ impl ToString for Error {
 
 pub struct EventQueue {
     receiver: Receiver<Event>,
+    skip_input_event: Arc<AtomicBool>,
     _runner_handle: JoinHandle<()>,
 }
 
@@ -52,12 +57,19 @@ impl EventQueue {
     pub fn start_with_config(config: CoreConfig) -> Self {
         let (sender, receiver) = channel();
         let tick_rate = Duration::from_millis(config.tick_rate);
+        let skip_input_event = Arc::new(AtomicBool::new(false));
+
+        let skip_event_read = skip_input_event.clone();
         let runner_handle = thread::spawn(move || {
             let mut last_tick = Instant::now();
             loop {
                 let timeout = tick_rate
                     .checked_sub(last_tick.elapsed())
                     .unwrap_or_else(|| Duration::from_millis(0));
+
+                if skip_event_read.load(Ordering::Relaxed) {
+                    continue;
+                }
 
                 match event::poll(timeout) {
                     Ok(_pool) => match event::read() {
@@ -92,8 +104,17 @@ impl EventQueue {
 
         EventQueue {
             receiver,
+            skip_input_event: skip_input_event.clone(),
             _runner_handle: runner_handle,
         }
+    }
+
+    pub fn lock_event_read(&mut self) {
+        self.skip_input_event.store(true, Ordering::Relaxed);
+    }
+
+    pub fn unlock_event_read(&mut self) {
+        self.skip_input_event.store(false, Ordering::Relaxed);
     }
 
     pub fn pool(&self) -> Result<Event, RecvError> {

@@ -13,11 +13,18 @@ use super::{
 pub type TabIdx = usize;
 
 #[derive(Clone, Debug)]
+pub struct ChildProgramDesc {
+    pub program_name: String,
+    pub args: Vec<String>,
+}
+
+#[derive(Clone, Debug)]
 pub struct AppState {
     pub left_panel: PanelState,
     pub right_panel: PanelState,
     pub app_exit: bool,
     pub config: Config,
+    pub child_program: Option<ChildProgramDesc>,
 }
 
 impl Default for AppState {
@@ -27,6 +34,7 @@ impl Default for AppState {
             right_panel: PanelState::default(),
             app_exit: false,
             config: Config::default(),
+            child_program: None,
         }
     }
 }
@@ -82,4 +90,3 @@ impl TabState {
 pub struct Error {
     pub message: String,
 }
-

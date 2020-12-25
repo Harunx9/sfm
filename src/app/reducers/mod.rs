@@ -1,6 +1,7 @@
 use super::{
     actions::{AppAction, FileManagerActions},
-    state::{AppState, PanelState},
+    config::icon_cfg::IconsConfig,
+    state::{AppState, PanelState, TabIdx, TabState},
 };
 
 mod dir_reducer;
@@ -51,5 +52,22 @@ fn app_reducer(state: AppState, app_action: AppAction) -> AppState {
             },
             ..state
         },
+        AppAction::ChildProgramClosed => AppState {
+            child_program: None,
+            ..state
+        },
     }
+}
+
+fn reload_tab(tab: TabIdx, tabs: Vec<TabState>, icons_cfg: &IconsConfig) -> Vec<TabState> {
+    let mut result = Vec::<TabState>::new();
+    for (idx, tab_state) in tabs.iter().enumerate() {
+        if idx == tab {
+            result.push(TabState::with_dir(tab_state.path.as_path(), icons_cfg));
+        } else {
+            result.push(tab_state.clone());
+        }
+    }
+
+    result
 }

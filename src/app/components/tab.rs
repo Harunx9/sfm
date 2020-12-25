@@ -1,5 +1,3 @@
-use std::path::PathBuf;
-
 use tui::{
     backend::Backend,
     layout::Rect,
@@ -12,7 +10,9 @@ use tui::{
 
 use crate::{
     app::{
-        actions::{DirectoryAction, FileAction, FileManagerActions, PanelSide, TabAction},
+        actions::{
+            DirectoryAction, FileAction, FileManagerActions, PanelInfo, PanelSide, TabAction,
+        },
         file_system::FileSystemItem,
         state::{AppState, TabState},
     },
@@ -133,9 +133,11 @@ impl Component<Event, AppState, FileManagerActions> for TabComponent {
                 let current_path = props.state.unwrap().path;
                 if let Some(parent) = current_path.parent() {
                     store.dispatch(FileManagerActions::Directory(DirectoryAction::Open {
-                        path: parent.into(),
-                        tab: tab_idx,
-                        panel: tab_side.clone(),
+                        panel: PanelInfo {
+                            path: parent.into(),
+                            tab: tab_idx,
+                            side: tab_side.clone(),
+                        },
                         in_new_tab: false,
                     }));
                 }
@@ -147,9 +149,11 @@ impl Component<Event, AppState, FileManagerActions> for TabComponent {
                 if state.config.keyboard_cfg.open_as_tab.is_pressed(key_evt) && props.is_focused {
                     if let FileSystemItem::Directory(dir) = current_item {
                         store.dispatch(FileManagerActions::Directory(DirectoryAction::Open {
-                            path: dir.get_path(),
-                            tab: tab_idx,
-                            panel: tab_side.clone(),
+                            panel: PanelInfo {
+                                path: dir.get_path(),
+                                tab: tab_idx,
+                                side: tab_side.clone(),
+                            },
                             in_new_tab: true,
                         }));
                     }
@@ -161,17 +165,21 @@ impl Component<Event, AppState, FileManagerActions> for TabComponent {
                     match current_item {
                         FileSystemItem::Directory(dir) => {
                             store.dispatch(FileManagerActions::Directory(DirectoryAction::Open {
-                                path: dir.get_path(),
-                                tab: tab_idx,
-                                panel: tab_side.clone(),
+                                panel: PanelInfo {
+                                    path: dir.get_path(),
+                                    tab: tab_idx,
+                                    side: tab_side.clone(),
+                                },
                                 in_new_tab: false,
                             }));
                         }
                         FileSystemItem::File(file) => {
                             store.dispatch(FileManagerActions::File(FileAction::Open {
-                                path: file.get_path(),
-                                tab: tab_idx,
-                                panel: tab_side.clone(),
+                                panel: PanelInfo {
+                                    path: file.get_path(),
+                                    tab: tab_idx,
+                                    side: tab_side.clone(),
+                                },
                             }))
                         }
                         _ => {}
@@ -185,17 +193,21 @@ impl Component<Event, AppState, FileManagerActions> for TabComponent {
                         FileSystemItem::Directory(dir) => {
                             store.dispatch(FileManagerActions::Directory(
                                 DirectoryAction::Delete {
-                                    path: dir.get_path(),
-                                    tab: tab_idx,
-                                    panel: tab_side.clone(),
+                                    panel: PanelInfo {
+                                        path: dir.get_path(),
+                                        tab: tab_idx,
+                                        side: tab_side.clone(),
+                                    },
                                 },
                             ));
                         }
                         FileSystemItem::File(file) => {
                             store.dispatch(FileManagerActions::File(FileAction::Delete {
-                                path: file.get_path(),
-                                tab: tab_idx,
-                                panel: tab_side.clone(),
+                                panel: PanelInfo {
+                                    path: file.get_path(),
+                                    tab: tab_idx,
+                                    side: tab_side.clone(),
+                                },
                             }))
                         }
                         _ => {}
