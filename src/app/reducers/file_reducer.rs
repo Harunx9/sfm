@@ -2,7 +2,6 @@ use std::{
     ffi::OsStr,
     fs::{self, File},
     path::PathBuf,
-    process::{Command, Stdio},
 };
 
 use crate::app::{
@@ -215,24 +214,11 @@ fn rename_file_in_tab(
     icons: &IconsConfig,
 ) -> Vec<TabState> {
     let mut result = Vec::<TabState>::new();
-
     for (idx, tab_state) in tabs.iter_mut().enumerate() {
         if idx == current_tab {
-            let item_to_delete = tab_state
-                .items
-                .iter()
-                .find(|item| item.is_file() && item.get_path().eq(&from));
-            if let Some(item) = item_to_delete {
-                if let FileSystemItem::File(file) = item {
-                    match fs::rename(file.get_path(), to.as_path()) {
-                        Ok(_) => result.push(TabState::with_dir(tab_state.path.as_path(), icons)),
-                        Err(_) => {} //TODO: add error handling to state
-                    }
-                } else {
-                    result.push(tab_state.clone());
-                }
-            } else {
-                result.push(tab_state.clone());
+            match fs::rename(from.as_path(), to.as_path()) {
+                Ok(_) => result.push(TabState::with_dir(tab_state.path.as_path(), icons)),
+                Err(_) => {} //TODO: add error handling to state
             }
         } else {
             result.push(tab_state.clone());

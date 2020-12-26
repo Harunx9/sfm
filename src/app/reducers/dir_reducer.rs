@@ -202,31 +202,19 @@ fn rename_dir_in_tab(
     from: PathBuf,
     to: PathBuf,
     current_tab: TabIdx,
-    mut tabs: Vec<TabState>,
+    tabs: Vec<TabState>,
     icons: &IconsConfig,
 ) -> Vec<TabState> {
     let mut result = Vec::<TabState>::new();
 
-    for (idx, val) in tabs.iter_mut().enumerate() {
+    for (idx, tab_state) in tabs.iter().enumerate() {
         if idx == current_tab {
-            let dir_to_rename = val
-                .items
-                .iter()
-                .find(|item| item.is_dir() && item.get_path().eq(from.as_path()));
-            if let Some(item) = dir_to_rename {
-                if let FileSystemItem::Directory(dir) = item {
-                    match std::fs::rename(dir.get_path(), to.clone()) {
-                        Ok(_) => result.push(TabState::with_dir(val.path.as_path(), icons)),
-                        Err(_) => {} //TODO: Add error handling
-                    }
-                } else {
-                    result.push(val.clone());
-                }
-            } else {
-                result.push(val.clone());
+            match std::fs::rename(from.clone(), to.clone()) {
+                Ok(_) => result.push(TabState::with_dir(tab_state.path.as_path(), icons)),
+                Err(_) => {} //TODO: Add error handling
             }
         } else {
-            result.push(val.clone());
+            result.push(tab_state.clone());
         }
     }
 

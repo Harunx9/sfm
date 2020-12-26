@@ -1,20 +1,24 @@
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 
 #[derive(Debug, Clone, Copy)]
-pub struct KeyBinging {
+pub struct KeyBinding {
     key: KeyCode,
-    modifier: Option<KeyModifiers>,
+    modifiers: KeyModifiers,
 }
 
-impl KeyBinging {
-    pub fn new(key: KeyCode, modifier: Option<KeyModifiers>) -> Self {
-        KeyBinging { key, modifier }
+impl KeyBinding {
+    pub fn with_modifiers(key: KeyCode, modifiers: KeyModifiers) -> Self {
+        KeyBinding { key, modifiers }
+    }
+
+    pub fn new(key: KeyCode) -> Self {
+        KeyBinding {
+            key,
+            modifiers: KeyModifiers::empty(),
+        }
     }
 
     pub fn is_pressed(&self, key_evt: KeyEvent) -> bool {
-        match self.modifier {
-            Some(modifier) => modifier == key_evt.modifiers && self.key == key_evt.code,
-            None => self.key == key_evt.code,
-        }
+        self.modifiers == key_evt.modifiers && self.key == key_evt.code
     }
 }
