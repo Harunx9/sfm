@@ -3,7 +3,7 @@ use fs::Metadata;
 
 use crate::app::config::icon_cfg::IconsConfig;
 
-use super::{DirectoryItem, FileItem, FileSystemItem};
+use super::{DirectoryItem, FileItem, FileSystemItem, SymlinkItem};
 use std::{
     fs::{self, DirEntry},
     path::{Path, PathBuf},
@@ -55,23 +55,33 @@ pub fn get_items_from_dir(dir: &Path, icons: &IconsConfig) -> Vec<FileSystemItem
 fn map_dir_entry_to_file_system_item(dir_entry: DirEntry, icons: &IconsConfig) -> FileSystemItem {
     if let Ok(metadata) = dir_entry.metadata() {
         let (name, path, modified) = get_file_system_item_props(dir_entry, &metadata);
-
-        if metadata.is_file() {
+        let file_type = metadata.file_type();
+        if file_type.is_file() {
             let file_extensions = name.split('.').last().unwrap_or("");
             return FileSystemItem::File(FileItem::new(
                 name.to_string(),
-                PathBuf::from(path),
+                path,
                 modified,
                 icons.get_file_icon(file_extensions.to_string()),
             ));
         }
 
-        if metadata.is_dir() {
+        if file_type.is_dir() {
             return FileSystemItem::Directory(DirectoryItem::new(
                 name.to_string(),
-                PathBuf::from(path),
+                path,
                 modified,
                 icons.get_dir_icon(name),
+            ));
+        }
+
+        if file_type.is_symlink() {
+            let file_extensions = name.split('.').last().unwrap_or("");
+            return FileSystemItem::Symlink(SymlinkItem::new(
+                name.to_string(),
+                path,
+                modified,
+                icons.get_file_icon(file_extensions.to_string()),
             ));
         }
 
@@ -84,7 +94,7 @@ fn map_dir_entry_to_file_system_item(dir_entry: DirEntry, icons: &IconsConfig) -
 fn get_file_system_item_props(
     dir_entry: DirEntry,
     metadata: &Metadata,
-) -> (String, String, DateTime<Local>) {
+) -> (String, PathBuf, DateTime<Local>) {
     let modified: DateTime<Local> = if let Ok(last_modified) = metadata.modified() {
         last_modified.into()
     } else {
@@ -98,11 +108,6 @@ fn get_file_system_item_props(
         ""
     };
     let path_buffer = dir_entry.path();
-    let path = if let Some(path) = path_buffer.to_str() {
-        path
-    } else {
-        ""
-    };
 
-    (name.to_string(), path.to_string(), modified)
+    (name.to_string(), path_buffer, modified)
 }
