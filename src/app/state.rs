@@ -3,6 +3,7 @@ use std::path::{Path, PathBuf};
 use tui::widgets::ListState;
 
 use super::{
+    actions::PanelSide,
     config::{icon_cfg::IconsConfig, Config},
     file_system::{
         directory::{get_items_from_dir, DirInfo},
@@ -25,6 +26,7 @@ pub struct AppState {
     pub app_exit: bool,
     pub config: Config,
     pub child_program: Option<ChildProgramDesc>,
+    pub modal: Option<ModalType>,
 }
 
 impl Default for AppState {
@@ -35,6 +37,7 @@ impl Default for AppState {
             app_exit: false,
             config: Config::default(),
             child_program: None,
+            modal: None,
         }
     }
 }
@@ -87,6 +90,16 @@ impl TabState {
     }
 }
 
+#[derive(Clone, Debug)]
+pub enum ModalType {
+    CreateModal {
+        panel_side: PanelSide,
+        panel_tab: TabIdx,
+    },
+    ErrorModal(Error),
+}
+
+#[derive(Clone, Debug)]
 pub struct Error {
     pub message: String,
 }

@@ -56,6 +56,14 @@ fn app_reducer(state: AppState, app_action: AppAction) -> AppState {
             child_program: None,
             ..state
         },
+        AppAction::ShowModal(modal_type) => AppState {
+            modal: Some(modal_type),
+            ..state
+        },
+        AppAction::CloseModal => AppState {
+            modal: None,
+            ..state
+        },
     }
 }
 

@@ -149,7 +149,7 @@ impl Component<Event, AppState, FileManagerActions> for PanelComponent {
                 return true;
             }
 
-            if state.config.keyboard_cfg.close_tab.is_pressed(key_evt)
+            if state.config.keyboard_cfg.close.is_pressed(key_evt)
                 && props.is_focused
                 && props.tabs.len() > 1
             {

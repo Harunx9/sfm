@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use super::state::TabIdx;
+use super::state::{ModalType, TabIdx};
 
 #[derive(Clone, Debug)]
 pub enum FileManagerActions {
@@ -17,6 +17,8 @@ pub enum AppAction {
     ChildProgramClosed,
     FocusLeft,
     FocusRight,
+    ShowModal(ModalType),
+    CloseModal,
 }
 
 #[derive(Clone, Debug)]

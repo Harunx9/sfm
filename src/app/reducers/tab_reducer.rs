@@ -56,7 +56,7 @@ fn select_previous(state: AppState) -> AppState {
 
 fn select_next_element(current_tab: usize, mut items: Vec<TabState>) -> Vec<TabState> {
     for (idx, val) in items.iter_mut().enumerate() {
-        if idx == current_tab {
+        if idx == current_tab && val.items.is_empty() == false {
             let next_tab = match val.tab_state.selected() {
                 Some(current) => {
                     if current >= val.items.len() - 1 {
@@ -77,7 +77,7 @@ fn select_next_element(current_tab: usize, mut items: Vec<TabState>) -> Vec<TabS
 
 fn select_prev_element(current_tab: usize, mut items: Vec<TabState>) -> Vec<TabState> {
     for (idx, val) in items.iter_mut().enumerate() {
-        if idx == current_tab {
+        if idx == current_tab && val.items.is_empty() == false {
             let prev_tab = match val.tab_state.selected() {
                 Some(current) => {
                     if current == 0 {

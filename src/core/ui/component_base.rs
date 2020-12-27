@@ -37,9 +37,12 @@ where
         self.state.clone()
     }
 
-    pub fn set_state(&mut self, callback: StateSetter<TState>) {
-        self.state = callback(self.state.clone());
+    pub fn set_state<StateSetter>(&mut self, callback: StateSetter)
+    where
+        StateSetter: Fn(TState) -> TState,
+    {
+        if let Some(state) = self.state.clone() {
+            self.state = Some(callback(state.clone()))
+        }
     }
 }
-
-type StateSetter<TState> = fn(Option<TState>) -> Option<TState>;

@@ -11,10 +11,11 @@ use tui::{
 use crate::{
     app::{
         actions::{
-            DirectoryAction, FileAction, FileManagerActions, PanelInfo, PanelSide, TabAction,
+            AppAction, DirectoryAction, FileAction, FileManagerActions, PanelInfo, PanelSide,
+            TabAction,
         },
         file_system::FileSystemItem,
-        state::{AppState, TabState},
+        state::{AppState, ModalType, TabState},
     },
     core::{
         events::Event,
@@ -119,12 +120,12 @@ impl Component<Event, AppState, FileManagerActions> for TabComponent {
         };
 
         if let Event::Keyboard(key_evt) = event {
-            if state.config.keyboard_cfg.next_tab_item.is_pressed(key_evt) {
+            if state.config.keyboard_cfg.move_down.is_pressed(key_evt) {
                 store.dispatch(FileManagerActions::Tab(TabAction::Next));
                 return true;
             }
 
-            if state.config.keyboard_cfg.prev_tab_item.is_pressed(key_evt) {
+            if state.config.keyboard_cfg.move_up.is_pressed(key_evt) {
                 store.dispatch(FileManagerActions::Tab(TabAction::Previous));
                 return true;
             }
@@ -311,6 +312,20 @@ impl Component<Event, AppState, FileManagerActions> for TabComponent {
                         _ => {}
                     };
 
+                    return true;
+                }
+
+                if state.config.keyboard_cfg.create.is_pressed(key_evt) && props.is_focused {
+                    let tab_idx = match tab_side {
+                        PanelSide::Left => state.left_panel.current_tab,
+                        PanelSide::Right => state.right_panel.current_tab,
+                    };
+                    store.dispatch(FileManagerActions::App(AppAction::ShowModal(
+                        ModalType::CreateModal {
+                            panel_side: tab_side,
+                            panel_tab: tab_idx,
+                        },
+                    )));
                     return true;
                 }
             }

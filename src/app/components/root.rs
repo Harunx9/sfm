@@ -6,16 +6,20 @@ use tui::{
 use crate::{
     app::{
         actions::{AppAction, FileManagerActions, PanelSide},
-        state::AppState,
+        state::{AppState, ModalType},
     },
     core::{events::Event, store::Store, ui::component::Component},
 };
 
-use super::panel::PanelComponent;
+use super::{
+    create_modal::{CreateModalComponent, CreateModalProps},
+    panel::PanelComponent,
+};
 
 pub struct RootComponent {
     left_panel: PanelComponent,
     right_panel: PanelComponent,
+    create_modal: Option<CreateModalComponent>,
 }
 
 impl RootComponent {
@@ -23,6 +27,7 @@ impl RootComponent {
         RootComponent {
             left_panel: PanelComponent::empty(),
             right_panel: PanelComponent::empty(),
+            create_modal: None,
         }
     }
 
@@ -38,6 +43,21 @@ impl RootComponent {
             PanelSide::Right,
             &state.config.icons,
         );
+        if let Some(modal_type) = state.modal {
+            match modal_type {
+                ModalType::CreateModal {
+                    panel_side,
+                    panel_tab,
+                } => {
+                    if self.create_modal.is_none() {
+                        self.create_modal = Some(CreateModalComponent::with_props(
+                            CreateModalProps::new(panel_side, panel_tab),
+                        ));
+                    }
+                }
+                ModalType::ErrorModal(_) => {}
+            };
+        }
     }
 }
 
@@ -56,6 +76,10 @@ impl Component<Event, AppState, FileManagerActions> for RootComponent {
             if state.config.keyboard_cfg.quit.is_pressed(key_evt) {
                 store.dispatch(FileManagerActions::App(AppAction::Exit));
                 return true;
+            }
+
+            if let Some(ref mut create_modal) = self.create_modal {
+                return create_modal.handle_event(event, store);
             }
 
             if state
@@ -99,5 +123,8 @@ impl Component<Event, AppState, FileManagerActions> for RootComponent {
             .split(frame.size());
         self.left_panel.render(frame, Some(layout[0]));
         self.right_panel.render(frame, Some(layout[1]));
+        if let Some(ref create_modal) = self.create_modal {
+            create_modal.render(frame, None);
+        }
     }
 }
