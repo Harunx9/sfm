@@ -140,7 +140,8 @@ fn create_file_in_tab(
     for (idx, tab_state) in tabs.iter_mut().enumerate() {
         if idx == tab {
             if dir_path.exists() {
-                let file_path = dir_path.with_extension(file_name.clone());
+                let mut file_path = dir_path.clone();
+                file_path.push(file_name.clone());
                 match File::create(file_path) {
                     Ok(_) => result.push(TabState::with_dir(dir_path.as_path(), icons)),
                     Err(_) => {}

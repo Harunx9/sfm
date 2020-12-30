@@ -190,6 +190,7 @@ impl Component<Event, AppState, FileManagerActions> for CreateModalComponent {
                         CreateOption::Symlink => {}
                     };
 
+                    store.dispatch(FileManagerActions::App(AppAction::CloseModal));
                     return true;
                 }
 
