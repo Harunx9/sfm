@@ -95,6 +95,7 @@ pub enum ModalType {
     CreateModal {
         panel_side: PanelSide,
         panel_tab: TabIdx,
+        panel_tab_path: PathBuf,
     },
     ErrorModal(Error),
 }

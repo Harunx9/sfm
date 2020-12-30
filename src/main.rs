@@ -38,9 +38,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     terminal.clear()?;
 
     let mut root_component = RootComponent::new();
+    store.dispatch(FileManagerActions::App(app::actions::AppAction::FocusLeft));
     root_component.on_init(&store);
 
-    store.dispatch(FileManagerActions::App(app::actions::AppAction::FocusLeft));
     loop {
         terminal.draw(|f| root_component.render(f, None))?;
 

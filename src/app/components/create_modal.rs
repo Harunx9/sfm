@@ -1,12 +1,17 @@
+use std::path::PathBuf;
+
+use crossterm::event::{KeyCode, KeyModifiers};
 use tui::{
     style::Style,
     text::{Span, Spans},
-    widgets::{Block, Borders, List, ListItem, ListState},
+    widgets::{Block, Borders, Clear, List, ListItem, ListState, Paragraph},
 };
 
 use crate::{
     app::{
-        actions::{FileManagerActions, PanelSide},
+        actions::{
+            AppAction, DirectoryAction, FileAction, FileManagerActions, PanelInfo, PanelSide,
+        },
         state::{AppState, TabIdx},
     },
     core::{
@@ -22,18 +27,20 @@ use super::create_modal_layout;
 pub struct CreateModalProps {
     panel_side: Option<PanelSide>,
     panel_tab: TabIdx,
+    dir_path: PathBuf,
 }
 
 impl CreateModalProps {
-    pub fn new(panel_side: PanelSide, panel_tab: TabIdx) -> Self {
+    pub fn new(panel_side: PanelSide, panel_tab: TabIdx, dir_path: PathBuf) -> Self {
         Self {
             panel_side: Some(panel_side),
             panel_tab,
+            dir_path,
         }
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub enum CreateOption {
     File,
     Dir,
@@ -157,21 +164,104 @@ impl Component<Event, AppState, FileManagerActions> for CreateModalComponent {
             } else if let Some(create_selection) = local_state.create_selection {
                 if state.config.keyboard_cfg.accept.is_pressed(key_evt)
                     && local_state.input.is_empty() == false
-                {}
+                {
+                    let panle_side = props.panel_side.unwrap();
+                    match create_selection {
+                        CreateOption::File => {
+                            store.dispatch(FileManagerActions::File(FileAction::Create {
+                                file_name: local_state.input.clone(),
+                                panel: PanelInfo {
+                                    side: panle_side,
+                                    tab: props.panel_tab,
+                                    path: props.dir_path,
+                                },
+                            }))
+                        }
+                        CreateOption::Dir => {
+                            store.dispatch(FileManagerActions::Directory(DirectoryAction::Create {
+                                dir_name: local_state.input.clone(),
+                                panel: PanelInfo {
+                                    side: panle_side,
+                                    tab: props.panel_tab,
+                                    path: props.dir_path,
+                                },
+                            }))
+                        }
+                        CreateOption::Symlink => {}
+                    };
+
+                    return true;
+                }
+
+                match key_evt.code {
+                    KeyCode::Char(c) => {
+                        self.base.set_state(|current_state| {
+                            let mut current_text = current_state.input.clone();
+                            if key_evt.modifiers == KeyModifiers::SHIFT {
+                                current_text =
+                                    format!("{}{}", current_text, c.to_uppercase().to_string());
+                            } else {
+                                current_text.push(c);
+                            }
+
+                            CreateModalState {
+                                input: current_text,
+                                ..current_state
+                            }
+                        });
+                        return true;
+                    }
+                    KeyCode::Backspace => {
+                        self.base.set_state(|current_state| {
+                            let mut current_text = current_state.input.clone();
+                            current_text.pop();
+
+                            CreateModalState {
+                                input: current_text,
+                                ..current_state
+                            }
+                        });
+                        return true;
+                    }
+                    _ => {}
+                };
+            }
+
+            if state.config.keyboard_cfg.close.is_pressed(key_evt) {
+                store.dispatch(FileManagerActions::App(AppAction::CloseModal));
+                return true;
             }
         }
         false
     }
+
     fn render<TBackend: tui::backend::Backend>(
         &self,
         frame: &mut tui::Frame<TBackend>,
-        _area: Option<tui::layout::Rect>,
+        area: Option<tui::layout::Rect>,
     ) {
-        let layout = create_modal_layout(50, 50, frame.size());
-        let mut local_state = self.base.get_state().unwrap();
-        let props = self.base.get_props().unwrap();
+        let layout = if let Some(area) = area {
+            create_modal_layout(50, 50, area)
+        } else {
+            create_modal_layout(50, 50, frame.size())
+        };
 
-        if let Some(create_selecton) = local_state.create_selection {
+        let mut local_state = self.base.get_state().unwrap();
+
+        if local_state.create_selection.is_some() {
+            let block = Block::default()
+                .title(Spans::from(vec![
+                    Span::from("| "),
+                    Span::from("Chose item to create:"),
+                    Span::from(" |"),
+                ]))
+                .borders(Borders::ALL)
+                .border_style(Style::default())
+                .border_type(tui::widgets::BorderType::Thick)
+                .style(Style::default());
+
+            let paragraph = Paragraph::new(local_state.input).block(block);
+            frame.render_widget(paragraph, layout);
         } else {
             let items = vec![
                 ListItem::new(CreateOption::File.to_string()),
@@ -187,13 +277,14 @@ impl Component<Event, AppState, FileManagerActions> for CreateModalComponent {
                 .borders(Borders::ALL)
                 .border_style(Style::default())
                 .border_type(tui::widgets::BorderType::Thick)
-                .style(Style::default());
+                .style(Style::default().bg(tui::style::Color::Reset));
 
             let list = List::new(items)
                 .block(block)
                 .highlight_style(Style::default())
                 .highlight_symbol(">>");
 
+            frame.render_widget(Clear, layout);
             frame.render_stateful_widget(list, layout, &mut local_state.list_state);
         }
     }

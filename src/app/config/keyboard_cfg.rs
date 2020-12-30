@@ -33,7 +33,7 @@ impl Default for KeyboardConfig {
             move_up: KeyBinding::new(KeyCode::Char('k')),
             next_tab: KeyBinding::new(KeyCode::Char('n')),
             prev_tab: KeyBinding::new(KeyCode::Char('p')),
-            close: KeyBinding::new(KeyCode::Char('q')),
+            close: KeyBinding::new(KeyCode::Esc),
             open: KeyBinding::new(KeyCode::Char('o')),
             open_as_tab: KeyBinding::with_modifiers(KeyCode::Char('o'), KeyModifiers::CONTROL),
             navigate_up: KeyBinding::new(KeyCode::Backspace),

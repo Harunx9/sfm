@@ -314,20 +314,22 @@ impl Component<Event, AppState, FileManagerActions> for TabComponent {
 
                     return true;
                 }
+            }
 
-                if state.config.keyboard_cfg.create.is_pressed(key_evt) && props.is_focused {
-                    let tab_idx = match tab_side {
-                        PanelSide::Left => state.left_panel.current_tab,
-                        PanelSide::Right => state.right_panel.current_tab,
-                    };
-                    store.dispatch(FileManagerActions::App(AppAction::ShowModal(
-                        ModalType::CreateModal {
-                            panel_side: tab_side,
-                            panel_tab: tab_idx,
-                        },
-                    )));
-                    return true;
-                }
+            if state.config.keyboard_cfg.create.is_pressed(key_evt) && props.is_focused {
+                let path = props.state.unwrap().path;
+                let tab_idx = match tab_side {
+                    PanelSide::Left => state.left_panel.current_tab,
+                    PanelSide::Right => state.right_panel.current_tab,
+                };
+                store.dispatch(FileManagerActions::App(AppAction::ShowModal(
+                    ModalType::CreateModal {
+                        panel_side: tab_side,
+                        panel_tab: tab_idx,
+                        panel_tab_path: path,
+                    },
+                )));
+                return true;
             }
         }
 

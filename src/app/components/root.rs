@@ -8,7 +8,11 @@ use crate::{
         actions::{AppAction, FileManagerActions, PanelSide},
         state::{AppState, ModalType},
     },
-    core::{events::Event, store::Store, ui::component::Component},
+    core::{
+        events::Event,
+        store::Store,
+        ui::{component::Component, component_base::ComponentBase},
+    },
 };
 
 use super::{
@@ -16,7 +20,13 @@ use super::{
     panel::PanelComponent,
 };
 
+#[derive(Clone, Default)]
+pub struct RootComponentState {
+    focused_panel: Option<PanelSide>,
+}
+
 pub struct RootComponent {
+    base: ComponentBase<(), RootComponentState>,
     left_panel: PanelComponent,
     right_panel: PanelComponent,
     create_modal: Option<CreateModalComponent>,
@@ -25,6 +35,7 @@ pub struct RootComponent {
 impl RootComponent {
     pub fn new() -> Self {
         RootComponent {
+            base: ComponentBase::new(None, Some(RootComponentState::default())),
             left_panel: PanelComponent::empty(),
             right_panel: PanelComponent::empty(),
             create_modal: None,
@@ -33,6 +44,19 @@ impl RootComponent {
 
     fn map_state(&mut self, store: &Store<AppState, FileManagerActions>) {
         let state = store.get_state();
+        if state.left_panel.is_focused {
+            self.base.set_state(|_current_state| RootComponentState {
+                focused_panel: Some(PanelSide::Left),
+            });
+        } else if state.right_panel.is_focused {
+            self.base.set_state(|_current_state| RootComponentState {
+                focused_panel: Some(PanelSide::Right),
+            });
+        } else {
+            self.base.set_state(|_current_state| RootComponentState {
+                focused_panel: None,
+            });
+        }
         self.left_panel = PanelComponent::with_panel_state(
             state.left_panel,
             PanelSide::Left,
@@ -43,20 +67,24 @@ impl RootComponent {
             PanelSide::Right,
             &state.config.icons,
         );
-        if let Some(modal_type) = state.modal {
+        if let Some(modal_type) = state.modal.clone() {
             match modal_type {
                 ModalType::CreateModal {
                     panel_side,
                     panel_tab,
+                    panel_tab_path,
                 } => {
                     if self.create_modal.is_none() {
                         self.create_modal = Some(CreateModalComponent::with_props(
-                            CreateModalProps::new(panel_side, panel_tab),
+                            CreateModalProps::new(panel_side, panel_tab, panel_tab_path),
                         ));
                     }
                 }
                 ModalType::ErrorModal(_) => {}
             };
+        }
+        if self.create_modal.is_some() && state.modal.is_none() {
+            self.create_modal = None;
         }
     }
 }
@@ -79,7 +107,9 @@ impl Component<Event, AppState, FileManagerActions> for RootComponent {
             }
 
             if let Some(ref mut create_modal) = self.create_modal {
-                return create_modal.handle_event(event, store);
+                let result = create_modal.handle_event(event, store);
+                self.map_state(store);
+                return result;
             }
 
             if state
@@ -117,6 +147,7 @@ impl Component<Event, AppState, FileManagerActions> for RootComponent {
     }
 
     fn render<TBackend: Backend>(&self, frame: &mut tui::Frame<TBackend>, _area: Option<Rect>) {
+        let local_state = self.base.get_state().unwrap();
         let layout = Layout::default()
             .direction(Direction::Horizontal)
             .constraints([Constraint::Percentage(50), Constraint::Percentage(50)])
@@ -124,7 +155,14 @@ impl Component<Event, AppState, FileManagerActions> for RootComponent {
         self.left_panel.render(frame, Some(layout[0]));
         self.right_panel.render(frame, Some(layout[1]));
         if let Some(ref create_modal) = self.create_modal {
-            create_modal.render(frame, None);
+            if let Some(focused_panel) = local_state.focused_panel {
+                match focused_panel {
+                    PanelSide::Left => create_modal.render(frame, Some(layout[0])),
+                    PanelSide::Right => create_modal.render(frame, Some(layout[1])),
+                };
+            } else {
+                create_modal.render(frame, None);
+            }
         }
     }
 }
