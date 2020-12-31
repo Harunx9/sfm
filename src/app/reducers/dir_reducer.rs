@@ -262,7 +262,8 @@ fn create_directory_in_tab(
     for (idx, val) in tabs.iter_mut().enumerate() {
         if idx == tab {
             if parent_path.exists() {
-                let dir_path = parent_path.with_extension(dir_name.clone());
+                let mut dir_path = parent_path.clone();
+                dir_path.push(dir_name.clone());
                 match fs::create_dir(dir_path) {
                     Ok(_) => result.push(TabState::with_dir(parent_path.as_path(), icons)),
                     Err(_) => {}
