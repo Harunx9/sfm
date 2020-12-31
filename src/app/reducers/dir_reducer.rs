@@ -3,7 +3,6 @@ use std::{fs, path::PathBuf};
 use crate::app::{
     actions::{DirectoryAction, PanelInfo, PanelSide},
     config::icon_cfg::IconsConfig,
-    file_system::FileSystemItem,
     state::{AppState, PanelState, TabIdx, TabState},
 };
 
@@ -264,6 +263,7 @@ fn create_directory_in_tab(
             if parent_path.exists() {
                 let mut dir_path = parent_path.clone();
                 dir_path.push(dir_name.clone());
+
                 match fs::create_dir(dir_path) {
                     Ok(_) => result.push(TabState::with_dir(parent_path.as_path(), icons)),
                     Err(_) => {}

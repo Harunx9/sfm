@@ -1,11 +1,7 @@
 use crate::core::events::Event;
 use crate::core::ui::component::Component;
 use crate::core::{events::EventQueue, store::Store};
-use std::{
-    error::Error,
-    io::{stdout, Write},
-    process::Command,
-};
+use std::{error::Error, io::stdout, process::Command};
 
 use app::{
     actions::FileManagerActions, components::root::RootComponent, config::Config,
