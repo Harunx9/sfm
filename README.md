@@ -5,11 +5,11 @@
 ![screenshot](./screen.png)
 
 ---
-*Warning: Current status is "beta" if you run in some problem please create issue and I will check problem*
+*Warning: Current status is "work in progress" if you run in some problem please create issue and I will check problem*
 ---
 
 ## Features:
-In order tyo get icons please install nerd fornt in your system (on screen JetbrainsMono Nerd Font Mono)
+In order to get icons please install nerd fornt in your system (on screen Jetbrains Mono Nerd Font Mono)
 
 1. Current features
     * Fies management
@@ -47,5 +47,7 @@ In order tyo get icons please install nerd fornt in your system (on screen Jetbr
 - `enter` - select modal option 
 
 ## Instalation 
+
+Right now you can clone this repo and perform `cargo run` I will come with a more convenient way in the future.
 
 //TODO
