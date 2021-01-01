@@ -17,6 +17,7 @@ use crate::{
 
 use super::{
     create_modal::{CreateModalComponent, CreateModalProps},
+    error_modal::{ErrorModalComponent, ErrorModalComponentProps},
     panel::PanelComponent,
 };
 
@@ -30,6 +31,7 @@ pub struct RootComponent {
     left_panel: PanelComponent,
     right_panel: PanelComponent,
     create_modal: Option<CreateModalComponent>,
+    error_modal: Option<ErrorModalComponent>,
 }
 
 impl RootComponent {
@@ -39,6 +41,7 @@ impl RootComponent {
             left_panel: PanelComponent::empty(),
             right_panel: PanelComponent::empty(),
             create_modal: None,
+            error_modal: None,
         }
     }
 
@@ -80,11 +83,21 @@ impl RootComponent {
                         ));
                     }
                 }
-                ModalType::ErrorModal(_) => {}
+                ModalType::ErrorModal(error_modal) => {
+                    if self.error_modal.is_none() {
+                        self.error_modal = Some(ErrorModalComponent::with_props(
+                            ErrorModalComponentProps::new(error_modal.message),
+                        ));
+                    }
+                }
             };
         }
         if self.create_modal.is_some() && state.modal.is_none() {
             self.create_modal = None;
+        }
+
+        if self.error_modal.is_some() && state.modal.is_none() {
+            self.error_modal = None;
         }
     }
 }
@@ -106,9 +119,17 @@ impl Component<Event, AppState, FileManagerActions> for RootComponent {
                 return true;
             }
 
+            if let Some(ref mut error_modal) = self.error_modal {
+                let result = error_modal.handle_event(event, store);
+                self.map_state(store);
+
+                return result;
+            }
+
             if let Some(ref mut create_modal) = self.create_modal {
                 let result = create_modal.handle_event(event, store);
                 self.map_state(store);
+
                 return result;
             }
 
@@ -155,13 +176,24 @@ impl Component<Event, AppState, FileManagerActions> for RootComponent {
         self.left_panel.render(frame, Some(layout[0]));
         self.right_panel.render(frame, Some(layout[1]));
         if let Some(ref create_modal) = self.create_modal {
-            if let Some(focused_panel) = local_state.focused_panel {
+            if let Some(focused_panel) = local_state.focused_panel.clone() {
                 match focused_panel {
                     PanelSide::Left => create_modal.render(frame, Some(layout[0])),
                     PanelSide::Right => create_modal.render(frame, Some(layout[1])),
                 };
             } else {
                 create_modal.render(frame, None);
+            }
+        }
+
+        if let Some(ref error_modal) = self.error_modal {
+            if let Some(focused_panel) = local_state.focused_panel.clone() {
+                match focused_panel {
+                    PanelSide::Left => error_modal.render(frame, Some(layout[0])),
+                    PanelSide::Right => error_modal.render(frame, Some(layout[1])),
+                };
+            } else {
+                error_modal.render(frame, None);
             }
         }
     }

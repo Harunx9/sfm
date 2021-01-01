@@ -77,12 +77,24 @@ fn map_dir_entry_to_file_system_item(dir_entry: DirEntry, icons: &IconsConfig) -
 
         if file_type.is_symlink() {
             let file_extensions = name.split('.').last().unwrap_or("");
-            return FileSystemItem::Symlink(SymlinkItem::new(
-                name.to_string(),
-                path,
-                modified,
-                icons.get_file_icon(file_extensions.to_string()),
-            ));
+            match fs::read_link(path.clone()) {
+                Ok(path) => {
+                    return FileSystemItem::Symlink(SymlinkItem::new(
+                        name.to_string(),
+                        path,
+                        modified,
+                        icons.get_file_icon(file_extensions.to_string()),
+                    ))
+                }
+                Err(_) => {
+                    return FileSystemItem::Symlink(SymlinkItem::new(
+                        name.to_string(),
+                        path,
+                        modified,
+                        icons.get_file_icon(file_extensions.to_string()),
+                    ))
+                }
+            }
         }
 
         FileSystemItem::Unknown

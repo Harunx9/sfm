@@ -242,9 +242,9 @@ impl Component<Event, AppState, FileManagerActions> for CreateModalComponent {
         area: Option<tui::layout::Rect>,
     ) {
         let layout = if let Some(area) = area {
-            create_modal_layout(50, 50, area)
+            create_modal_layout(50, 10, area)
         } else {
-            create_modal_layout(50, 50, frame.size())
+            create_modal_layout(50, 10, frame.size())
         };
 
         let mut local_state = self.base.get_state().unwrap();
@@ -253,7 +253,7 @@ impl Component<Event, AppState, FileManagerActions> for CreateModalComponent {
             let block = Block::default()
                 .title(Spans::from(vec![
                     Span::from("| "),
-                    Span::from("Chose item to create:"),
+                    Span::from("Item name:"),
                     Span::from(" |"),
                 ]))
                 .borders(Borders::ALL)
@@ -261,12 +261,18 @@ impl Component<Event, AppState, FileManagerActions> for CreateModalComponent {
                 .border_type(tui::widgets::BorderType::Thick)
                 .style(Style::default());
 
-            let paragraph = Paragraph::new(local_state.input).block(block);
+            let paragraph = Paragraph::new(local_state.input)
+                .block(block)
+                .alignment(tui::layout::Alignment::Center);
+
+            frame.render_widget(Clear, layout);
             frame.render_widget(paragraph, layout);
         } else {
             let items = vec![
-                ListItem::new(CreateOption::File.to_string()),
-                ListItem::new(CreateOption::Dir.to_string()),
+                ListItem::new(Spans::from(vec![Span::from(
+                    CreateOption::File.to_string(),
+                )])),
+                ListItem::new(Spans::from(vec![Span::from(CreateOption::Dir.to_string())])),
             ];
 
             let block = Block::default()

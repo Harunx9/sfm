@@ -1,6 +1,7 @@
 use tui::layout::{Constraint, Direction, Layout, Rect};
 
 pub mod create_modal;
+pub mod error_modal;
 pub mod panel;
 pub mod root;
 pub mod tab;
