@@ -9,7 +9,7 @@
 ---
 
 ## Features:
-In order to get icons please install nerd fornt in your system (on screen Jetbrains Mono Nerd Font Mono)
+In order to get icons please install nerd font in your system (on screen Jetbrains Mono Nerd Font Mono)
 
 1. Current features
     * Fies management
@@ -34,6 +34,7 @@ In order to get icons please install nerd fornt in your system (on screen Jetbra
 - `l` - focus right panel
 - `j` - next item 
 - `k` - prev item 
+- `ctrl + r` - open rename modal
 - `ctrl + l` - move selected item from left to right panel  
 - `ctrl + h` - move selected item from right to left panel
 - `ctrl + c` - open create modal on focused panel 
