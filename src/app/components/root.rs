@@ -19,6 +19,7 @@ use super::{
     create_modal::{CreateModalComponent, CreateModalProps},
     error_modal::{ErrorModalComponent, ErrorModalComponentProps},
     panel::PanelComponent,
+    rename_modal::{RenameModalComponent, RenameModalComponentProps},
 };
 
 #[derive(Clone, Default)]
@@ -31,6 +32,7 @@ pub struct RootComponent {
     left_panel: PanelComponent,
     right_panel: PanelComponent,
     create_modal: Option<CreateModalComponent>,
+    rename_modal: Option<RenameModalComponent>,
     error_modal: Option<ErrorModalComponent>,
 }
 
@@ -41,6 +43,7 @@ impl RootComponent {
             left_panel: PanelComponent::empty(),
             right_panel: PanelComponent::empty(),
             create_modal: None,
+            rename_modal: None,
             error_modal: None,
         }
     }
@@ -90,10 +93,25 @@ impl RootComponent {
                         ));
                     }
                 }
+                ModalType::RenameModal {
+                    panel_side,
+                    panel_tab,
+                    item,
+                } => {
+                    if self.rename_modal.is_none() {
+                        self.rename_modal = Some(RenameModalComponent::with_props(
+                            RenameModalComponentProps::new(Some(item), Some(panel_side), panel_tab),
+                        ));
+                    }
+                }
             };
         }
         if self.create_modal.is_some() && state.modal.is_none() {
             self.create_modal = None;
+        }
+
+        if self.rename_modal.is_some() && state.modal.is_none() {
+            self.rename_modal = None;
         }
 
         if self.error_modal.is_some() && state.modal.is_none() {
@@ -128,6 +146,13 @@ impl Component<Event, AppState, FileManagerActions> for RootComponent {
 
             if let Some(ref mut create_modal) = self.create_modal {
                 let result = create_modal.handle_event(event, store);
+                self.map_state(store);
+
+                return result;
+            }
+
+            if let Some(ref mut rename_modal) = self.rename_modal {
+                let result = rename_modal.handle_event(event, store);
                 self.map_state(store);
 
                 return result;
@@ -183,6 +208,17 @@ impl Component<Event, AppState, FileManagerActions> for RootComponent {
                 };
             } else {
                 create_modal.render(frame, None);
+            }
+        }
+
+        if let Some(ref rename_modal) = self.rename_modal {
+            if let Some(focused_panel) = local_state.focused_panel.clone() {
+                match focused_panel {
+                    PanelSide::Left => rename_modal.render(frame, Some(layout[0])),
+                    PanelSide::Right => rename_modal.render(frame, Some(layout[1])),
+                };
+            } else {
+                rename_modal.render(frame, None);
             }
         }
 

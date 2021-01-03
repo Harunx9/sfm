@@ -92,6 +92,11 @@ impl TabState {
 
 #[derive(Clone, Debug)]
 pub enum ModalType {
+    RenameModal {
+        panel_side: PanelSide,
+        panel_tab: TabIdx,
+        item: FileSystemItem,
+    },
     CreateModal {
         panel_side: PanelSide,
         panel_tab: TabIdx,
