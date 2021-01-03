@@ -17,13 +17,12 @@ In order to get icons please install nerd font in your system (on screen Jetbrai
         - Remove file or directory
         - Move file or dir between panels
         - Open file in nvim
+        - Rename file or dir
     * Tab management
         - Open as tab (tabs are indicated on top of panel)
         - Navigate between tabs
         - Close tabs 
 2. ToDo
-    - Rename file under selection in panel
-    - Rename dir under selection in panel
     - Config file
     - Symlink management(create, rename)
     - Panel filtering
