@@ -113,7 +113,7 @@ impl Component<Event, AppState, FileManagerActions> for RenameModalComponent {
                             },
                         }));
                     }
-                    FileSystemItem::Symlink(symlink) => {}
+                    FileSystemItem::Symlink(_) => {}
                     FileSystemItem::Unknown => {}
                 };
 

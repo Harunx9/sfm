@@ -8,5 +8,5 @@ pub mod store;
 pub mod ui;
 
 pub trait ToSpans {
-    fn to_spans(&self, area: Rect) -> Spans;
+    fn to_spans(&self, area: Rect, show_icons: bool) -> Spans;
 }

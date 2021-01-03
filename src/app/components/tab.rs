@@ -31,6 +31,7 @@ pub struct TabComponentProps {
     has_displayed_tabs: bool,
     is_focused: bool,
     panel_side: Option<PanelSide>,
+    show_icons: bool,
 }
 
 impl Default for TabComponentProps {
@@ -40,6 +41,7 @@ impl Default for TabComponentProps {
             has_displayed_tabs: false,
             is_focused: false,
             panel_side: None,
+            show_icons: false,
         }
     }
 }
@@ -50,12 +52,14 @@ impl TabComponentProps {
         has_displayed_tabs: bool,
         is_focused: bool,
         panel_side: PanelSide,
+        show_icons: bool,
     ) -> Self {
         TabComponentProps {
             state: Some(state),
             has_displayed_tabs,
             is_focused,
             panel_side: Some(panel_side),
+            show_icons,
         }
     }
 }
@@ -353,11 +357,14 @@ impl Component<Event, AppState, FileManagerActions> for TabComponent {
 
     fn render<TBackend: Backend>(&self, frame: &mut tui::Frame<TBackend>, area: Option<Rect>) {
         if let Some(tab_props) = self.base.get_props() {
+            let show_icons = tab_props.show_icons;
             if let Some(mut state) = tab_props.state {
                 let list_items: Vec<ListItem> = state
                     .items
                     .iter()
-                    .map(|item| ListItem::new(item.to_spans(area.unwrap_or(frame.size()))))
+                    .map(|item| {
+                        ListItem::new(item.to_spans(area.unwrap_or(frame.size()), show_icons))
+                    })
                     .collect();
 
                 let border_style = if tab_props.is_focused {
@@ -367,13 +374,21 @@ impl Component<Event, AppState, FileManagerActions> for TabComponent {
                 };
 
                 let block = Block::default()
-                    .title(Spans::from(vec![
-                        Span::from("| "),
-                        Span::from(state.icon),
-                        Span::from(" "),
-                        Span::from(state.name),
-                        Span::from(" |"),
-                    ]))
+                    .title(if show_icons {
+                        Spans::from(vec![
+                            Span::from("| "),
+                            Span::from(state.icon),
+                            Span::from(" "),
+                            Span::from(state.name),
+                            Span::from(" |"),
+                        ])
+                    } else {
+                        Spans::from(vec![
+                            Span::from("| "),
+                            Span::from(state.name),
+                            Span::from(" |"),
+                        ])
+                    })
                     .borders(Borders::ALL)
                     .border_style(border_style)
                     .border_type(tui::widgets::BorderType::Thick)

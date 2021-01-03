@@ -27,6 +27,7 @@ pub struct PanelComponentProps {
     tabs: Vec<TabInfo>,
     current_tab: usize,
     is_focused: bool,
+    show_icons: bool,
 }
 
 #[derive(Clone, Default, Debug)]
@@ -99,6 +100,7 @@ impl PanelComponent {
             tabs,
             current_tab: panel_state.current_tab,
             is_focused: panel_state.is_focused,
+            show_icons: icons.use_icons,
         };
 
         let state = PanelComponentState {
@@ -111,6 +113,7 @@ impl PanelComponent {
                 has_displayed_tabs,
                 panel_state.is_focused,
                 side,
+                icons.use_icons,
             )),
             None,
         );
@@ -166,6 +169,7 @@ impl Component<Event, AppState, FileManagerActions> for PanelComponent {
 
     fn render<TBackend: Backend>(&self, frame: &mut Frame<TBackend>, area: Option<Rect>) {
         let props = self.base.get_props().unwrap();
+        let show_icons = props.show_icons;
         if props.tabs.len() > 1 {
             let tabs_items: Vec<Spans> = props
                 .tabs
@@ -176,17 +180,25 @@ impl Component<Event, AppState, FileManagerActions> for PanelComponent {
                         let style = Style::default()
                             .fg(self.style.active_tab_fg)
                             .bg(self.style.active_tab_bg);
-                        Spans::from(vec![
-                            Span::styled(val.icon.clone(), style),
-                            Span::styled(" ", style),
-                            Span::styled(val.name.clone(), style),
-                        ])
+                        if show_icons {
+                            Spans::from(vec![
+                                Span::styled(val.icon.clone(), style),
+                                Span::styled(" ", style),
+                                Span::styled(val.name.clone(), style),
+                            ])
+                        } else {
+                            Spans::from(vec![Span::styled(val.name.clone(), style)])
+                        }
                     } else {
-                        Spans::from(vec![
-                            Span::styled(val.icon.clone(), Style::default()),
-                            Span::styled(" ", Style::default()),
-                            Span::styled(val.name.clone(), Style::default()),
-                        ])
+                        if show_icons {
+                            Spans::from(vec![
+                                Span::styled(val.icon.clone(), Style::default()),
+                                Span::styled(" ", Style::default()),
+                                Span::styled(val.name.clone(), Style::default()),
+                            ])
+                        } else {
+                            Spans::from(vec![Span::styled(val.name.clone(), Style::default())])
+                        }
                     }
                 })
                 .collect();

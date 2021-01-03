@@ -75,11 +75,11 @@ impl FileSystemItem {
 }
 
 impl ToSpans for FileSystemItem {
-    fn to_spans(&self, area: Rect) -> Spans {
+    fn to_spans(&self, area: Rect, show_icons: bool) -> Spans {
         match self {
-            FileSystemItem::Directory(dir) => dir.to_spans(area),
-            FileSystemItem::File(file) => file.to_spans(area),
-            FileSystemItem::Symlink(symlink) => symlink.to_spans(area),
+            FileSystemItem::Directory(dir) => dir.to_spans(area, show_icons),
+            FileSystemItem::File(file) => file.to_spans(area, show_icons),
+            FileSystemItem::Symlink(symlink) => symlink.to_spans(area, show_icons),
             FileSystemItem::Unknown => Spans::default(),
         }
     }
@@ -122,15 +122,24 @@ impl SymlinkItem {
 }
 
 impl ToSpans for SymlinkItem {
-    fn to_spans(&self, _area: Rect) -> Spans {
-        Spans::from(vec![
-            Span::from("  "),
-            Span::from(self.icon.clone()),
-            Span::from("  "),
-            Span::from(self.name.clone()),
-            Span::from(" -> "),
-            Span::from(self.file_path.to_str().unwrap_or("")),
-        ])
+    fn to_spans(&self, _area: Rect, show_icons: bool) -> Spans {
+        if show_icons {
+            Spans::from(vec![
+                Span::from("  "),
+                Span::from(self.icon.clone()),
+                Span::from("  "),
+                Span::from(self.name.clone()),
+                Span::from(" -> "),
+                Span::from(self.file_path.to_str().unwrap_or("")),
+            ])
+        } else {
+            Spans::from(vec![
+                Span::from("  "),
+                Span::from(self.name.clone()),
+                Span::from(" -> "),
+                Span::from(self.file_path.to_str().unwrap_or("")),
+            ])
+        }
     }
 }
 
@@ -171,13 +180,17 @@ impl DirectoryItem {
 }
 
 impl ToSpans for DirectoryItem {
-    fn to_spans(&self, _area: Rect) -> Spans {
-        Spans::from(vec![
-            Span::from("  "),
-            Span::from(self.icon.clone()),
-            Span::from("  "),
-            Span::from(self.name.clone()),
-        ])
+    fn to_spans(&self, _area: Rect, show_icons: bool) -> Spans {
+        if show_icons {
+            Spans::from(vec![
+                Span::from("  "),
+                Span::from(self.icon.clone()),
+                Span::from("  "),
+                Span::from(self.name.clone()),
+            ])
+        } else {
+            Spans::from(vec![Span::from("  "), Span::from(self.name.clone())])
+        }
     }
 }
 
@@ -218,12 +231,16 @@ impl FileItem {
 }
 
 impl ToSpans for FileItem {
-    fn to_spans(&self, _area: Rect) -> Spans {
-        Spans::from(vec![
-            Span::from("  "),
-            Span::from(self.icon.clone()),
-            Span::from("  "),
-            Span::from(self.name.clone()),
-        ])
+    fn to_spans(&self, _area: Rect, show_icons: bool) -> Spans {
+        if show_icons {
+            Spans::from(vec![
+                Span::from("  "),
+                Span::from(self.icon.clone()),
+                Span::from("  "),
+                Span::from(self.name.clone()),
+            ])
+        } else {
+            Spans::from(vec![Span::from("  "), Span::from(self.name.clone())])
+        }
     }
 }
