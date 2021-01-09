@@ -61,7 +61,14 @@ fn create_link(symlink_path: PathBuf, item_path: PathBuf) -> io::Result<()> {
 }
 
 #[cfg(windows)]
-fn create_link(symlink_path: PathBuf, item_path: PathBuf) -> io::Result<()> {}
+fn create_link(symlink_path: PathBuf, item_path: PathBuf) -> io::Result<()> {
+    let symlink_path = expand_if_contains_tilde(symlink_path.as_path()).unwrap();
+    if item_path.is_dir() {
+        fs::symlink_dir(item_path.as_path(), symlink_path.as_path())
+    } else {
+        fs::symlink_file(item_path.as_path(), symlink_path.as_path())
+    }
+}
 
 fn create_symlink_in_tab(
     symlink_path: PathBuf,
