@@ -7,7 +7,7 @@ license-file = "LICENSE"
 keywords = ["file-manager", "cli", "windows", "macOS", "linux"]
 categories = ["command-line-utilities"]
 repository = "https://github.com/Harunx9/sfm"
-description= "Simple two-panel file manager written in Rust inspired by vim and Total Commander"
+description= "Simple two-panel file manager written in Rust inspired by Vim and Total Commander"
 
 [dependencies]
 crossterm = { version = "0.19.0" ,default-features = false }

@@ -2,7 +2,6 @@ use std::{io, path::PathBuf};
 
 use crate::app::{
     actions::{PanelSide, SymlinkAction},
-    config::icon_cfg::IconsConfig,
     file_system::path::expand_if_contains_tilde,
     state::{AppState, PanelState, TabIdx, TabState},
 };
@@ -35,7 +34,6 @@ fn create_symlink(
                     panel.tab,
                     panel.path,
                     state.left_panel.tabs,
-                    &state.config.icons,
                 ),
                 ..state.left_panel
             },
@@ -48,7 +46,6 @@ fn create_symlink(
                     panel.tab,
                     panel.path,
                     state.right_panel.tabs,
-                    &state.config.icons,
                 ),
                 ..state.right_panel
             },
@@ -71,7 +68,6 @@ fn create_symlink_in_tab(
     tab: TabIdx,
     path: PathBuf,
     tabs: Vec<TabState>,
-    icons_config: &IconsConfig,
 ) -> Vec<TabState> {
     let mut result = Vec::<TabState>::new();
 
