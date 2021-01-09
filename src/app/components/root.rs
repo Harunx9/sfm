@@ -76,20 +76,25 @@ impl RootComponent {
         if let Some(modal_type) = state.modal.clone() {
             match modal_type {
                 ModalType::CreateModal {
+                    item_index,
                     panel_side,
                     panel_tab,
                     panel_tab_path,
                 } => {
                     if self.create_modal.is_none() {
-                        self.create_modal = Some(CreateModalComponent::with_props(
-                            CreateModalProps::new(panel_side, panel_tab, panel_tab_path),
-                        ));
+                        self.create_modal =
+                            Some(CreateModalComponent::with_props(CreateModalProps::new(
+                                panel_side,
+                                panel_tab,
+                                panel_tab_path,
+                                item_index,
+                            )));
                     }
                 }
                 ModalType::ErrorModal(error_modal) => {
                     if self.error_modal.is_none() {
                         self.error_modal = Some(ErrorModalComponent::with_props(
-                            ErrorModalComponentProps::new(error_modal.message),
+                            ErrorModalComponentProps::new(error_modal),
                         ));
                     }
                 }

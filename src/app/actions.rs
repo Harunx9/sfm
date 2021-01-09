@@ -6,6 +6,7 @@ use super::state::{ModalType, TabIdx};
 pub enum FileManagerActions {
     File(FileAction),
     Directory(DirectoryAction),
+    Symlink(SymlinkAction),
     App(AppAction),
     Panel(PanelAction),
     Tab(TabAction),
@@ -34,7 +35,7 @@ pub enum TabAction {
     Previous,
 }
 
-#[derive(Clone, Debug, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
 pub enum PanelSide {
     Left,
     Right,
@@ -69,4 +70,19 @@ pub enum DirectoryAction {
     Move { from: PanelInfo, to: PanelInfo },
     Open { panel: PanelInfo, in_new_tab: bool },
     Create { dir_name: String, panel: PanelInfo },
+}
+
+#[derive(Clone, Debug)]
+pub enum SymlinkAction {
+    Delete {
+        panel: PanelInfo,
+    },
+    Open {
+        panel: PanelInfo,
+        in_new_tab: bool,
+    },
+    Create {
+        symlink_path: PathBuf,
+        panel: PanelInfo,
+    },
 }

@@ -5,7 +5,7 @@ use std::{error::Error, io::stdout, process::Command};
 
 use app::{
     actions::FileManagerActions, components::root::RootComponent, config::Config,
-    reducers::root_reducer, state::AppState,
+    middlewares::symlink_middleware, reducers::root_reducer, state::AppState,
 };
 use crossterm::{
     event::{DisableMouseCapture, EnableMouseCapture},
@@ -35,6 +35,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let mut root_component = RootComponent::new();
     store.dispatch(FileManagerActions::App(app::actions::AppAction::FocusLeft));
+    store.register_middleware(symlink_middleware);
     root_component.on_init(&store);
 
     loop {

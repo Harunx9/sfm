@@ -7,11 +7,13 @@ use super::{
 mod dir_reducer;
 mod file_reducer;
 mod panel_reducer;
+mod symlink_reducer;
 mod tab_reducer;
 
 use dir_reducer::dir_reducer;
 use file_reducer::file_reducer;
 use panel_reducer::panel_reducer;
+use symlink_reducer::symlink_reducer;
 use tab_reducer::tab_reducer;
 
 pub fn root_reducer(state: AppState, action: FileManagerActions) -> AppState {
@@ -19,6 +21,9 @@ pub fn root_reducer(state: AppState, action: FileManagerActions) -> AppState {
         FileManagerActions::App(app_action) => app_reducer(state.clone(), app_action),
         FileManagerActions::File(file_action) => file_reducer(state.clone(), file_action),
         FileManagerActions::Directory(dir_action) => dir_reducer(state.clone(), dir_action),
+        FileManagerActions::Symlink(symlink_action) => {
+            symlink_reducer(state.clone(), symlink_action)
+        }
         FileManagerActions::Panel(panel_action) => panel_reducer(state.clone(), panel_action),
         FileManagerActions::Tab(tab_action) => tab_reducer(state.clone(), tab_action),
     }

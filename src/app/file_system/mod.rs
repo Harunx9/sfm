@@ -9,6 +9,7 @@ use tui::{
 use crate::core::ToSpans;
 
 pub mod directory;
+pub mod path;
 
 #[derive(Clone, Debug)]
 pub enum FileSystemItem {

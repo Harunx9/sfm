@@ -53,7 +53,7 @@ where
 
     fn dispatch_middlewares(&mut self, order: usize, action: TAction) {
         if order == self.middlewares.len() {
-            self.dispatch_reducer(action.clone());
+            self.state = self.dispatch_reducer(action.clone());
             return;
         }
 

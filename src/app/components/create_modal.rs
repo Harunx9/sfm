@@ -11,6 +11,7 @@ use crate::{
     app::{
         actions::{
             AppAction, DirectoryAction, FileAction, FileManagerActions, PanelInfo, PanelSide,
+            SymlinkAction,
         },
         state::{AppState, TabIdx},
     },
@@ -26,13 +27,20 @@ use super::create_modal_layout;
 #[derive(Clone, Default)]
 pub struct CreateModalProps {
     panel_side: Option<PanelSide>,
+    item_to_symlink: Option<usize>,
     panel_tab: TabIdx,
     dir_path: PathBuf,
 }
 
 impl CreateModalProps {
-    pub fn new(panel_side: PanelSide, panel_tab: TabIdx, dir_path: PathBuf) -> Self {
+    pub fn new(
+        panel_side: PanelSide,
+        panel_tab: TabIdx,
+        dir_path: PathBuf,
+        item_to_symlink: Option<usize>,
+    ) -> Self {
         Self {
+            item_to_symlink,
             panel_side: Some(panel_side),
             panel_tab,
             dir_path,
@@ -40,7 +48,7 @@ impl CreateModalProps {
     }
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub enum CreateOption {
     File,
     Dir,
@@ -187,7 +195,25 @@ impl Component<Event, AppState, FileManagerActions> for CreateModalComponent {
                                 },
                             }))
                         }
-                        CreateOption::Symlink => {}
+                        CreateOption::Symlink => {
+                            let item_path = match props.panel_side.unwrap() {
+                                PanelSide::Left => state.left_panel.tabs[props.panel_tab].items
+                                    [props.item_to_symlink.unwrap()]
+                                .get_path(),
+                                PanelSide::Right => state.right_panel.tabs[props.panel_tab].items
+                                    [props.item_to_symlink.unwrap()]
+                                .get_path(),
+                            };
+
+                            store.dispatch(FileManagerActions::Symlink(SymlinkAction::Create {
+                                symlink_path: PathBuf::from(local_state.input.clone()),
+                                panel: PanelInfo {
+                                    path: item_path,
+                                    side: panle_side,
+                                    tab: props.panel_tab,
+                                },
+                            }))
+                        }
                     };
 
                     store.dispatch(FileManagerActions::App(AppAction::CloseModal));
@@ -248,12 +274,17 @@ impl Component<Event, AppState, FileManagerActions> for CreateModalComponent {
         };
 
         let mut local_state = self.base.get_state().unwrap();
+        let props = self.base.get_props().unwrap();
 
-        if local_state.create_selection.is_some() {
+        if let Some(create_selection) = local_state.create_selection {
             let block = Block::default()
                 .title(Spans::from(vec![
                     Span::from("| "),
-                    Span::from("Item name:"),
+                    if create_selection == CreateOption::Symlink {
+                        Span::from("Symlink path:")
+                    } else {
+                        Span::from("Item name:")
+                    },
                     Span::from(" |"),
                 ]))
                 .borders(Borders::ALL)
@@ -268,12 +299,18 @@ impl Component<Event, AppState, FileManagerActions> for CreateModalComponent {
             frame.render_widget(Clear, layout);
             frame.render_widget(paragraph, layout);
         } else {
-            let items = vec![
+            let mut items = vec![
                 ListItem::new(Spans::from(vec![Span::from(
                     CreateOption::File.to_string(),
                 )])),
                 ListItem::new(Spans::from(vec![Span::from(CreateOption::Dir.to_string())])),
             ];
+
+            if props.item_to_symlink.is_some() {
+                items.push(ListItem::new(Spans::from(vec![Span::from(
+                    CreateOption::Symlink.to_string(),
+                )])));
+            }
 
             let block = Block::default()
                 .title(Spans::from(vec![

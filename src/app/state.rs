@@ -98,14 +98,10 @@ pub enum ModalType {
         item: FileSystemItem,
     },
     CreateModal {
+        item_index: Option<usize>,
         panel_side: PanelSide,
         panel_tab: TabIdx,
         panel_tab_path: PathBuf,
     },
-    ErrorModal(Error),
-}
-
-#[derive(Clone, Debug)]
-pub struct Error {
-    pub message: String,
+    ErrorModal(String),
 }
