@@ -12,7 +12,6 @@ pub mod program_associations;
 #[derive(Debug, Clone)]
 pub struct Config {
     pub core_cfg: CoreConfig,
-    pub enchanced_graphics: bool,
     pub keyboard_cfg: KeyboardConfig,
     pub icons: IconsConfig,
     pub file_associated_programs: FileAssociatedPrograms,
@@ -22,7 +21,6 @@ impl Default for Config {
     fn default() -> Self {
         Config {
             core_cfg: CoreConfig::default(),
-            enchanced_graphics: false,
             keyboard_cfg: KeyboardConfig::default(),
             icons: IconsConfig::default(),
             file_associated_programs: FileAssociatedPrograms::default(),

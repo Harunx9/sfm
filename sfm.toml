@@ -1,0 +1,77 @@
+#Example configuration
+#Core configuration
+#[core]
+#tick_rate = 240
+#use_icons = true
+
+#[color_scheme]
+#foregorund = "White"
+#background = "Reset"
+#normal_black = "Black"
+#normal_red = "Red"
+#normal_green = "Green"
+#normal_yellow = "Yellow"
+#normal_blue = "Blue"
+#normal_magneta = "Magneta"
+#normal_cyan = "Cyan"
+#normal_white = "White"
+#light_black = "Gray"
+#light_red = "LightRed"
+#light_green = "LightGreen"
+#light_yellow = "LightYellow"
+#light_blue = "LightBlue"
+#light_magneta = "LightMagenta"
+#light_cyan = "LightCyan"
+#light_white = "White"
+
+#[keyboard_cfg]
+#quit = { key = "q", modifier = "C" }
+#focus_left_panel = { key = "h" }
+#focus_right_panel = { key = "l" }
+#move_down = { key = "j" }
+#move_up = { key = "k" }
+#next_tab = { key = "n" }
+#prev_tab = { key = "p" }
+#close = { key = "esc" }
+#open = { key = "o" }
+#open_as_tab = { key = "o", modifier = "C" }
+#navigate_up = { key = "backspace" }
+#delete = { key = "d", modifier = "C" }
+#move_left = { key = "h", modifier = "C" }
+#move_right = { key = "l", modifier = "C" }
+#rename = { key = "r", modifier = "C" }
+#create = { key = "c", modifier = "C" }
+#accept = { key = "enter" }
+
+#[icons_dir]
+#".git" = ""
+#node_modules = ""
+#default = ""
+
+#[icons_files]
+#".gitignore" = ""
+#".gitmodules" = ""
+#rs = ""
+#cs = ""
+#cpp = "ﭱ"
+#c = ""
+#hpp = ""
+#h = ""
+#js = ""
+#ts = ""
+#jsx = ""
+#tsx = "ﰆ"
+#html = ""
+#css = ""
+#sass = ""
+#toml = ""
+#yaml = ""
+#php = ""
+#py = ""
+#rb = ""
+#java = ""
+#lock = ""
+#default = ""
+
+#[file_associated_programs]
+#default = "vi"

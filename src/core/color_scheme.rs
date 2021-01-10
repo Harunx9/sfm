@@ -81,7 +81,7 @@ impl Default for ColorScheme {
             Color::Magenta,
             Color::Cyan,
             Color::White,
-            Color::Black,
+            Color::Gray,
             Color::LightRed,
             Color::LightGreen,
             Color::LightYellow,
