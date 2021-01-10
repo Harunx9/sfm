@@ -12,7 +12,7 @@ use crate::{
     app::{
         actions::{
             AppAction, DirectoryAction, FileAction, FileManagerActions, PanelInfo, PanelSide,
-            TabAction,
+            SymlinkAction, TabAction,
         },
         file_system::FileSystemItem,
         state::{AppState, ModalType, TabState},
@@ -152,16 +152,29 @@ impl Component<Event, AppState, FileManagerActions> for TabComponent {
 
             if let Some(current_item) = self.current_item() {
                 if state.config.keyboard_cfg.open_as_tab.is_pressed(key_evt) && props.is_focused {
-                    if let FileSystemItem::Directory(dir) = current_item {
-                        store.dispatch(FileManagerActions::Directory(DirectoryAction::Open {
-                            panel: PanelInfo {
-                                path: dir.get_path(),
-                                tab: tab_idx,
-                                side: tab_side.clone(),
-                            },
-                            in_new_tab: true,
-                        }));
-                    }
+                    match current_item {
+                        FileSystemItem::Directory(dir) => {
+                            store.dispatch(FileManagerActions::Directory(DirectoryAction::Open {
+                                panel: PanelInfo {
+                                    path: dir.get_path(),
+                                    tab: tab_idx,
+                                    side: tab_side.clone(),
+                                },
+                                in_new_tab: true,
+                            }));
+                        }
+                        FileSystemItem::Symlink(symlink) => {
+                            store.dispatch(FileManagerActions::Symlink(SymlinkAction::Open {
+                                panel: PanelInfo {
+                                    path: symlink.get_path(),
+                                    tab: tab_idx,
+                                    side: tab_side.clone(),
+                                },
+                                in_new_tab: true,
+                            }))
+                        }
+                        _ => {}
+                    };
 
                     return true;
                 }
@@ -187,6 +200,16 @@ impl Component<Event, AppState, FileManagerActions> for TabComponent {
                                 },
                             }))
                         }
+                        FileSystemItem::Symlink(symlink) => {
+                            store.dispatch(FileManagerActions::Symlink(SymlinkAction::Open {
+                                panel: PanelInfo {
+                                    path: symlink.get_path(),
+                                    tab: tab_idx,
+                                    side: tab_side.clone(),
+                                },
+                                in_new_tab: false,
+                            }))
+                        }
                         _ => {}
                     };
 
@@ -210,6 +233,15 @@ impl Component<Event, AppState, FileManagerActions> for TabComponent {
                             store.dispatch(FileManagerActions::File(FileAction::Delete {
                                 panel: PanelInfo {
                                     path: file.get_path(),
+                                    tab: tab_idx,
+                                    side: tab_side.clone(),
+                                },
+                            }))
+                        }
+                        FileSystemItem::Symlink(symlink) => {
+                            store.dispatch(FileManagerActions::Symlink(SymlinkAction::Delete {
+                                panel: PanelInfo {
+                                    path: symlink.get_path(),
                                     tab: tab_idx,
                                     side: tab_side.clone(),
                                 },

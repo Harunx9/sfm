@@ -24,7 +24,7 @@ impl FileSystemItem {
         match self {
             FileSystemItem::Directory(dir) => dir.path.clone(),
             FileSystemItem::File(file) => file.path.clone(),
-            FileSystemItem::Symlink(symlink) => symlink.file_path.clone(),
+            FileSystemItem::Symlink(symlink) => symlink.path.clone(),
             FileSystemItem::Unknown => PathBuf::new(),
         }
     }
@@ -89,7 +89,8 @@ impl ToSpans for FileSystemItem {
 #[derive(Clone, Debug)]
 pub struct SymlinkItem {
     name: String,
-    file_path: PathBuf,
+    path: PathBuf,
+    target: PathBuf,
     last_modification: DateTime<Local>,
     icon: String,
 }
@@ -97,13 +98,15 @@ pub struct SymlinkItem {
 impl SymlinkItem {
     pub fn new(
         name: String,
-        file_path: PathBuf,
+        path: PathBuf,
+        target: PathBuf,
         last_modification: DateTime<Local>,
         icon: String,
     ) -> Self {
         Self {
             name,
-            file_path,
+            path,
+            target,
             last_modification,
             icon,
         }
@@ -114,7 +117,7 @@ impl SymlinkItem {
     }
 
     pub fn get_path(&self) -> PathBuf {
-        self.file_path.clone()
+        self.path.clone()
     }
 
     pub fn is_visible(&self) -> bool {
@@ -131,14 +134,14 @@ impl ToSpans for SymlinkItem {
                 Span::from("  "),
                 Span::from(self.name.clone()),
                 Span::from(" -> "),
-                Span::from(self.file_path.to_str().unwrap_or("")),
+                Span::from(self.target.to_str().unwrap_or("")),
             ])
         } else {
             Spans::from(vec![
                 Span::from("  "),
                 Span::from(self.name.clone()),
                 Span::from(" -> "),
-                Span::from(self.file_path.to_str().unwrap_or("")),
+                Span::from(self.target.to_str().unwrap_or("")),
             ])
         }
     }
