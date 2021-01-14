@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+use toml::Value;
+
 #[derive(Debug, Clone)]
 pub struct IconsConfig {
     pub use_icons: bool,
@@ -10,7 +12,7 @@ pub struct IconsConfig {
 impl Default for IconsConfig {
     fn default() -> Self {
         IconsConfig {
-            use_icons: true,
+            use_icons: false,
             dir_icons: get_default_dir_icons(),
             files_icon: get_default_files_icons(),
         }
@@ -70,6 +72,34 @@ impl IconsConfig {
         match self.files_icon.get(&file_name) {
             Some(icon) => icon.clone(),
             None => self.files_icon["default"].clone(),
+        }
+    }
+
+    pub fn update_from_file(&mut self, cfg: &Value) {
+        if let Some(core) = cfg.get("core") {
+            if let Some(use_icons) = core.get("use_icons") {
+                if let Value::Boolean(value) = use_icons {
+                    self.use_icons = value.clone();
+                }
+            }
+        }
+
+        if let Some(icons_files) = cfg.get("icons_files") {
+            if let Value::Table(values) = icons_files {
+                for (key, value) in values.iter() {
+                    self.files_icon
+                        .insert(key.clone(), value.as_str().unwrap().to_string());
+                }
+            }
+        }
+
+        if let Some(icons_dir) = cfg.get("icons_dir") {
+            if let Value::Table(values) = icons_dir {
+                for (key, value) in values.iter() {
+                    self.dir_icons
+                        .insert(key.clone(), value.as_str().unwrap().to_string());
+                }
+            }
         }
     }
 }

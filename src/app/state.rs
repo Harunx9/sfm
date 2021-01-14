@@ -29,6 +29,15 @@ pub struct AppState {
     pub modal: Option<ModalType>,
 }
 
+impl AppState {
+    pub fn with_config(config: Config) -> Self {
+        let mut state = AppState::default();
+        state.config = config;
+
+        state
+    }
+}
+
 impl Default for AppState {
     fn default() -> Self {
         AppState {

@@ -7,14 +7,15 @@ license-file = "LICENSE"
 keywords = ["file-manager", "cli", "windows", "macOS", "linux"]
 categories = ["command-line-utilities"]
 repository = "https://github.com/Harunx9/sfm"
-description= "Simple two-panel file manager written in Rust inspired by Vim and Total Commander"
+description = "Simple two-panel file manager written in Rust inspired by Vim and Total Commander"
 
 [dependencies]
-crossterm = { version = "0.19.0" ,default-features = false }
-tui = {version = "0.14.0", default-features = false, features = ["crossterm"] }
+crossterm = { version = "0.19.0", default-features = false }
+tui = { version = "0.14.0", default-features = false, features = ["crossterm"] }
 chrono = "0.4.19"
 dirs = "3.0.1"
 toml = "0.5.0"
+lazy_static = "1.4.0"
 
 [[bin]]
 name = "sfm"

@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate lazy_static;
+
 use crate::core::events::Event;
 use crate::core::ui::component::Component;
 use crate::core::{events::EventQueue, store::Store};
@@ -15,11 +18,16 @@ use crossterm::{
 };
 use tui::{backend::CrosstermBackend, Terminal};
 
+lazy_static! {
+    static ref CONFIG_PATHS: Vec<String> =
+        vec!["~/sfm.toml".to_string(), "~/.config/sfm.toml".to_string()];
+}
+
 pub mod app;
 pub mod core;
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let cfg = Config::default();
+    let cfg = Config::load_or_default(CONFIG_PATHS.to_vec());
     enable_raw_mode()?;
     let mut stdout = stdout();
     execute!(stdout, EnterAlternateScreen, EnableMouseCapture)?;
@@ -29,7 +37,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut terminal = Terminal::new(backend)?;
     let mut event_queue = EventQueue::start_with_config(cfg.core_cfg);
 
-    let mut store = Store::<AppState, FileManagerActions>::new(root_reducer);
+    let mut store =
+        Store::<AppState, FileManagerActions>::with_state(root_reducer, AppState::with_config(cfg));
 
     terminal.clear()?;
 
