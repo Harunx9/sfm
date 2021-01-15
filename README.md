@@ -114,6 +114,7 @@ Configuration file should be named `sfm.toml` and shoudl be placed in `~/` or `~
         -  `rename = { key = "r", modifier = "C" }`
         -  `create = { key = "c", modifier = "C" }`
         -  `accept = { key = "enter" }`
+
 * ### [icons_dir] section
     * In order to see icons you need nerd font patch. See in sfm.toml in repo root.
     
