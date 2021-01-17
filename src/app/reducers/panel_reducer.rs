@@ -1,9 +1,14 @@
 use crate::app::{
     actions::{PanelAction, PanelSide},
+    file_system::FileSystem,
     state::{AppState, PanelState, TabIdx},
 };
+use std::fmt::Debug;
 
-pub fn panel_reducer(state: AppState, panel_action: PanelAction) -> AppState {
+pub fn panel_reducer<TFileSystem: Clone + Debug + Default + FileSystem>(
+    state: AppState<TFileSystem>,
+    panel_action: PanelAction,
+) -> AppState<TFileSystem> {
     match panel_action {
         PanelAction::Next { panel } => next_tab(state, panel),
         PanelAction::Previous { panel } => prev_tab(state, panel),
@@ -11,7 +16,11 @@ pub fn panel_reducer(state: AppState, panel_action: PanelAction) -> AppState {
     }
 }
 
-fn close_tab(state: AppState, tab: TabIdx, panel: PanelSide) -> AppState {
+fn close_tab<TFileSystem: Clone + Debug + Default + FileSystem>(
+    state: AppState<TFileSystem>,
+    tab: TabIdx,
+    panel: PanelSide,
+) -> AppState<TFileSystem> {
     match panel {
         PanelSide::Left => AppState {
             left_panel: close_tab_in_panel(state.left_panel, tab),
@@ -24,7 +33,10 @@ fn close_tab(state: AppState, tab: TabIdx, panel: PanelSide) -> AppState {
     }
 }
 
-fn close_tab_in_panel(panel_state: PanelState, tab: TabIdx) -> PanelState {
+fn close_tab_in_panel<TFileSystem: Clone + Debug + Default + FileSystem>(
+    panel_state: PanelState<TFileSystem>,
+    tab: TabIdx,
+) -> PanelState<TFileSystem> {
     let tabs: Vec<_> = panel_state
         .tabs
         .iter()
@@ -46,10 +58,14 @@ fn close_tab_in_panel(panel_state: PanelState, tab: TabIdx) -> PanelState {
             panel_state.current_tab
         },
         is_focused: panel_state.is_focused,
+        marker: std::marker::PhantomData,
     }
 }
 
-fn prev_tab(state: AppState, panel: PanelSide) -> AppState {
+fn prev_tab<TFileSystem: Clone + Debug + Default + FileSystem>(
+    state: AppState<TFileSystem>,
+    panel: PanelSide,
+) -> AppState<TFileSystem> {
     match panel {
         PanelSide::Left => AppState {
             left_panel: PanelState {
@@ -76,7 +92,10 @@ fn prev_tab(state: AppState, panel: PanelSide) -> AppState {
     }
 }
 
-fn next_tab(state: AppState, panel: PanelSide) -> AppState {
+fn next_tab<TFileSystem: Clone + Debug + Default + FileSystem>(
+    state: AppState<TFileSystem>,
+    panel: PanelSide,
+) -> AppState<TFileSystem> {
     match panel {
         PanelSide::Left => AppState {
             left_panel: PanelState {

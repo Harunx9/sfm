@@ -1,3 +1,4 @@
+use std::fmt::Debug;
 use tui::{
     backend::Backend,
     layout::{Constraint, Layout, Rect},
@@ -11,6 +12,7 @@ use crate::{
     app::{
         actions::{FileManagerActions, PanelAction, PanelSide},
         config::icon_cfg::IconsConfig,
+        file_system::FileSystem,
         state::{AppState, PanelState},
     },
     core::{
@@ -63,18 +65,24 @@ impl Default for PanelStyle {
     }
 }
 
-pub struct PanelComponent {
+pub struct PanelComponent<TFileSystem: Clone + Default + Debug + FileSystem> {
     base: ComponentBase<PanelComponentProps, PanelComponentState>,
-    tab: TabComponent,
+    tab: TabComponent<TFileSystem>,
     style: PanelStyle,
+    _marker: std::marker::PhantomData<TFileSystem>,
 }
 
-impl PanelComponent {
-    pub fn new(props: PanelComponentProps, state: PanelComponentState, tab: TabComponent) -> Self {
+impl<TFileSystem: Clone + Default + Debug + FileSystem> PanelComponent<TFileSystem> {
+    pub fn new(
+        props: PanelComponentProps,
+        state: PanelComponentState,
+        tab: TabComponent<TFileSystem>,
+    ) -> Self {
         PanelComponent {
             base: ComponentBase::new(Some(props), Some(state)),
             tab,
             style: PanelStyle::default(),
+            _marker: std::marker::PhantomData,
         }
     }
 
@@ -83,10 +91,15 @@ impl PanelComponent {
             base: ComponentBase::new(None, None),
             tab: TabComponent::empty(),
             style: PanelStyle::default(),
+            _marker: std::marker::PhantomData,
         }
     }
 
-    pub fn with_panel_state(panel_state: PanelState, side: PanelSide, icons: &IconsConfig) -> Self {
+    pub fn with_panel_state(
+        panel_state: PanelState<TFileSystem>,
+        side: PanelSide,
+        icons: &IconsConfig,
+    ) -> Self {
         let tabs: Vec<_> = panel_state
             .tabs
             .iter()
@@ -122,11 +135,13 @@ impl PanelComponent {
     }
 }
 
-impl Component<Event, AppState, FileManagerActions> for PanelComponent {
+impl<TFileSystem: Clone + Debug + Default + FileSystem>
+    Component<Event, AppState<TFileSystem>, FileManagerActions> for PanelComponent<TFileSystem>
+{
     fn handle_event(
         &mut self,
         event: Event,
-        store: &mut Store<AppState, FileManagerActions>,
+        store: &mut Store<AppState<TFileSystem>, FileManagerActions>,
     ) -> bool {
         let state = store.get_state();
         let props = self.base.get_props().unwrap();

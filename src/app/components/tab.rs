@@ -1,3 +1,4 @@
+use std::fmt::Debug;
 use tui::{
     backend::Backend,
     layout::Rect,
@@ -14,7 +15,7 @@ use crate::{
             AppAction, DirectoryAction, FileAction, FileManagerActions, PanelInfo, PanelSide,
             SymlinkAction, TabAction,
         },
-        file_system::FileSystemItem,
+        file_system::{file_system_item::FileSystemItem, FileSystem},
         state::{AppState, ModalType, TabState},
     },
     core::{
@@ -26,15 +27,15 @@ use crate::{
 };
 
 #[derive(Clone, Debug)]
-pub struct TabComponentProps {
-    state: Option<TabState>,
+pub struct TabComponentProps<TFileSystem: Clone + Debug + Default + FileSystem> {
+    state: Option<TabState<TFileSystem>>,
     has_displayed_tabs: bool,
     is_focused: bool,
     panel_side: Option<PanelSide>,
     show_icons: bool,
 }
 
-impl Default for TabComponentProps {
+impl<TFileSystem: Clone + Debug + Default + FileSystem> Default for TabComponentProps<TFileSystem> {
     fn default() -> Self {
         TabComponentProps {
             state: None,
@@ -46,9 +47,9 @@ impl Default for TabComponentProps {
     }
 }
 
-impl TabComponentProps {
+impl<TFileSystem: Clone + Debug + Default + FileSystem> TabComponentProps<TFileSystem> {
     pub fn new(
-        state: TabState,
+        state: TabState<TFileSystem>,
         has_displayed_tabs: bool,
         is_focused: bool,
         panel_side: PanelSide,
@@ -82,13 +83,13 @@ impl Default for TabStyle {
     }
 }
 
-pub struct TabComponent {
-    base: ComponentBase<TabComponentProps, ()>,
+pub struct TabComponent<TFileSystem: Clone + Debug + Default + FileSystem> {
+    base: ComponentBase<TabComponentProps<TFileSystem>, ()>,
     style: TabStyle,
 }
 
-impl TabComponent {
-    pub fn new(props: Option<TabComponentProps>, style: Option<TabStyle>) -> Self {
+impl<TFileSystem: Clone + Debug + Default + FileSystem> TabComponent<TFileSystem> {
+    pub fn new(props: Option<TabComponentProps<TFileSystem>>, style: Option<TabStyle>) -> Self {
         TabComponent {
             base: ComponentBase::new(props, None),
             style: style.unwrap_or(TabStyle::default()),
@@ -109,11 +110,13 @@ impl TabComponent {
     }
 }
 
-impl Component<Event, AppState, FileManagerActions> for TabComponent {
+impl<TFileSystem: Clone + Debug + Default + FileSystem>
+    Component<Event, AppState<TFileSystem>, FileManagerActions> for TabComponent<TFileSystem>
+{
     fn handle_event(
         &mut self,
         event: Event,
-        store: &mut Store<AppState, FileManagerActions>,
+        store: &mut Store<AppState<TFileSystem>, FileManagerActions>,
     ) -> bool {
         let state = store.get_state();
         let props = self.base.get_props().unwrap();

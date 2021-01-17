@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::{fmt::Debug, path::PathBuf};
 
 use crossterm::event::{KeyCode, KeyModifiers};
 use tui::{
@@ -13,6 +13,7 @@ use crate::{
             AppAction, DirectoryAction, FileAction, FileManagerActions, PanelInfo, PanelSide,
             SymlinkAction,
         },
+        file_system::FileSystem,
         state::{AppState, TabIdx},
     },
     core::{
@@ -94,23 +95,28 @@ pub struct CreateModalState {
     list_state: ListState,
 }
 
-pub struct CreateModalComponent {
+pub struct CreateModalComponent<TFileSystem: Clone + Debug + Default + FileSystem> {
     base: ComponentBase<CreateModalProps, CreateModalState>,
+    _maker: std::marker::PhantomData<TFileSystem>,
 }
 
-impl CreateModalComponent {
+impl<TFileSystem: Clone + Debug + Default + FileSystem> CreateModalComponent<TFileSystem> {
     pub fn with_props(props: CreateModalProps) -> Self {
         CreateModalComponent {
             base: ComponentBase::new(Some(props), Some(CreateModalState::default())),
+            _maker: std::marker::PhantomData,
         }
     }
 }
 
-impl Component<Event, AppState, FileManagerActions> for CreateModalComponent {
+impl<TFileSystem: Clone + Debug + Default + FileSystem>
+    Component<Event, AppState<TFileSystem>, FileManagerActions>
+    for CreateModalComponent<TFileSystem>
+{
     fn handle_event(
         &mut self,
         event: Event,
-        store: &mut Store<AppState, FileManagerActions>,
+        store: &mut Store<AppState<TFileSystem>, FileManagerActions>,
     ) -> bool {
         let state = store.get_state();
         let local_state = self.base.get_state().unwrap();

@@ -1,14 +1,18 @@
-use std::{fs, path::PathBuf};
-
 use crate::app::{
     actions::{DirectoryAction, PanelInfo, PanelSide},
     config::icon_cfg::IconsConfig,
+    file_system::FileSystem,
     state::{AppState, PanelState, TabIdx, TabState},
 };
+use std::fmt::Debug;
+use std::path::PathBuf;
 
 use super::reload_tab;
 
-pub fn dir_reducer(state: AppState, dir_action: DirectoryAction) -> AppState {
+pub fn dir_reducer<TFileSystem: Clone + Debug + Default + FileSystem>(
+    state: AppState<TFileSystem>,
+    dir_action: DirectoryAction,
+) -> AppState<TFileSystem> {
     match dir_action {
         DirectoryAction::Delete { panel } => delete_dir(state, panel),
         DirectoryAction::Rename { from, to } => rename_dir(state, from, to),
@@ -18,7 +22,11 @@ pub fn dir_reducer(state: AppState, dir_action: DirectoryAction) -> AppState {
     }
 }
 
-fn create_directory(state: AppState, dir_name: String, panel: PanelInfo) -> AppState {
+fn create_directory<TFileSystem: Clone + Debug + Default + FileSystem>(
+    mut state: AppState<TFileSystem>,
+    dir_name: String,
+    panel: PanelInfo,
+) -> AppState<TFileSystem> {
     match panel.side {
         PanelSide::Left => AppState {
             left_panel: PanelState {
@@ -27,6 +35,7 @@ fn create_directory(state: AppState, dir_name: String, panel: PanelInfo) -> AppS
                     panel.path,
                     panel.tab,
                     state.left_panel.tabs,
+                    &mut state.file_system,
                     &state.config.icons,
                 ),
                 ..state.left_panel
@@ -40,6 +49,7 @@ fn create_directory(state: AppState, dir_name: String, panel: PanelInfo) -> AppS
                     panel.path,
                     panel.tab,
                     state.right_panel.tabs,
+                    &mut state.file_system,
                     &state.config.icons,
                 ),
                 ..state.right_panel
@@ -49,7 +59,11 @@ fn create_directory(state: AppState, dir_name: String, panel: PanelInfo) -> AppS
     }
 }
 
-fn open_dir(state: AppState, panel: PanelInfo, in_new_tab: bool) -> AppState {
+fn open_dir<TFileSystem: Clone + Debug + Default + FileSystem>(
+    state: AppState<TFileSystem>,
+    panel: PanelInfo,
+    in_new_tab: bool,
+) -> AppState<TFileSystem> {
     match panel.side {
         PanelSide::Left => AppState {
             left_panel: PanelState {
@@ -57,6 +71,7 @@ fn open_dir(state: AppState, panel: PanelInfo, in_new_tab: bool) -> AppState {
                     let mut current_tabs = state.left_panel.tabs.clone();
                     current_tabs.push(TabState::with_dir(
                         panel.path.as_path(),
+                        &state.file_system,
                         &state.config.icons,
                     ));
 
@@ -66,6 +81,7 @@ fn open_dir(state: AppState, panel: PanelInfo, in_new_tab: bool) -> AppState {
                         panel.path,
                         panel.tab,
                         state.left_panel.tabs,
+                        &state.file_system,
                         &state.config.icons,
                     )
                 },
@@ -79,6 +95,7 @@ fn open_dir(state: AppState, panel: PanelInfo, in_new_tab: bool) -> AppState {
                     let mut current_tabs = state.right_panel.tabs.clone();
                     current_tabs.push(TabState::with_dir(
                         panel.path.as_path(),
+                        &state.file_system,
                         &state.config.icons,
                     ));
 
@@ -88,6 +105,7 @@ fn open_dir(state: AppState, panel: PanelInfo, in_new_tab: bool) -> AppState {
                         panel.path,
                         panel.tab,
                         state.right_panel.tabs,
+                        &state.file_system,
                         &state.config.icons,
                     )
                 },
@@ -98,7 +116,11 @@ fn open_dir(state: AppState, panel: PanelInfo, in_new_tab: bool) -> AppState {
     }
 }
 
-fn rename_dir(state: AppState, from: PanelInfo, to: PanelInfo) -> AppState {
+fn rename_dir<TFileSystem: Clone + Debug + Default + FileSystem>(
+    mut state: AppState<TFileSystem>,
+    from: PanelInfo,
+    to: PanelInfo,
+) -> AppState<TFileSystem> {
     match to.side {
         PanelSide::Left => AppState {
             left_panel: PanelState {
@@ -107,19 +129,30 @@ fn rename_dir(state: AppState, from: PanelInfo, to: PanelInfo) -> AppState {
                     to.path,
                     to.tab,
                     state.left_panel.tabs,
+                    &mut state.file_system,
                     &state.config.icons,
                 ),
                 ..state.left_panel
             },
             right_panel: PanelState {
-                tabs: reload_tab(from.tab, state.right_panel.tabs, &state.config.icons),
+                tabs: reload_tab(
+                    from.tab,
+                    state.right_panel.tabs,
+                    &state.file_system,
+                    &state.config.icons,
+                ),
                 ..state.right_panel
             },
             ..state
         },
         PanelSide::Right => AppState {
             left_panel: PanelState {
-                tabs: reload_tab(from.tab, state.left_panel.tabs, &state.config.icons),
+                tabs: reload_tab(
+                    from.tab,
+                    state.left_panel.tabs,
+                    &state.file_system,
+                    &state.config.icons,
+                ),
                 ..state.left_panel
             },
             right_panel: PanelState {
@@ -128,6 +161,7 @@ fn rename_dir(state: AppState, from: PanelInfo, to: PanelInfo) -> AppState {
                     to.path,
                     to.tab,
                     state.right_panel.tabs,
+                    &mut state.file_system,
                     &state.config.icons,
                 ),
                 ..state.right_panel
@@ -137,7 +171,10 @@ fn rename_dir(state: AppState, from: PanelInfo, to: PanelInfo) -> AppState {
     }
 }
 
-fn delete_dir(state: AppState, panel: PanelInfo) -> AppState {
+fn delete_dir<TFileSystem: Clone + Debug + Default + FileSystem>(
+    mut state: AppState<TFileSystem>,
+    panel: PanelInfo,
+) -> AppState<TFileSystem> {
     match panel.side {
         PanelSide::Left => AppState {
             left_panel: PanelState {
@@ -145,6 +182,7 @@ fn delete_dir(state: AppState, panel: PanelInfo) -> AppState {
                     panel.path,
                     panel.tab,
                     state.left_panel.tabs,
+                    &mut state.file_system,
                     &state.config.icons,
                 ),
                 ..state.left_panel
@@ -157,6 +195,7 @@ fn delete_dir(state: AppState, panel: PanelInfo) -> AppState {
                     panel.path,
                     panel.tab,
                     state.right_panel.tabs,
+                    &mut state.file_system,
                     &state.config.icons,
                 ),
                 ..state.right_panel
@@ -166,13 +205,14 @@ fn delete_dir(state: AppState, panel: PanelInfo) -> AppState {
     }
 }
 
-fn open_dir_in_tab(
+fn open_dir_in_tab<TFileSystem: Clone + Debug + Default + FileSystem>(
     path: PathBuf,
     current_tab: TabIdx,
-    mut tabs: Vec<TabState>,
+    mut tabs: Vec<TabState<TFileSystem>>,
+    file_system: &TFileSystem,
     icons: &IconsConfig,
-) -> Vec<TabState> {
-    let mut result = Vec::<TabState>::new();
+) -> Vec<TabState<TFileSystem>> {
+    let mut result = Vec::<TabState<TFileSystem>>::new();
 
     for (idx, val) in tabs.iter_mut().enumerate() {
         if idx == current_tab {
@@ -181,10 +221,14 @@ fn open_dir_in_tab(
                 .iter()
                 .find(|item| item.is_dir() && item.get_path().eq(path.as_path()));
             if let Some(item) = dir_to_open {
-                result.push(TabState::with_dir(item.get_path().as_path(), icons));
+                result.push(TabState::with_dir(
+                    item.get_path().as_path(),
+                    file_system,
+                    icons,
+                ));
             } else {
                 if path.exists() {
-                    result.push(TabState::with_dir(path.as_path(), icons));
+                    result.push(TabState::with_dir(path.as_path(), file_system, icons));
                 } else {
                     result.push(val.clone());
                 }
@@ -197,19 +241,24 @@ fn open_dir_in_tab(
     result
 }
 
-fn rename_dir_in_tab(
+fn rename_dir_in_tab<TFileSystem: Clone + Debug + Default + FileSystem>(
     from: PathBuf,
     to: PathBuf,
     current_tab: TabIdx,
-    tabs: Vec<TabState>,
+    tabs: Vec<TabState<TFileSystem>>,
+    file_system: &mut TFileSystem,
     icons: &IconsConfig,
-) -> Vec<TabState> {
-    let mut result = Vec::<TabState>::new();
+) -> Vec<TabState<TFileSystem>> {
+    let mut result = Vec::<TabState<TFileSystem>>::new();
 
     for (idx, tab_state) in tabs.iter().enumerate() {
         if idx == current_tab {
-            match std::fs::rename(from.clone(), to.clone()) {
-                Ok(_) => result.push(TabState::with_dir(tab_state.path.as_path(), icons)),
+            match file_system.rename_item(&from, &to) {
+                Ok(_) => result.push(TabState::with_dir(
+                    tab_state.path.as_path(),
+                    file_system,
+                    icons,
+                )),
                 Err(_) => {} //TODO: Add error handling
             }
         } else {
@@ -220,13 +269,14 @@ fn rename_dir_in_tab(
     result
 }
 
-fn delete_dir_from_tab(
+fn delete_dir_from_tab<TFileSystem: Clone + Debug + Default + FileSystem>(
     path: PathBuf,
     current_tab: TabIdx,
-    mut tabs: Vec<TabState>,
+    mut tabs: Vec<TabState<TFileSystem>>,
+    file_system: &mut TFileSystem,
     icons: &IconsConfig,
-) -> Vec<TabState> {
-    let mut result = Vec::<TabState>::new();
+) -> Vec<TabState<TFileSystem>> {
+    let mut result = Vec::<TabState<TFileSystem>>::new();
 
     for (idx, val) in tabs.iter_mut().enumerate() {
         if idx == current_tab {
@@ -235,8 +285,10 @@ fn delete_dir_from_tab(
                 .iter()
                 .find(|item| item.is_dir() && item.get_path().eq(path.as_path()));
             if let Some(item) = dir_to_delete {
-                match std::fs::remove_dir_all(item.get_path()) {
-                    Ok(_) => result.push(TabState::with_dir(val.path.as_path(), icons)),
+                match file_system.delete_dir(&item.get_path()) {
+                    Ok(_) => {
+                        result.push(TabState::with_dir(val.path.as_path(), file_system, icons))
+                    }
                     Err(_) => {}
                 }
             } else {
@@ -250,22 +302,27 @@ fn delete_dir_from_tab(
     result
 }
 
-fn create_directory_in_tab(
+fn create_directory_in_tab<TFileSystem: Clone + Debug + Default + FileSystem>(
     dir_name: String,
     parent_path: PathBuf,
     tab: TabIdx,
-    mut tabs: Vec<TabState>,
+    mut tabs: Vec<TabState<TFileSystem>>,
+    file_system: &mut TFileSystem,
     icons: &IconsConfig,
-) -> Vec<TabState> {
-    let mut result = Vec::<TabState>::new();
+) -> Vec<TabState<TFileSystem>> {
+    let mut result = Vec::<TabState<TFileSystem>>::new();
     for (idx, val) in tabs.iter_mut().enumerate() {
         if idx == tab {
             if parent_path.exists() {
                 let mut dir_path = parent_path.clone();
                 dir_path.push(dir_name.clone());
 
-                match fs::create_dir(dir_path) {
-                    Ok(_) => result.push(TabState::with_dir(parent_path.as_path(), icons)),
+                match file_system.create_dir(&dir_path) {
+                    Ok(_) => result.push(TabState::with_dir(
+                        parent_path.as_path(),
+                        file_system,
+                        icons,
+                    )),
                     Err(_) => {}
                 };
             } else {

@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::{fmt::Debug, path::PathBuf};
 
 use crossterm::event::{KeyCode, KeyModifiers};
 use tui::{
@@ -12,7 +12,7 @@ use crate::{
         actions::{
             AppAction, DirectoryAction, FileAction, FileManagerActions, PanelInfo, PanelSide,
         },
-        file_system::FileSystemItem,
+        file_system::{file_system_item::FileSystemItem, FileSystem},
         state::{AppState, TabIdx},
     },
     core::{
@@ -50,11 +50,12 @@ pub struct RenameModalComponentState {
     input: String,
 }
 
-pub struct RenameModalComponent {
+pub struct RenameModalComponent<TFileSystem: Clone + Debug + Default + FileSystem> {
     base: ComponentBase<RenameModalComponentProps, RenameModalComponentState>,
+    _maker: std::marker::PhantomData<TFileSystem>,
 }
 
-impl RenameModalComponent {
+impl<TFileSystem: Clone + Debug + Default + FileSystem> RenameModalComponent<TFileSystem> {
     pub fn with_props(props: RenameModalComponentProps) -> Self {
         let item = props.item_to_rename.clone().unwrap();
 
@@ -65,15 +66,19 @@ impl RenameModalComponent {
                     input: item.get_path().to_str().unwrap().to_string(),
                 }),
             ),
+            _maker: std::marker::PhantomData,
         }
     }
 }
 
-impl Component<Event, AppState, FileManagerActions> for RenameModalComponent {
+impl<TFileSystem: Clone + Debug + Default + FileSystem>
+    Component<Event, AppState<TFileSystem>, FileManagerActions>
+    for RenameModalComponent<TFileSystem>
+{
     fn handle_event(
         &mut self,
         event: Event,
-        store: &mut Store<AppState, FileManagerActions>,
+        store: &mut Store<AppState<TFileSystem>, FileManagerActions>,
     ) -> bool {
         let state = store.get_state();
         let local_state = self.base.get_state().unwrap();

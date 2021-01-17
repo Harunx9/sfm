@@ -8,7 +8,8 @@ use std::{error::Error, io::stdout, process::Command};
 
 use app::{
     actions::FileManagerActions, components::root::RootComponent, config::Config,
-    middlewares::symlink_middleware, reducers::root_reducer, state::AppState,
+    file_system::PhisicalFileSystem, middlewares::symlink_middleware, reducers::root_reducer,
+    state::AppState,
 };
 use crossterm::{
     event::{DisableMouseCapture, EnableMouseCapture},
@@ -27,7 +28,8 @@ pub mod app;
 pub mod core;
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let cfg = Config::load_or_default(CONFIG_PATHS.to_vec());
+    let file_system = PhisicalFileSystem::default();
+    let cfg = Config::load_or_default(CONFIG_PATHS.to_vec(), &file_system);
     enable_raw_mode()?;
     let mut stdout = stdout();
     execute!(stdout, EnterAlternateScreen, EnableMouseCapture)?;
@@ -37,8 +39,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut terminal = Terminal::new(backend)?;
     let mut event_queue = EventQueue::start_with_config(cfg.core_cfg);
 
-    let mut store =
-        Store::<AppState, FileManagerActions>::with_state(root_reducer, AppState::with_config(cfg));
+    let mut store = Store::<AppState<PhisicalFileSystem>, FileManagerActions>::with_state(
+        root_reducer,
+        AppState::<PhisicalFileSystem>::new(cfg, file_system),
+    );
 
     terminal.clear()?;
 

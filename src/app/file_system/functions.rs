@@ -1,58 +1,66 @@
-use chrono::{DateTime, Local};
-use fs::Metadata;
+#[cfg(unix)]
+use std::os::unix::fs;
+#[cfg(windows)]
+use std::os::windows::fs;
 
-use crate::app::config::icon_cfg::IconsConfig;
-
-use super::{DirectoryItem, FileItem, FileSystemItem, SymlinkItem};
 use std::{
-    fs::{self, DirEntry},
+    fs::{read_link, DirEntry, Metadata},
+    io,
     path::{Path, PathBuf},
     time::SystemTime,
 };
 
-#[derive(Clone, Debug)]
-pub struct DirInfo {
-    pub name: String,
-    pub path: PathBuf,
+use chrono::{DateTime, Local};
+
+use crate::app::config::icon_cfg::IconsConfig;
+
+use super::{
+    dir_item::DirItem, file_item::FileItem, file_system_item::FileSystemItem,
+    symlink_item::SymlinkItem,
+};
+
+#[cfg(unix)]
+pub fn create_link<TPath: AsRef<Path>>(symlink_path: &TPath, item_path: &TPath) -> io::Result<()> {
+    let symlink_path = expand_if_contains_tilde(symlink_path).unwrap();
+    fs::symlink(item_path, symlink_path)
 }
 
-impl DirInfo {
-    pub fn new(path: &Path) -> Option<Self> {
-        if let Ok(path_buffer) = fs::canonicalize(path) {
-            let name = if let Some(file_name) = path_buffer.file_name() {
-                file_name.to_str().unwrap_or("")
-            } else {
-                ""
-            };
-            let path = path_buffer.as_path().to_str().unwrap_or("");
-            return Some(DirInfo {
-                name: name.to_string(),
-                path: PathBuf::from(path),
-            });
-        }
-        None
+#[cfg(windows)]
+pub fn create_link<TPath: AsRef<Path>>(symlink_path: &TPath, item_path: TPath) -> io::Result<()> {
+    let symlink_path = expand_if_contains_tilde(symlink_path).unwrap();
+    if item_path.is_dir() {
+        fs::symlink_dir(item_path, symlink_path)
+    } else {
+        fs::symlink_file(item_path, symlink_path)
     }
 }
 
-pub fn get_items_from_dir(dir: &Path, icons: &IconsConfig) -> Vec<FileSystemItem> {
-    match fs::read_dir(dir) {
-        Ok(mut iter) => {
-            let mut result = Vec::new();
-            while let Some(load_result) = iter.next() {
-                if let Ok(dir_entry) = load_result {
-                    result.push(map_dir_entry_to_file_system_item(dir_entry, icons));
-                }
-            }
-
-            result.sort_by(|one, two| one.get_name().cmp(&two.get_name()));
-
-            result
-        }
-        Err(_) => Vec::new(),
+//From: https://stackoverflow.com/questions/54267608/expand-tilde-in-rust-path-idiomatically
+pub fn expand_if_contains_tilde<TPath: AsRef<Path>>(input: TPath) -> Option<PathBuf> {
+    let path = input.as_ref();
+    if path.starts_with("~") == false {
+        return Some(path.to_path_buf());
     }
+    if path == Path::new("~") {
+        return dirs::home_dir();
+    }
+
+    dirs::home_dir().map(|mut home_path| {
+        if home_path == Path::new("/") {
+            // Corner case: `h` root directory;
+            // don't prepend extra `/`, just drop the tilde.
+            path.strip_prefix("~").unwrap().to_path_buf()
+        } else {
+            home_path.push(path.strip_prefix("~/").unwrap());
+            home_path
+        }
+    })
 }
 
-fn map_dir_entry_to_file_system_item(dir_entry: DirEntry, icons: &IconsConfig) -> FileSystemItem {
+pub fn map_dir_entry_to_file_system_item(
+    dir_entry: DirEntry,
+    icons: &IconsConfig,
+) -> FileSystemItem {
     if let Ok(metadata) = dir_entry.metadata() {
         let (name, path, modified) = get_file_system_item_props(dir_entry, &metadata);
         let file_type = metadata.file_type();
@@ -67,7 +75,7 @@ fn map_dir_entry_to_file_system_item(dir_entry: DirEntry, icons: &IconsConfig) -
         }
 
         if file_type.is_dir() {
-            return FileSystemItem::Directory(DirectoryItem::new(
+            return FileSystemItem::Directory(DirItem::new(
                 name.to_string(),
                 path,
                 modified,
@@ -77,7 +85,7 @@ fn map_dir_entry_to_file_system_item(dir_entry: DirEntry, icons: &IconsConfig) -
 
         if file_type.is_symlink() {
             let file_extensions = name.split('.').last().unwrap_or("");
-            match fs::read_link(path.clone()) {
+            match read_link(path.clone()) {
                 Ok(target) => {
                     return FileSystemItem::Symlink(SymlinkItem::new(
                         name.to_string(),
