@@ -1,16 +1,23 @@
 use crate::app::{
     actions::TabAction,
+    file_system::FileSystem,
     state::{AppState, PanelState, TabState},
 };
+use std::fmt::Debug;
 
-pub fn tab_reducer(state: AppState, tab_action: TabAction) -> AppState {
+pub fn tab_reducer<TFileSystem: Clone + Debug + Default + FileSystem>(
+    state: AppState<TFileSystem>,
+    tab_action: TabAction,
+) -> AppState<TFileSystem> {
     match tab_action {
         TabAction::Next => select_next(state),
         TabAction::Previous => select_previous(state),
     }
 }
 
-fn select_next(state: AppState) -> AppState {
+fn select_next<TFileSystem: Clone + Debug + Default + FileSystem>(
+    state: AppState<TFileSystem>,
+) -> AppState<TFileSystem> {
     if state.left_panel.is_focused {
         AppState {
             left_panel: PanelState {
@@ -32,7 +39,9 @@ fn select_next(state: AppState) -> AppState {
     }
 }
 
-fn select_previous(state: AppState) -> AppState {
+fn select_previous<TFileSystem: Clone + Debug + Default + FileSystem>(
+    state: AppState<TFileSystem>,
+) -> AppState<TFileSystem> {
     if state.left_panel.is_focused {
         AppState {
             left_panel: PanelState {
@@ -54,7 +63,10 @@ fn select_previous(state: AppState) -> AppState {
     }
 }
 
-fn select_next_element(current_tab: usize, mut items: Vec<TabState>) -> Vec<TabState> {
+fn select_next_element<TFileSystem: Clone + Debug + Default + FileSystem>(
+    current_tab: usize,
+    mut items: Vec<TabState<TFileSystem>>,
+) -> Vec<TabState<TFileSystem>> {
     for (idx, val) in items.iter_mut().enumerate() {
         if idx == current_tab && val.items.is_empty() == false {
             let next_tab = match val.tab_state.selected() {
@@ -75,7 +87,10 @@ fn select_next_element(current_tab: usize, mut items: Vec<TabState>) -> Vec<TabS
     items.clone()
 }
 
-fn select_prev_element(current_tab: usize, mut items: Vec<TabState>) -> Vec<TabState> {
+fn select_prev_element<TFileSystem: Clone + Debug + Default + FileSystem>(
+    current_tab: usize,
+    mut items: Vec<TabState<TFileSystem>>,
+) -> Vec<TabState<TFileSystem>> {
     for (idx, val) in items.iter_mut().enumerate() {
         if idx == current_tab && val.items.is_empty() == false {
             let prev_tab = match val.tab_state.selected() {

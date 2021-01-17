@@ -1,250 +1,138 @@
-use std::path::PathBuf;
+use std::{
+    fs::{self, File},
+    path::Path,
+};
+use std::{io, path::PathBuf};
 
-use chrono::{DateTime, Local};
-use tui::{
-    layout::Rect,
-    text::{Span, Spans},
+use self::{
+    file_system_item::FileSystemItem,
+    functions::{create_link, map_dir_entry_to_file_system_item},
 };
 
-use crate::core::ToSpans;
+use super::config::icon_cfg::IconsConfig;
 
-pub mod directory;
-pub mod path;
+pub mod dir_item;
+pub mod file_item;
+pub mod file_system_item;
+pub mod functions;
+pub mod symlink_item;
 
-#[derive(Clone, Debug)]
-pub enum FileSystemItem {
-    Directory(DirectoryItem),
-    File(FileItem),
-    Symlink(SymlinkItem),
-    Unknown,
+pub trait FileSystem {
+    fn get_dir_info<TPath: AsRef<Path>>(&self, path: &TPath) -> Option<DirInfo>;
+    fn list_dir<TPath: AsRef<Path>>(
+        &self,
+        path: &TPath,
+        icons: &IconsConfig,
+    ) -> Vec<FileSystemItem>;
+    fn read_to_string<TPath: AsRef<Path>>(&self, path: &TPath) -> Option<String>;
+    fn delete_file<TPath: AsRef<Path>>(&mut self, path: &TPath) -> io::Result<()>;
+    fn delete_dir<TPath: AsRef<Path>>(&mut self, path: &TPath) -> io::Result<()>;
+    fn delete_empty_dir<TPath: AsRef<Path>>(&mut self, path: &TPath) -> io::Result<()>;
+    fn rename_item<TPath: AsRef<Path>>(&mut self, source: &TPath, target: &TPath)
+        -> io::Result<()>;
+    fn create_symlink<TPath: AsRef<Path>>(
+        &mut self,
+        source: &TPath,
+        target: &TPath,
+    ) -> io::Result<()>;
+    fn create_file<TPath: AsRef<Path>>(&mut self, path: &TPath) -> io::Result<File>;
+    fn create_dir<TPath: AsRef<Path>>(&mut self, path: &TPath) -> io::Result<()>;
 }
 
-impl FileSystemItem {
-    pub fn get_path(&self) -> PathBuf {
-        match self {
-            FileSystemItem::Directory(dir) => dir.path.clone(),
-            FileSystemItem::File(file) => file.path.clone(),
-            FileSystemItem::Symlink(symlink) => symlink.path.clone(),
-            FileSystemItem::Unknown => PathBuf::new(),
+#[derive(Clone, Debug, Default)]
+pub struct PhisicalFileSystem;
+
+impl FileSystem for PhisicalFileSystem {
+    fn get_dir_info<TPath: AsRef<Path>>(&self, path: &TPath) -> Option<DirInfo> {
+        DirInfo::new(path)
+    }
+
+    fn list_dir<TPath: AsRef<Path>>(
+        &self,
+        path: &TPath,
+        icons: &IconsConfig,
+    ) -> Vec<FileSystemItem> {
+        match fs::read_dir(path) {
+            Ok(mut iter) => {
+                let mut result = Vec::new();
+                while let Some(load_result) = iter.next() {
+                    if let Ok(dir_entry) = load_result {
+                        result.push(map_dir_entry_to_file_system_item(dir_entry, icons));
+                    }
+                }
+
+                result.sort_by(|one, two| one.get_name().cmp(&two.get_name()));
+
+                result
+            }
+            Err(_) => Vec::new(),
         }
     }
 
-    pub fn get_name(&self) -> String {
-        match self {
-            FileSystemItem::Directory(dir) => dir.name.clone(),
-            FileSystemItem::File(file) => file.name.clone(),
-            FileSystemItem::Symlink(symlink) => symlink.name.clone(),
-            FileSystemItem::Unknown => "".to_string(),
+    fn read_to_string<TPath: AsRef<Path>>(&self, path: &TPath) -> Option<String> {
+        match fs::read_to_string(path) {
+            Ok(content) => return Some(content.clone()),
+            Err(_) => None,
         }
     }
 
-    pub fn is_symlink(&self) -> bool {
-        match self {
-            FileSystemItem::Directory(_) => false,
-            FileSystemItem::File(_) => false,
-            FileSystemItem::Symlink(_) => true,
-            FileSystemItem::Unknown => false,
-        }
+    fn delete_file<TPath: AsRef<Path>>(&mut self, path: &TPath) -> io::Result<()> {
+        fs::remove_file(path)
     }
 
-    pub fn is_file(&self) -> bool {
-        match self {
-            FileSystemItem::Directory(_) => false,
-            FileSystemItem::File(_) => true,
-            FileSystemItem::Symlink(_) => false,
-            FileSystemItem::Unknown => false,
-        }
+    fn delete_dir<TPath: AsRef<Path>>(&mut self, path: &TPath) -> io::Result<()> {
+        fs::remove_dir_all(path)
     }
 
-    pub fn is_dir(&self) -> bool {
-        match self {
-            FileSystemItem::Directory(_) => true,
-            FileSystemItem::File(_) => false,
-            FileSystemItem::Symlink(_) => false,
-            FileSystemItem::Unknown => false,
-        }
+    fn rename_item<TPath: AsRef<Path>>(
+        &mut self,
+        source: &TPath,
+        target: &TPath,
+    ) -> io::Result<()> {
+        fs::rename(source, target)
     }
 
-    pub fn is_visible(&self) -> bool {
-        match self {
-            FileSystemItem::Directory(dir) => dir.is_visible(),
-            FileSystemItem::File(file) => file.is_visible(),
-            FileSystemItem::Symlink(_) => true,
-            FileSystemItem::Unknown => false,
-        }
-    }
-}
-
-impl ToSpans for FileSystemItem {
-    fn to_spans(&self, area: Rect, show_icons: bool) -> Spans {
-        match self {
-            FileSystemItem::Directory(dir) => dir.to_spans(area, show_icons),
-            FileSystemItem::File(file) => file.to_spans(area, show_icons),
-            FileSystemItem::Symlink(symlink) => symlink.to_spans(area, show_icons),
-            FileSystemItem::Unknown => Spans::default(),
-        }
-    }
-}
-
-#[derive(Clone, Debug)]
-pub struct SymlinkItem {
-    name: String,
-    path: PathBuf,
-    target: PathBuf,
-    last_modification: DateTime<Local>,
-    icon: String,
-}
-
-impl SymlinkItem {
-    pub fn new(
-        name: String,
-        path: PathBuf,
-        target: PathBuf,
-        last_modification: DateTime<Local>,
-        icon: String,
-    ) -> Self {
-        Self {
-            name,
-            path,
-            target,
-            last_modification,
-            icon,
-        }
+    fn create_symlink<TPath: AsRef<Path>>(
+        &mut self,
+        source: &TPath,
+        target: &TPath,
+    ) -> io::Result<()> {
+        create_link(target, source)
     }
 
-    pub fn get_name(&self) -> String {
-        self.name.clone()
+    fn create_file<TPath: AsRef<Path>>(&mut self, path: &TPath) -> io::Result<File> {
+        File::create(path)
     }
 
-    pub fn get_path(&self) -> PathBuf {
-        self.path.clone()
+    fn create_dir<TPath: AsRef<Path>>(&mut self, path: &TPath) -> io::Result<()> {
+        fs::create_dir(path)
     }
 
-    pub fn is_visible(&self) -> bool {
-        self.name.starts_with('.')
-    }
-}
-
-impl ToSpans for SymlinkItem {
-    fn to_spans(&self, _area: Rect, show_icons: bool) -> Spans {
-        if show_icons {
-            Spans::from(vec![
-                Span::from("  "),
-                Span::from(self.icon.clone()),
-                Span::from("  "),
-                Span::from(self.name.clone()),
-                Span::from(" -> "),
-                Span::from(self.target.to_str().unwrap_or("")),
-            ])
-        } else {
-            Spans::from(vec![
-                Span::from("  "),
-                Span::from(self.name.clone()),
-                Span::from(" -> "),
-                Span::from(self.target.to_str().unwrap_or("")),
-            ])
-        }
+    fn delete_empty_dir<TPath: AsRef<Path>>(&mut self, path: &TPath) -> io::Result<()> {
+        fs::remove_dir(path)
     }
 }
 
 #[derive(Clone, Debug)]
-pub struct DirectoryItem {
-    name: String,
-    path: PathBuf,
-    last_modification: DateTime<Local>,
-    icon: String,
+pub struct DirInfo {
+    pub name: String,
+    pub path: PathBuf,
 }
 
-impl DirectoryItem {
-    pub fn new(
-        name: String,
-        path: PathBuf,
-        last_modification: DateTime<Local>,
-        icon: String,
-    ) -> Self {
-        DirectoryItem {
-            name,
-            path,
-            last_modification,
-            icon,
+impl DirInfo {
+    pub fn new<TPath: AsRef<Path>>(path: &TPath) -> Option<Self> {
+        if let Ok(path_buffer) = fs::canonicalize(path) {
+            let name = if let Some(file_name) = path_buffer.file_name() {
+                file_name.to_str().unwrap_or("")
+            } else {
+                ""
+            };
+            let path = path_buffer.as_path().to_str().unwrap_or("");
+            return Some(DirInfo {
+                name: name.to_string(),
+                path: PathBuf::from(path),
+            });
         }
-    }
-
-    pub fn get_name(&self) -> String {
-        self.name.clone()
-    }
-
-    pub fn get_path(&self) -> PathBuf {
-        self.path.clone()
-    }
-
-    pub fn is_visible(&self) -> bool {
-        self.name.starts_with('.')
-    }
-}
-
-impl ToSpans for DirectoryItem {
-    fn to_spans(&self, _area: Rect, show_icons: bool) -> Spans {
-        if show_icons {
-            Spans::from(vec![
-                Span::from("  "),
-                Span::from(self.icon.clone()),
-                Span::from("  "),
-                Span::from(self.name.clone()),
-            ])
-        } else {
-            Spans::from(vec![Span::from("  "), Span::from(self.name.clone())])
-        }
-    }
-}
-
-#[derive(Clone, Debug)]
-pub struct FileItem {
-    name: String,
-    path: PathBuf,
-    last_modification: DateTime<Local>,
-    icon: String,
-}
-
-impl FileItem {
-    pub fn new(
-        name: String,
-        path: PathBuf,
-        last_modification: DateTime<Local>,
-        icon: String,
-    ) -> Self {
-        FileItem {
-            name,
-            path,
-            last_modification,
-            icon,
-        }
-    }
-
-    pub fn get_name(&self) -> String {
-        self.name.clone()
-    }
-
-    pub fn get_path(&self) -> PathBuf {
-        self.path.clone()
-    }
-
-    pub fn is_visible(&self) -> bool {
-        self.name.starts_with('.')
-    }
-}
-
-impl ToSpans for FileItem {
-    fn to_spans(&self, _area: Rect, show_icons: bool) -> Spans {
-        if show_icons {
-            Spans::from(vec![
-                Span::from("  "),
-                Span::from(self.icon.clone()),
-                Span::from("  "),
-                Span::from(self.name.clone()),
-            ])
-        } else {
-            Spans::from(vec![Span::from("  "), Span::from(self.name.clone())])
-        }
+        None
     }
 }

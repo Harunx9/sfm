@@ -1,8 +1,10 @@
 use super::{
     actions::{AppAction, FileManagerActions},
     config::icon_cfg::IconsConfig,
+    file_system::FileSystem,
     state::{AppState, PanelState, TabIdx, TabState},
 };
+use std::fmt::Debug;
 
 mod dir_reducer;
 mod file_reducer;
@@ -16,7 +18,10 @@ use panel_reducer::panel_reducer;
 use symlink_reducer::symlink_reducer;
 use tab_reducer::tab_reducer;
 
-pub fn root_reducer(state: AppState, action: FileManagerActions) -> AppState {
+pub fn root_reducer<TFileSystem: Clone + Debug + Default + FileSystem>(
+    state: AppState<TFileSystem>,
+    action: FileManagerActions,
+) -> AppState<TFileSystem> {
     match action {
         FileManagerActions::App(app_action) => app_reducer(state.clone(), app_action),
         FileManagerActions::File(file_action) => file_reducer(state.clone(), file_action),
@@ -29,7 +34,10 @@ pub fn root_reducer(state: AppState, action: FileManagerActions) -> AppState {
     }
 }
 
-fn app_reducer(state: AppState, app_action: AppAction) -> AppState {
+fn app_reducer<TFileSystem: Clone + Debug + Default + FileSystem>(
+    state: AppState<TFileSystem>,
+    app_action: AppAction,
+) -> AppState<TFileSystem> {
     match app_action {
         AppAction::Exit => AppState {
             app_exit: true,
@@ -72,11 +80,20 @@ fn app_reducer(state: AppState, app_action: AppAction) -> AppState {
     }
 }
 
-fn reload_tab(tab: TabIdx, tabs: Vec<TabState>, icons_cfg: &IconsConfig) -> Vec<TabState> {
-    let mut result = Vec::<TabState>::new();
+fn reload_tab<TFileSystem: Clone + Default + Debug + FileSystem>(
+    tab: TabIdx,
+    tabs: Vec<TabState<TFileSystem>>,
+    file_system: &TFileSystem,
+    icons_cfg: &IconsConfig,
+) -> Vec<TabState<TFileSystem>> {
+    let mut result = Vec::<TabState<TFileSystem>>::new();
     for (idx, tab_state) in tabs.iter().enumerate() {
         if idx == tab {
-            result.push(TabState::with_dir(tab_state.path.as_path(), icons_cfg));
+            result.push(TabState::with_dir(
+                tab_state.path.as_path(),
+                file_system,
+                icons_cfg,
+            ));
         } else {
             result.push(tab_state.clone());
         }

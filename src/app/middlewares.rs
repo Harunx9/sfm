@@ -2,13 +2,14 @@ use super::{
     actions::{
         AppAction, DirectoryAction, FileAction, FileManagerActions, PanelInfo, SymlinkAction,
     },
+    file_system::FileSystem,
     state::{AppState, ModalType},
 };
 use crate::core::store::Store;
-use std::fs;
+use std::{fmt::Debug, fs};
 
-pub fn symlink_middleware(
-    store: &mut Store<AppState, FileManagerActions>,
+pub fn symlink_middleware<TFileSystem: Clone + Debug + Default + FileSystem>(
+    store: &mut Store<AppState<TFileSystem>, FileManagerActions>,
     action: FileManagerActions,
 ) -> Option<FileManagerActions> {
     match action {
@@ -17,8 +18,8 @@ pub fn symlink_middleware(
     }
 }
 
-fn symlink_resolver(
-    _: &mut Store<AppState, FileManagerActions>,
+fn symlink_resolver<TFileSystem: Clone + Debug + Default + FileSystem>(
+    _: &mut Store<AppState<TFileSystem>, FileManagerActions>,
     symlink_action: SymlinkAction,
 ) -> Option<FileManagerActions> {
     match symlink_action {

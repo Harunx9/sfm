@@ -1,17 +1,15 @@
-use std::{io, path::PathBuf};
+use std::{fmt::Debug, path::PathBuf};
 
 use crate::app::{
     actions::{PanelSide, SymlinkAction},
-    file_system::path::expand_if_contains_tilde,
+    file_system::FileSystem,
     state::{AppState, PanelState, TabIdx, TabState},
 };
 
-#[cfg(unix)]
-use std::os::unix::fs;
-#[cfg(windows)]
-use std::os::windows::fs;
-
-pub fn symlink_reducer(state: AppState, action: SymlinkAction) -> AppState {
+pub fn symlink_reducer<TFileSystem: Clone + Debug + Default + FileSystem>(
+    state: AppState<TFileSystem>,
+    action: SymlinkAction,
+) -> AppState<TFileSystem> {
     match action {
         SymlinkAction::Create {
             symlink_path,
@@ -21,11 +19,11 @@ pub fn symlink_reducer(state: AppState, action: SymlinkAction) -> AppState {
     }
 }
 
-fn create_symlink(
-    state: AppState,
+fn create_symlink<TFileSystem: Clone + Debug + Default + FileSystem>(
+    mut state: AppState<TFileSystem>,
     symlink_path: PathBuf,
     panel: crate::app::actions::PanelInfo,
-) -> AppState {
+) -> AppState<TFileSystem> {
     match panel.side {
         PanelSide::Left => AppState {
             left_panel: PanelState {
@@ -33,6 +31,7 @@ fn create_symlink(
                     symlink_path,
                     panel.tab,
                     panel.path,
+                    &mut state.file_system,
                     state.left_panel.tabs,
                 ),
                 ..state.left_panel
@@ -45,6 +44,7 @@ fn create_symlink(
                     symlink_path,
                     panel.tab,
                     panel.path,
+                    &mut state.file_system,
                     state.right_panel.tabs,
                 ),
                 ..state.right_panel
@@ -54,33 +54,18 @@ fn create_symlink(
     }
 }
 
-#[cfg(unix)]
-fn create_link(symlink_path: PathBuf, item_path: PathBuf) -> io::Result<()> {
-    let symlink_path = expand_if_contains_tilde(symlink_path.as_path()).unwrap();
-    fs::symlink(item_path.as_path(), symlink_path.as_path())
-}
-
-#[cfg(windows)]
-fn create_link(symlink_path: PathBuf, item_path: PathBuf) -> io::Result<()> {
-    let symlink_path = expand_if_contains_tilde(symlink_path.as_path()).unwrap();
-    if item_path.is_dir() {
-        fs::symlink_dir(item_path.as_path(), symlink_path.as_path())
-    } else {
-        fs::symlink_file(item_path.as_path(), symlink_path.as_path())
-    }
-}
-
-fn create_symlink_in_tab(
+fn create_symlink_in_tab<TFileSystem: Clone + Debug + Default + FileSystem>(
     symlink_path: PathBuf,
     tab: TabIdx,
     path: PathBuf,
-    tabs: Vec<TabState>,
-) -> Vec<TabState> {
-    let mut result = Vec::<TabState>::new();
+    file_system: &mut TFileSystem,
+    tabs: Vec<TabState<TFileSystem>>,
+) -> Vec<TabState<TFileSystem>> {
+    let mut result = Vec::<TabState<TFileSystem>>::new();
 
     for (idx, tab_state) in tabs.iter().enumerate() {
         if idx == tab {
-            match create_link(symlink_path.clone(), path.clone()) {
+            match file_system.create_symlink(&symlink_path, &path) {
                 Ok(_) => result.push(tab_state.clone()),
                 Err(err) => {
                     eprintln!("{}", err);

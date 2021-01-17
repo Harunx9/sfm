@@ -1,12 +1,7 @@
-use tui::{
-    style::Style,
-    text::{Span, Spans},
-    widgets::{Block, BorderType, Borders, Clear, Paragraph},
-};
-
 use crate::{
     app::{
         actions::{AppAction, FileManagerActions},
+        file_system::FileSystem,
         state::AppState,
     },
     core::{
@@ -14,6 +9,12 @@ use crate::{
         store::Store,
         ui::{component::Component, component_base::ComponentBase},
     },
+};
+use std::fmt::Debug;
+use tui::{
+    style::Style,
+    text::{Span, Spans},
+    widgets::{Block, BorderType, Borders, Clear, Paragraph},
 };
 
 use super::create_modal_layout;
@@ -31,23 +32,28 @@ impl ErrorModalComponentProps {
     }
 }
 
-pub struct ErrorModalComponent {
+pub struct ErrorModalComponent<TFileSystem: Clone + Debug + Default + FileSystem> {
     base: ComponentBase<ErrorModalComponentProps, ()>,
+    _maker: std::marker::PhantomData<TFileSystem>,
 }
 
-impl ErrorModalComponent {
+impl<TFileSystem: Clone + Debug + Default + FileSystem> ErrorModalComponent<TFileSystem> {
     pub fn with_props(props: ErrorModalComponentProps) -> Self {
         ErrorModalComponent {
             base: ComponentBase::new(Some(props), None),
+            _maker: std::marker::PhantomData,
         }
     }
 }
 
-impl Component<Event, AppState, FileManagerActions> for ErrorModalComponent {
+impl<TFileSystem: Clone + Debug + Default + FileSystem>
+    Component<Event, AppState<TFileSystem>, FileManagerActions>
+    for ErrorModalComponent<TFileSystem>
+{
     fn handle_event(
         &mut self,
         event: Event,
-        store: &mut Store<AppState, FileManagerActions>,
+        store: &mut Store<AppState<TFileSystem>, FileManagerActions>,
     ) -> bool {
         let state = store.get_state();
         if let Event::Keyboard(key_evt) = event {

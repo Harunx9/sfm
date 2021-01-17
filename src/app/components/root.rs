@@ -1,3 +1,4 @@
+use std::fmt::Debug;
 use tui::{
     backend::Backend,
     layout::{Constraint, Direction, Layout, Rect},
@@ -6,6 +7,7 @@ use tui::{
 use crate::{
     app::{
         actions::{AppAction, FileManagerActions, PanelSide},
+        file_system::FileSystem,
         state::{AppState, ModalType},
     },
     core::{
@@ -27,16 +29,17 @@ pub struct RootComponentState {
     focused_panel: Option<PanelSide>,
 }
 
-pub struct RootComponent {
+pub struct RootComponent<TFileSystem: Clone + Debug + Default + FileSystem> {
     base: ComponentBase<(), RootComponentState>,
-    left_panel: PanelComponent,
-    right_panel: PanelComponent,
-    create_modal: Option<CreateModalComponent>,
-    rename_modal: Option<RenameModalComponent>,
-    error_modal: Option<ErrorModalComponent>,
+    left_panel: PanelComponent<TFileSystem>,
+    right_panel: PanelComponent<TFileSystem>,
+    create_modal: Option<CreateModalComponent<TFileSystem>>,
+    rename_modal: Option<RenameModalComponent<TFileSystem>>,
+    error_modal: Option<ErrorModalComponent<TFileSystem>>,
+    _maker: std::marker::PhantomData<TFileSystem>,
 }
 
-impl RootComponent {
+impl<TFileSystem: Clone + Debug + Default + FileSystem> RootComponent<TFileSystem> {
     pub fn new() -> Self {
         RootComponent {
             base: ComponentBase::new(None, Some(RootComponentState::default())),
@@ -45,10 +48,11 @@ impl RootComponent {
             create_modal: None,
             rename_modal: None,
             error_modal: None,
+            _maker: std::marker::PhantomData,
         }
     }
 
-    fn map_state(&mut self, store: &Store<AppState, FileManagerActions>) {
+    fn map_state(&mut self, store: &Store<AppState<TFileSystem>, FileManagerActions>) {
         let state = store.get_state();
         if state.left_panel.is_focused {
             self.base.set_state(|_current_state| RootComponentState {
@@ -125,15 +129,17 @@ impl RootComponent {
     }
 }
 
-impl Component<Event, AppState, FileManagerActions> for RootComponent {
-    fn on_init(&mut self, store: &Store<AppState, FileManagerActions>) {
+impl<TFileSystem: Clone + Debug + Default + FileSystem>
+    Component<Event, AppState<TFileSystem>, FileManagerActions> for RootComponent<TFileSystem>
+{
+    fn on_init(&mut self, store: &Store<AppState<TFileSystem>, FileManagerActions>) {
         self.map_state(store);
     }
 
     fn handle_event(
         &mut self,
         event: Event,
-        store: &mut Store<AppState, FileManagerActions>,
+        store: &mut Store<AppState<TFileSystem>, FileManagerActions>,
     ) -> bool {
         let state = store.get_state();
         if let Event::Keyboard(key_evt) = event {
