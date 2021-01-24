@@ -2,6 +2,7 @@ use tui::layout::{Constraint, Direction, Layout, Rect};
 
 pub mod create_modal;
 pub mod error_modal;
+pub mod not_empty_dir_delete_modal;
 pub mod panel;
 pub mod rename_modal;
 pub mod root;

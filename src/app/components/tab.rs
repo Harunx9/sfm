@@ -229,6 +229,7 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem>
                                         tab: tab_idx,
                                         side: tab_side.clone(),
                                     },
+                                    is_empty: dir.is_empty(),
                                 },
                             ));
                         }

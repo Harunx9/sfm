@@ -77,9 +77,12 @@ pub fn map_dir_entry_to_file_system_item(
         if file_type.is_dir() {
             return FileSystemItem::Directory(DirItem::new(
                 name.to_string(),
-                path,
+                path.clone(),
                 modified,
                 icons.get_dir_icon(name),
+                path.read_dir()
+                    .map(|mut i| i.next().is_none())
+                    .unwrap_or(false),
             ));
         }
 

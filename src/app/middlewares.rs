@@ -48,15 +48,41 @@ fn symlink_resolver<TFileSystem: Clone + Debug + Default + FileSystem>(
                 ModalType::ErrorModal(format!("{}", err)),
             ))),
         },
-        SymlinkAction::Delete { panel } => {
-            if panel.path.is_dir() {
+        _ => Some(FileManagerActions::Symlink(symlink_action)),
+    }
+}
+
+pub fn dir_middleware<TFileSystem: Clone + Debug + Default + FileSystem>(
+    store: &mut Store<AppState<TFileSystem>, FileManagerActions>,
+    action: FileManagerActions,
+) -> Option<FileManagerActions> {
+    match action {
+        FileManagerActions::Directory(dir_action) => directory_resolver(store, dir_action),
+        _ => Some(action),
+    }
+}
+
+fn directory_resolver<TFileSystem: Clone + Debug + Default + FileSystem>(
+    _: &mut Store<AppState<TFileSystem>, FileManagerActions>,
+    dir_action: DirectoryAction,
+) -> Option<FileManagerActions> {
+    match dir_action {
+        DirectoryAction::Delete { panel, is_empty } => {
+            if is_empty {
                 Some(FileManagerActions::Directory(DirectoryAction::Delete {
                     panel,
+                    is_empty,
                 }))
             } else {
-                Some(FileManagerActions::File(FileAction::Delete { panel }))
+                Some(FileManagerActions::App(AppAction::ShowModal(
+                    ModalType::DeleteDirWithContent {
+                        panel_side: panel.side,
+                        panel_tab: panel.tab,
+                        path: panel.path,
+                    },
+                )))
             }
         }
-        _ => Some(FileManagerActions::Symlink(symlink_action)),
+        _ => Some(FileManagerActions::Directory(dir_action)),
     }
 }

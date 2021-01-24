@@ -7,8 +7,12 @@ use crate::core::{events::EventQueue, store::Store};
 use std::{error::Error, io::stdout, process::Command};
 
 use app::{
-    actions::FileManagerActions, components::root::RootComponent, config::Config,
-    file_system::PhisicalFileSystem, middlewares::symlink_middleware, reducers::root_reducer,
+    actions::FileManagerActions,
+    components::root::RootComponent,
+    config::Config,
+    file_system::PhisicalFileSystem,
+    middlewares::{dir_middleware, symlink_middleware},
+    reducers::root_reducer,
     state::AppState,
 };
 use crossterm::{
@@ -49,6 +53,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut root_component = RootComponent::new();
     store.dispatch(FileManagerActions::App(app::actions::AppAction::FocusLeft));
     store.register_middleware(symlink_middleware);
+    store.register_middleware(dir_middleware);
     root_component.on_init(&store);
 
     loop {
