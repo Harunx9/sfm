@@ -65,7 +65,8 @@ pub enum FileAction {
 
 #[derive(Clone, Debug)]
 pub enum DirectoryAction {
-    Delete { panel: PanelInfo },
+    DeleteWithContent { panel: PanelInfo },
+    Delete { panel: PanelInfo, is_empty: bool },
     Rename { from: PanelInfo, to: PanelInfo },
     Move { from: PanelInfo, to: PanelInfo },
     Open { panel: PanelInfo, in_new_tab: bool },

@@ -14,6 +14,7 @@ pub struct DirItem {
     path: PathBuf,
     last_modification: DateTime<Local>,
     icon: String,
+    is_empty: bool,
 }
 
 impl DirItem {
@@ -22,12 +23,14 @@ impl DirItem {
         path: PathBuf,
         last_modification: DateTime<Local>,
         icon: String,
+        is_empty: bool,
     ) -> Self {
         DirItem {
             name,
             path,
             last_modification,
             icon,
+            is_empty,
         }
     }
 
@@ -41,6 +44,10 @@ impl DirItem {
 
     pub fn is_visible(&self) -> bool {
         self.name.starts_with('.')
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.is_empty
     }
 }
 

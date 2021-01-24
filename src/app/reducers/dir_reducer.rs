@@ -14,11 +14,46 @@ pub fn dir_reducer<TFileSystem: Clone + Debug + Default + FileSystem>(
     dir_action: DirectoryAction,
 ) -> AppState<TFileSystem> {
     match dir_action {
-        DirectoryAction::Delete { panel } => delete_dir(state, panel),
+        DirectoryAction::Delete { panel, .. } => delete_dir(state, panel),
         DirectoryAction::Rename { from, to } => rename_dir(state, from, to),
         DirectoryAction::Move { from, to } => rename_dir(state, from, to),
         DirectoryAction::Open { panel, in_new_tab } => open_dir(state, panel, in_new_tab),
         DirectoryAction::Create { dir_name, panel } => create_directory(state, dir_name, panel),
+        DirectoryAction::DeleteWithContent { panel } => delete_dir_with_content(state, panel),
+    }
+}
+
+fn delete_dir_with_content<TFileSystem: Clone + Debug + Default + FileSystem>(
+    mut state: AppState<TFileSystem>,
+    panel: PanelInfo,
+) -> AppState<TFileSystem> {
+    match panel.side {
+        PanelSide::Left => AppState {
+            left_panel: PanelState {
+                tabs: delete_dir_with_content_from_tab(
+                    panel.path,
+                    panel.tab,
+                    state.left_panel.tabs,
+                    &mut state.file_system,
+                    &state.config.icons,
+                ),
+                ..state.left_panel
+            },
+            ..state
+        },
+        PanelSide::Right => AppState {
+            right_panel: PanelState {
+                tabs: delete_dir_with_content_from_tab(
+                    panel.path,
+                    panel.tab,
+                    state.right_panel.tabs,
+                    &mut state.file_system,
+                    &state.config.icons,
+                ),
+                ..state.right_panel
+            },
+            ..state
+        },
     }
 }
 
@@ -285,7 +320,7 @@ fn delete_dir_from_tab<TFileSystem: Clone + Debug + Default + FileSystem>(
                 .iter()
                 .find(|item| item.is_dir() && item.get_path().eq(path.as_path()));
             if let Some(item) = dir_to_delete {
-                match file_system.delete_dir(&item.get_path()) {
+                match file_system.delete_empty_dir(&item.get_path()) {
                     Ok(_) => {
                         result.push(TabState::with_dir(val.path.as_path(), file_system, icons))
                     }
@@ -302,6 +337,38 @@ fn delete_dir_from_tab<TFileSystem: Clone + Debug + Default + FileSystem>(
     result
 }
 
+fn delete_dir_with_content_from_tab<TFileSystem: Clone + Debug + Default + FileSystem>(
+    path: PathBuf,
+    current_tab: TabIdx,
+    mut tabs: Vec<TabState<TFileSystem>>,
+    file_system: &mut TFileSystem,
+    icons: &IconsConfig,
+) -> Vec<TabState<TFileSystem>> {
+    let mut result = Vec::<TabState<TFileSystem>>::new();
+
+    for (idx, val) in tabs.iter_mut().enumerate() {
+        if idx == current_tab {
+            let dir_to_delete = val
+                .items
+                .iter()
+                .find(|item| item.is_dir() && item.get_path().eq(path.as_path()));
+            if let Some(item) = dir_to_delete {
+                match file_system.delete_dir(&item.get_path()) {
+                    Ok(_) => {
+                        result.push(TabState::with_dir(val.path.as_path(), file_system, icons))
+                    }
+                    Err(_) => {}
+                }
+            } else {
+                result.push(val.clone());
+            }
+        } else {
+            result.push(val.clone());
+        }
+    }
+
+    result
+}
 fn create_directory_in_tab<TFileSystem: Clone + Debug + Default + FileSystem>(
     dir_name: String,
     parent_path: PathBuf,

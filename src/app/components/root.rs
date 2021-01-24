@@ -20,6 +20,9 @@ use crate::{
 use super::{
     create_modal::{CreateModalComponent, CreateModalProps},
     error_modal::{ErrorModalComponent, ErrorModalComponentProps},
+    not_empty_dir_delete_modal::{
+        NotEmptyDirDeleteModalComponent, NotEmptyDirDeleteModalComponentProps,
+    },
     panel::PanelComponent,
     rename_modal::{RenameModalComponent, RenameModalComponentProps},
 };
@@ -36,6 +39,7 @@ pub struct RootComponent<TFileSystem: Clone + Debug + Default + FileSystem> {
     create_modal: Option<CreateModalComponent<TFileSystem>>,
     rename_modal: Option<RenameModalComponent<TFileSystem>>,
     error_modal: Option<ErrorModalComponent<TFileSystem>>,
+    non_empty_dir_delete_modal: Option<NotEmptyDirDeleteModalComponent<TFileSystem>>,
     _maker: std::marker::PhantomData<TFileSystem>,
 }
 
@@ -48,6 +52,7 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem> RootComponent<TFileSyste
             create_modal: None,
             rename_modal: None,
             error_modal: None,
+            non_empty_dir_delete_modal: None,
             _maker: std::marker::PhantomData,
         }
     }
@@ -113,6 +118,22 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem> RootComponent<TFileSyste
                         ));
                     }
                 }
+                ModalType::DeleteDirWithContent {
+                    panel_side,
+                    panel_tab,
+                    path,
+                } => {
+                    if self.non_empty_dir_delete_modal.is_none() {
+                        self.non_empty_dir_delete_modal =
+                            Some(NotEmptyDirDeleteModalComponent::new(
+                                NotEmptyDirDeleteModalComponentProps::new(
+                                    Some(panel_side),
+                                    panel_tab,
+                                    path,
+                                ),
+                            ));
+                    }
+                }
             };
         }
         if self.create_modal.is_some() && state.modal.is_none() {
@@ -125,6 +146,10 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem> RootComponent<TFileSyste
 
         if self.error_modal.is_some() && state.modal.is_none() {
             self.error_modal = None;
+        }
+
+        if self.non_empty_dir_delete_modal.is_some() && state.modal.is_none() {
+            self.non_empty_dir_delete_modal = None;
         }
     }
 }
@@ -150,6 +175,13 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem>
 
             if let Some(ref mut error_modal) = self.error_modal {
                 let result = error_modal.handle_event(event, store);
+                self.map_state(store);
+
+                return result;
+            }
+
+            if let Some(ref mut non_empty_dir_delete_modal) = self.non_empty_dir_delete_modal {
+                let result = non_empty_dir_delete_modal.handle_event(event, store);
                 self.map_state(store);
 
                 return result;
@@ -230,6 +262,28 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem>
                 };
             } else {
                 rename_modal.render(frame, None);
+            }
+        }
+
+        if let Some(ref non_empty_dir_delete_modal) = self.non_empty_dir_delete_modal {
+            if let Some(focused_panel) = local_state.focused_panel.clone() {
+                match focused_panel {
+                    PanelSide::Left => non_empty_dir_delete_modal.render(frame, Some(layout[0])),
+                    PanelSide::Right => non_empty_dir_delete_modal.render(frame, Some(layout[1])),
+                };
+            } else {
+                non_empty_dir_delete_modal.render(frame, None);
+            }
+        }
+
+        if let Some(ref error_modal) = self.error_modal {
+            if let Some(focused_panel) = local_state.focused_panel.clone() {
+                match focused_panel {
+                    PanelSide::Left => error_modal.render(frame, Some(layout[0])),
+                    PanelSide::Right => error_modal.render(frame, Some(layout[1])),
+                };
+            } else {
+                error_modal.render(frame, None);
             }
         }
 

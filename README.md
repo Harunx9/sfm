@@ -127,5 +127,10 @@ Configuration file should be named `sfm.toml` and shoudl be placed in `~/` or `~
 
 ## Instalation 
 
-Right now you can clone this repo and perform `cargo run` I will come with a more convenient way in the future.
+* Via Cargo
+
+```bash
+cargo install sfm
+
+```
 
