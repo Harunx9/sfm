@@ -292,7 +292,7 @@ fn map_key(key: &str) -> KeyCode {
         "back_tab" => KeyCode::BackTab,
         "delete" => KeyCode::Delete,
         "insert" => KeyCode::Insert,
-        "esc" => KeyCode::End,
+        "esc" => KeyCode::Esc,
         "f1" => KeyCode::F(1),
         "f2" => KeyCode::F(2),
         "f3" => KeyCode::F(3),
