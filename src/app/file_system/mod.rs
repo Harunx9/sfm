@@ -40,9 +40,9 @@ pub trait FileSystem {
 }
 
 #[derive(Clone, Debug, Default)]
-pub struct PhisicalFileSystem;
+pub struct PhysicalFileSystem;
 
-impl FileSystem for PhisicalFileSystem {
+impl FileSystem for PhysicalFileSystem {
     fn get_dir_info<TPath: AsRef<Path>>(&self, path: &TPath) -> Option<DirInfo> {
         DirInfo::new(path)
     }

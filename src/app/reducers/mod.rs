@@ -4,7 +4,10 @@ use super::{
     file_system::FileSystem,
     state::{AppState, PanelState, TabIdx, TabState},
 };
-use std::fmt::Debug;
+use std::{
+    fmt::Debug,
+    path::{Path, PathBuf},
+};
 
 mod dir_reducer;
 mod file_reducer;
@@ -100,4 +103,54 @@ fn reload_tab<TFileSystem: Clone + Default + Debug + FileSystem>(
     }
 
     result
+}
+
+fn reload_tab_with_path<TFileSystem: Clone + Default + Debug + FileSystem>(
+    tab_path: &Path,
+    tabs: Vec<TabState<TFileSystem>>,
+    file_system: &TFileSystem,
+    icons_cfg: &IconsConfig,
+) -> Vec<TabState<TFileSystem>> {
+    let mut result = Vec::<TabState<TFileSystem>>::new();
+    for tab_state in tabs.iter() {
+        if tab_state.path == tab_path {
+            result.push(TabState::with_dir(tab_path, file_system, icons_cfg));
+        } else {
+            result.push(tab_state.clone());
+        }
+    }
+
+    result
+}
+
+fn reload_tab_contain_item<TFileSystem: Clone + Default + Debug + FileSystem>(
+    path: PathBuf,
+    tabs: Vec<TabState<TFileSystem>>,
+    file_system: &TFileSystem,
+    icons_cfg: &IconsConfig,
+) -> Vec<TabState<TFileSystem>> {
+    let mut result = Vec::<TabState<TFileSystem>>::new();
+    for tab_state in tabs.iter() {
+        result.push(reload_if_contain(
+            tab_state,
+            path.clone(),
+            file_system,
+            icons_cfg,
+        ));
+    }
+
+    result
+}
+
+fn reload_if_contain<TFileSystem: Clone + Default + Debug + FileSystem>(
+    tab_state: &TabState<TFileSystem>,
+    path: PathBuf,
+    file_system: &TFileSystem,
+    icons_cfg: &IconsConfig,
+) -> TabState<TFileSystem> {
+    if tab_state.items.iter().any(|i| i.get_path() == path) {
+        TabState::with_dir(tab_state.path.as_path(), file_system, icons_cfg)
+    } else {
+        tab_state.clone()
+    }
 }

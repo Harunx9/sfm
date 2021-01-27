@@ -7,7 +7,7 @@ use crate::app::{
 use std::fmt::Debug;
 use std::path::PathBuf;
 
-use super::reload_tab;
+use super::{reload_tab, reload_tab_contain_item, reload_tab_with_path};
 
 pub fn dir_reducer<TFileSystem: Clone + Debug + Default + FileSystem>(
     state: AppState<TFileSystem>,
@@ -31,7 +31,7 @@ fn delete_dir_with_content<TFileSystem: Clone + Debug + Default + FileSystem>(
         PanelSide::Left => AppState {
             left_panel: PanelState {
                 tabs: delete_dir_with_content_from_tab(
-                    panel.path,
+                    panel.path.clone(),
                     panel.tab,
                     state.left_panel.tabs,
                     &mut state.file_system,
@@ -39,12 +39,30 @@ fn delete_dir_with_content<TFileSystem: Clone + Debug + Default + FileSystem>(
                 ),
                 ..state.left_panel
             },
+            right_panel: PanelState {
+                tabs: reload_tab_contain_item(
+                    panel.path.clone(),
+                    state.right_panel.tabs,
+                    &mut state.file_system,
+                    &state.config.icons,
+                ),
+                ..state.right_panel
+            },
             ..state
         },
         PanelSide::Right => AppState {
+            left_panel: PanelState {
+                tabs: reload_tab_contain_item(
+                    panel.path.clone(),
+                    state.left_panel.tabs,
+                    &mut state.file_system,
+                    &state.config.icons,
+                ),
+                ..state.left_panel
+            },
             right_panel: PanelState {
                 tabs: delete_dir_with_content_from_tab(
-                    panel.path,
+                    panel.path.clone(),
                     panel.tab,
                     state.right_panel.tabs,
                     &mut state.file_system,
@@ -67,7 +85,7 @@ fn create_directory<TFileSystem: Clone + Debug + Default + FileSystem>(
             left_panel: PanelState {
                 tabs: create_directory_in_tab(
                     dir_name,
-                    panel.path,
+                    panel.path.clone(),
                     panel.tab,
                     state.left_panel.tabs,
                     &mut state.file_system,
@@ -75,9 +93,27 @@ fn create_directory<TFileSystem: Clone + Debug + Default + FileSystem>(
                 ),
                 ..state.left_panel
             },
+            right_panel: PanelState {
+                tabs: reload_tab_with_path(
+                    panel.path.as_path(),
+                    state.right_panel.tabs,
+                    &mut state.file_system,
+                    &state.config.icons,
+                ),
+                ..state.right_panel
+            },
             ..state
         },
         PanelSide::Right => AppState {
+            left_panel: PanelState {
+                tabs: reload_tab_with_path(
+                    panel.path.as_path(),
+                    state.left_panel.tabs,
+                    &mut state.file_system,
+                    &state.config.icons,
+                ),
+                ..state.left_panel
+            },
             right_panel: PanelState {
                 tabs: create_directory_in_tab(
                     dir_name,
@@ -214,7 +250,7 @@ fn delete_dir<TFileSystem: Clone + Debug + Default + FileSystem>(
         PanelSide::Left => AppState {
             left_panel: PanelState {
                 tabs: delete_dir_from_tab(
-                    panel.path,
+                    panel.path.clone(),
                     panel.tab,
                     state.left_panel.tabs,
                     &mut state.file_system,
@@ -222,9 +258,27 @@ fn delete_dir<TFileSystem: Clone + Debug + Default + FileSystem>(
                 ),
                 ..state.left_panel
             },
+            right_panel: PanelState {
+                tabs: reload_tab_contain_item(
+                    panel.path.clone(),
+                    state.right_panel.tabs,
+                    &mut state.file_system,
+                    &state.config.icons,
+                ),
+                ..state.right_panel
+            },
             ..state
         },
         PanelSide::Right => AppState {
+            left_panel: PanelState {
+                tabs: reload_tab_contain_item(
+                    panel.path.clone(),
+                    state.left_panel.tabs,
+                    &mut state.file_system,
+                    &state.config.icons,
+                ),
+                ..state.left_panel
+            },
             right_panel: PanelState {
                 tabs: delete_dir_from_tab(
                     panel.path,

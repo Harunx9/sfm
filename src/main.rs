@@ -10,7 +10,7 @@ use app::{
     actions::FileManagerActions,
     components::root::RootComponent,
     config::Config,
-    file_system::PhisicalFileSystem,
+    file_system::PhysicalFileSystem,
     middlewares::{dir_middleware, symlink_middleware},
     reducers::root_reducer,
     state::AppState,
@@ -32,7 +32,7 @@ pub mod app;
 pub mod core;
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let file_system = PhisicalFileSystem::default();
+    let file_system = PhysicalFileSystem::default();
     let cfg = Config::load_or_default(CONFIG_PATHS.to_vec(), &file_system);
     enable_raw_mode()?;
     let mut stdout = stdout();
@@ -43,9 +43,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut terminal = Terminal::new(backend)?;
     let mut event_queue = EventQueue::start_with_config(cfg.core_cfg);
 
-    let mut store = Store::<AppState<PhisicalFileSystem>, FileManagerActions>::with_state(
+    let mut store = Store::<AppState<PhysicalFileSystem>, FileManagerActions>::with_state(
         root_reducer,
-        AppState::<PhisicalFileSystem>::new(cfg, file_system),
+        AppState::<PhysicalFileSystem>::new(cfg, file_system),
     );
 
     terminal.clear()?;
