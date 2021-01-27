@@ -53,6 +53,17 @@ fn create_file<TFileSystem: Clone + Debug + Default + FileSystem>(
             ..state
         },
         PanelSide::Right => AppState {
+            right_panel: PanelState {
+                tabs: create_file_in_tab(
+                    file_name,
+                    panel.path.clone(),
+                    panel.tab,
+                    state.right_panel.tabs,
+                    &mut state.file_system,
+                    &state.config.icons,
+                ),
+                ..state.right_panel
+            },
             left_panel: PanelState {
                 tabs: reload_tab_with_path(
                     panel.path.as_path(),
@@ -61,17 +72,6 @@ fn create_file<TFileSystem: Clone + Debug + Default + FileSystem>(
                     &state.config.icons,
                 ),
                 ..state.left_panel
-            },
-            right_panel: PanelState {
-                tabs: create_file_in_tab(
-                    file_name,
-                    panel.path,
-                    panel.tab,
-                    state.right_panel.tabs,
-                    &mut state.file_system,
-                    &state.config.icons,
-                ),
-                ..state.right_panel
             },
             ..state
         },
@@ -116,6 +116,16 @@ fn delete_file<TFileSystem: Clone + Debug + Default + FileSystem>(
             ..state
         },
         PanelSide::Right => AppState {
+            right_panel: PanelState {
+                tabs: delete_file_from_tab(
+                    panel.path.clone(),
+                    panel.tab,
+                    state.right_panel.tabs,
+                    &mut state.file_system,
+                    &state.config.icons,
+                ),
+                ..state.right_panel
+            },
             left_panel: PanelState {
                 tabs: reload_tab_contain_item(
                     panel.path.clone(),
@@ -124,16 +134,6 @@ fn delete_file<TFileSystem: Clone + Debug + Default + FileSystem>(
                     &state.config.icons,
                 ),
                 ..state.left_panel
-            },
-            right_panel: PanelState {
-                tabs: delete_file_from_tab(
-                    panel.path,
-                    panel.tab,
-                    state.right_panel.tabs,
-                    &mut state.file_system,
-                    &state.config.icons,
-                ),
-                ..state.right_panel
             },
             ..state
         },

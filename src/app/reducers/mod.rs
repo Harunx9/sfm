@@ -114,7 +114,11 @@ fn reload_tab_with_path<TFileSystem: Clone + Default + Debug + FileSystem>(
     let mut result = Vec::<TabState<TFileSystem>>::new();
     for tab_state in tabs.iter() {
         if tab_state.path == tab_path {
-            result.push(TabState::with_dir(tab_path, file_system, icons_cfg));
+            result.push(TabState::with_dir(
+                tab_state.path.as_path(),
+                file_system,
+                icons_cfg,
+            ));
         } else {
             result.push(tab_state.clone());
         }
