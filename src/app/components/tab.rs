@@ -267,19 +267,31 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem>
                             let mut to_path = state.left_panel.tabs[state.left_panel.current_tab]
                                 .path
                                 .clone();
-                            to_path.push(name);
-                            store.dispatch(FileManagerActions::Directory(DirectoryAction::Move {
-                                from: PanelInfo {
-                                    path: dir.get_path(),
-                                    tab: state.right_panel.current_tab,
-                                    side: PanelSide::Right,
-                                },
-                                to: PanelInfo {
-                                    path: to_path,
-                                    tab: state.left_panel.current_tab,
-                                    side: PanelSide::Left,
-                                },
-                            }));
+                            if dir.get_path() == to_path {
+                                store.dispatch(FileManagerActions::App(AppAction::ShowModal(
+                                    ModalType::ErrorModal(format!(
+                                        "Can't move \n {} \n into \n {}",
+                                        dir.get_path().to_str().unwrap_or(""),
+                                        to_path.to_str().unwrap_or("")
+                                    )),
+                                )));
+                            } else {
+                                to_path.push(name);
+                                store.dispatch(FileManagerActions::Directory(
+                                    DirectoryAction::Move {
+                                        from: PanelInfo {
+                                            path: dir.get_path(),
+                                            tab: state.right_panel.current_tab,
+                                            side: PanelSide::Right,
+                                        },
+                                        to: PanelInfo {
+                                            path: to_path,
+                                            tab: state.left_panel.current_tab,
+                                            side: PanelSide::Left,
+                                        },
+                                    },
+                                ));
+                            }
                         }
                         FileSystemItem::File(file) => {
                             let name = file.get_name();
@@ -316,19 +328,31 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem>
                             let mut to_path = state.right_panel.tabs[state.right_panel.current_tab]
                                 .path
                                 .clone();
-                            to_path.push(name);
-                            store.dispatch(FileManagerActions::Directory(DirectoryAction::Move {
-                                from: PanelInfo {
-                                    path: dir.get_path(),
-                                    tab: state.left_panel.current_tab,
-                                    side: PanelSide::Left,
-                                },
-                                to: PanelInfo {
-                                    path: to_path,
-                                    tab: state.right_panel.current_tab,
-                                    side: PanelSide::Right,
-                                },
-                            }));
+                            if dir.get_path() == to_path {
+                                store.dispatch(FileManagerActions::App(AppAction::ShowModal(
+                                    ModalType::ErrorModal(format!(
+                                        "Can't move \n {} \n into \n {}",
+                                        dir.get_path().to_str().unwrap_or(""),
+                                        to_path.to_str().unwrap_or("")
+                                    )),
+                                )));
+                            } else {
+                                to_path.push(name);
+                                store.dispatch(FileManagerActions::Directory(
+                                    DirectoryAction::Move {
+                                        from: PanelInfo {
+                                            path: dir.get_path(),
+                                            tab: state.left_panel.current_tab,
+                                            side: PanelSide::Left,
+                                        },
+                                        to: PanelInfo {
+                                            path: to_path,
+                                            tab: state.right_panel.current_tab,
+                                            side: PanelSide::Right,
+                                        },
+                                    },
+                                ));
+                            }
                         }
                         FileSystemItem::File(file) => {
                             let name = file.get_name();
