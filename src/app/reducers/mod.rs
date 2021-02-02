@@ -86,7 +86,7 @@ fn app_reducer<TFileSystem: Clone + Debug + Default + FileSystem>(
 fn reload_tab<TFileSystem: Clone + Default + Debug + FileSystem>(
     tab: TabIdx,
     tabs: Vec<TabState<TFileSystem>>,
-    file_system: &TFileSystem,
+    file_system: &mut TFileSystem,
     icons_cfg: &IconsConfig,
 ) -> Vec<TabState<TFileSystem>> {
     let mut result = Vec::<TabState<TFileSystem>>::new();

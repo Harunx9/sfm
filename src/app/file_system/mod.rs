@@ -18,38 +18,36 @@ pub mod functions;
 pub mod symlink_item;
 
 pub trait FileSystem {
-    fn get_dir_info<TPath: AsRef<Path>>(&self, path: &TPath) -> Option<DirInfo>;
-    fn list_dir<TPath: AsRef<Path>>(
-        &self,
-        path: &TPath,
-        icons: &IconsConfig,
-    ) -> Vec<FileSystemItem>;
-    fn read_to_string<TPath: AsRef<Path>>(&self, path: &TPath) -> Option<String>;
-    fn delete_file<TPath: AsRef<Path>>(&mut self, path: &TPath) -> io::Result<()>;
-    fn delete_dir<TPath: AsRef<Path>>(&mut self, path: &TPath) -> io::Result<()>;
-    fn delete_empty_dir<TPath: AsRef<Path>>(&mut self, path: &TPath) -> io::Result<()>;
-    fn rename_item<TPath: AsRef<Path>>(&mut self, source: &TPath, target: &TPath)
-        -> io::Result<()>;
+    fn get_dir_info<TPath: AsRef<Path>>(&self, path: TPath) -> Option<DirInfo>;
+    fn list_dir<TPath: AsRef<Path>>(&self, path: TPath, icons: &IconsConfig)
+        -> Vec<FileSystemItem>;
+    fn read_to_string<TPath: AsRef<Path>>(&self, path: TPath) -> Option<String>;
+    fn delete_file<TPath: AsRef<Path>>(&mut self, path: TPath) -> io::Result<()>;
+    fn delete_dir<TPath: AsRef<Path>>(&mut self, path: TPath) -> io::Result<()>;
+    fn delete_empty_dir<TPath: AsRef<Path>>(&mut self, path: TPath) -> io::Result<()>;
+    fn rename_item<TPath: AsRef<Path>>(&mut self, source: TPath, target: TPath) -> io::Result<()>;
     fn create_symlink<TPath: AsRef<Path>>(
         &mut self,
-        source: &TPath,
-        target: &TPath,
+        source: TPath,
+        target: TPath,
     ) -> io::Result<()>;
-    fn create_file<TPath: AsRef<Path>>(&mut self, path: &TPath) -> io::Result<File>;
-    fn create_dir<TPath: AsRef<Path>>(&mut self, path: &TPath) -> io::Result<()>;
+    fn create_file<TPath: AsRef<Path>>(&mut self, path: TPath) -> io::Result<File>;
+    fn create_dir<TPath: AsRef<Path>>(&mut self, path: TPath) -> io::Result<()>;
+    fn copy_file<TPath: AsRef<Path>>(&mut self, source: TPath, target: TPath) -> io::Result<u64>;
+    fn copy_dir<TPath: AsRef<Path>>(&mut self, source: TPath, target: TPath) -> io::Result<u64>;
 }
 
 #[derive(Clone, Debug, Default)]
 pub struct PhysicalFileSystem;
 
 impl FileSystem for PhysicalFileSystem {
-    fn get_dir_info<TPath: AsRef<Path>>(&self, path: &TPath) -> Option<DirInfo> {
-        DirInfo::new(path)
+    fn get_dir_info<TPath: AsRef<Path>>(&self, path: TPath) -> Option<DirInfo> {
+        DirInfo::new(&path)
     }
 
     fn list_dir<TPath: AsRef<Path>>(
         &self,
-        path: &TPath,
+        path: TPath,
         icons: &IconsConfig,
     ) -> Vec<FileSystemItem> {
         match fs::read_dir(path) {
@@ -69,47 +67,61 @@ impl FileSystem for PhysicalFileSystem {
         }
     }
 
-    fn read_to_string<TPath: AsRef<Path>>(&self, path: &TPath) -> Option<String> {
+    fn read_to_string<TPath: AsRef<Path>>(&self, path: TPath) -> Option<String> {
         match fs::read_to_string(path) {
             Ok(content) => return Some(content.clone()),
             Err(_) => None,
         }
     }
 
-    fn delete_file<TPath: AsRef<Path>>(&mut self, path: &TPath) -> io::Result<()> {
+    fn delete_file<TPath: AsRef<Path>>(&mut self, path: TPath) -> io::Result<()> {
         fs::remove_file(path)
     }
 
-    fn delete_dir<TPath: AsRef<Path>>(&mut self, path: &TPath) -> io::Result<()> {
+    fn delete_dir<TPath: AsRef<Path>>(&mut self, path: TPath) -> io::Result<()> {
         fs::remove_dir_all(path)
     }
 
-    fn rename_item<TPath: AsRef<Path>>(
-        &mut self,
-        source: &TPath,
-        target: &TPath,
-    ) -> io::Result<()> {
+    fn rename_item<TPath: AsRef<Path>>(&mut self, source: TPath, target: TPath) -> io::Result<()> {
         fs::rename(source, target)
     }
 
     fn create_symlink<TPath: AsRef<Path>>(
         &mut self,
-        source: &TPath,
-        target: &TPath,
+        source: TPath,
+        target: TPath,
     ) -> io::Result<()> {
         create_link(target, source)
     }
 
-    fn create_file<TPath: AsRef<Path>>(&mut self, path: &TPath) -> io::Result<File> {
+    fn create_file<TPath: AsRef<Path>>(&mut self, path: TPath) -> io::Result<File> {
         File::create(path)
     }
 
-    fn create_dir<TPath: AsRef<Path>>(&mut self, path: &TPath) -> io::Result<()> {
+    fn create_dir<TPath: AsRef<Path>>(&mut self, path: TPath) -> io::Result<()> {
         fs::create_dir(path)
     }
 
-    fn delete_empty_dir<TPath: AsRef<Path>>(&mut self, path: &TPath) -> io::Result<()> {
+    fn delete_empty_dir<TPath: AsRef<Path>>(&mut self, path: TPath) -> io::Result<()> {
         fs::remove_dir(path)
+    }
+
+    fn copy_file<TPath: AsRef<Path>>(&mut self, source: TPath, target: TPath) -> io::Result<u64> {
+        fs::copy(source, target)
+    }
+
+    fn copy_dir<TPath: AsRef<Path>>(&mut self, source: TPath, target: TPath) -> io::Result<u64> {
+        fs::create_dir_all(target.as_ref())?;
+        for entry in fs::read_dir(source)? {
+            let entry = entry?;
+            let file_type = entry.file_type()?;
+            if file_type.is_dir() {
+                self.copy_dir(entry.path(), target.as_ref().join(entry.file_name()))?;
+            } else {
+                self.copy_file(entry.path(), target.as_ref().join(entry.file_name()))?;
+            }
+        }
+        Ok(0)
     }
 }
 

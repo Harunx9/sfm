@@ -20,6 +20,62 @@ pub fn dir_reducer<TFileSystem: Clone + Debug + Default + FileSystem>(
         DirectoryAction::Open { panel, in_new_tab } => open_dir(state, panel, in_new_tab),
         DirectoryAction::Create { dir_name, panel } => create_directory(state, dir_name, panel),
         DirectoryAction::DeleteWithContent { panel } => delete_dir_with_content(state, panel),
+        DirectoryAction::Copy { from, to } => copy_dir(state, from, to),
+    }
+}
+
+fn copy_dir<TFileSystem: Clone + Debug + Default + FileSystem>(
+    mut state: AppState<TFileSystem>,
+    from: PanelInfo,
+    to: PanelInfo,
+) -> AppState<TFileSystem> {
+    match to.side {
+        PanelSide::Left => AppState {
+            left_panel: PanelState {
+                tabs: copy_dir_to_tab(
+                    from.path,
+                    to.path,
+                    to.tab,
+                    state.left_panel.tabs,
+                    &mut state.file_system,
+                    &state.config.icons,
+                ),
+                ..state.left_panel
+            },
+            right_panel: PanelState {
+                tabs: reload_tab(
+                    from.tab,
+                    state.right_panel.tabs,
+                    &mut state.file_system,
+                    &state.config.icons,
+                ),
+                ..state.right_panel
+            },
+            ..state
+        },
+        PanelSide::Right => AppState {
+            right_panel: PanelState {
+                tabs: copy_dir_to_tab(
+                    from.path,
+                    to.path,
+                    to.tab,
+                    state.right_panel.tabs,
+                    &mut state.file_system,
+                    &state.config.icons,
+                ),
+                ..state.right_panel
+            },
+            left_panel: PanelState {
+                tabs: reload_tab(
+                    from.tab,
+                    state.left_panel.tabs,
+                    &mut state.file_system,
+                    &state.config.icons,
+                ),
+                ..state.left_panel
+            },
+            ..state
+        },
     }
 }
 
@@ -209,7 +265,7 @@ fn rename_dir<TFileSystem: Clone + Debug + Default + FileSystem>(
                 tabs: reload_tab(
                     from.tab,
                     state.right_panel.tabs,
-                    &state.file_system,
+                    &mut state.file_system,
                     &state.config.icons,
                 ),
                 ..state.right_panel
@@ -232,7 +288,7 @@ fn rename_dir<TFileSystem: Clone + Debug + Default + FileSystem>(
                 tabs: reload_tab(
                     from.tab,
                     state.left_panel.tabs,
-                    &state.file_system,
+                    &mut state.file_system,
                     &state.config.icons,
                 ),
                 ..state.left_panel
@@ -292,6 +348,34 @@ fn delete_dir<TFileSystem: Clone + Debug + Default + FileSystem>(
             ..state
         },
     }
+}
+
+fn copy_dir_to_tab<TFileSystem: Clone + Debug + Default + FileSystem>(
+    from: PathBuf,
+    to: PathBuf,
+    current_tab: TabIdx,
+    mut tabs: Vec<TabState<TFileSystem>>,
+    file_system: &mut TFileSystem,
+    icons: &IconsConfig,
+) -> Vec<TabState<TFileSystem>> {
+    let mut result = Vec::<TabState<TFileSystem>>::new();
+
+    for (idx, tab_state) in tabs.iter_mut().enumerate() {
+        if idx == current_tab {
+            match file_system.copy_dir(from.as_path(), to.as_path()) {
+                Ok(_) => result.push(TabState::with_dir(
+                    tab_state.path.as_path(),
+                    file_system,
+                    icons,
+                )),
+                Err(_) => {}
+            }
+        } else {
+            result.push(tab_state.clone());
+        }
+    }
+
+    result
 }
 
 fn open_dir_in_tab<TFileSystem: Clone + Debug + Default + FileSystem>(

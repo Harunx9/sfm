@@ -58,6 +58,7 @@ impl PartialEq for PanelInfo {
 pub enum FileAction {
     Delete { panel: PanelInfo },
     Rename { from: PanelInfo, to: PanelInfo },
+    Copy { from: PanelInfo, to: PanelInfo },
     Move { from: PanelInfo, to: PanelInfo },
     Open { panel: PanelInfo },
     Create { file_name: String, panel: PanelInfo },
@@ -68,6 +69,7 @@ pub enum DirectoryAction {
     DeleteWithContent { panel: PanelInfo },
     Delete { panel: PanelInfo, is_empty: bool },
     Rename { from: PanelInfo, to: PanelInfo },
+    Copy { from: PanelInfo, to: PanelInfo },
     Move { from: PanelInfo, to: PanelInfo },
     Open { panel: PanelInfo, in_new_tab: bool },
     Create { dir_name: String, panel: PanelInfo },
