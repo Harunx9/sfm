@@ -18,6 +18,8 @@ In order to get icons please install nerd font in your system (on screen Jetbrai
         - Move file or dir between panels
         - Open file in nvim
         - Rename file or dir
+        - Copy file or dir
+        - Create symlink
     * Tab management
         - Open as tab (tabs are indicated on top of panel)
         - Navigate between tabs
@@ -39,6 +41,8 @@ In order to get icons please install nerd font in your system (on screen Jetbrai
 - `ctrl + c` - open create modal on focused panel 
 - `ctrl + q` - quit program 
 - `ctrl + o` - open dir in tab 
+- `ctrl + x` - copy selected item from left panel to right panel
+- `ctrl + z` - copy selected item from right panel to left panel
 - `o` - open dir or file(right now it will open in neovim this will be configurable in future) 
 - `n` - next tab 
 - `p` - prev tab 
@@ -114,6 +118,8 @@ Configuration file should be named `sfm.toml` and shoudl be placed in `~/` or `~
         -  `rename = { key = "r", modifier = "C" }`
         -  `create = { key = "c", modifier = "C" }`
         -  `accept = { key = "enter" }`
+        -  `copy_to_right = { key = "x", modifier = "C" }`
+        -  `copy_to_left = { key = "z", modifier = "C" }`
 
 * ### [icons_dir] section
     * In order to see icons you need nerd font patch. See in sfm.toml in repo root.

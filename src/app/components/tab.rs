@@ -68,7 +68,7 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem> TabComponentProps<TFileS
 pub struct TabStyle {
     active_border_color: Color,
     selected_element_background: Color,
-    selected_element_foregound: Color,
+    selected_element_foreground: Color,
     selected_element_indicator: String,
 }
 
@@ -77,7 +77,7 @@ impl Default for TabStyle {
         TabStyle {
             active_border_color: Color::Blue,
             selected_element_background: Color::Red,
-            selected_element_foregound: Color::Black,
+            selected_element_foreground: Color::Black,
             selected_element_indicator: ">>".to_string(),
         }
     }
@@ -560,7 +560,7 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem>
                         .highlight_style(
                             Style::default()
                                 .bg(self.style.selected_element_background)
-                                .fg(self.style.selected_element_foregound),
+                                .fg(self.style.selected_element_foreground),
                         )
                         .highlight_symbol(self.style.selected_element_indicator.as_str());
 

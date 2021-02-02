@@ -1,9 +1,9 @@
 [package]
 name = "sfm"
-version = "0.1.3"
+version = "0.2.0"
 authors = ["Szymon <szwanot@gmail.com>"]
 edition = "2018"
-license-file = "LICENSE"
+license = "MIT"
 keywords = ["file-manager", "cli", "windows", "macOS", "linux"]
 categories = ["command-line-utilities"]
 repository = "https://github.com/Harunx9/sfm"
