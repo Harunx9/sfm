@@ -22,6 +22,8 @@ pub struct KeyboardConfig {
     pub rename: KeyBinding,
     pub create: KeyBinding,
     pub accept: KeyBinding,
+    pub copy_to_left: KeyBinding,
+    pub copy_to_right: KeyBinding,
 }
 
 impl KeyboardConfig {
@@ -247,6 +249,32 @@ impl KeyboardConfig {
                         self.accept = KeyBinding::with_modifiers(key_code, modifier);
                     }
                 }
+
+                if let Some(copy_to_left) = keyboard_cfg.get("copy_to_left") {
+                    if let Value::Table(key_binding) = copy_to_left {
+                        let key_code = map_key(key_binding["key"].as_str().unwrap());
+                        let modifier = if key_binding.contains_key("modifier") {
+                            map_modifier(key_binding["modifier"].as_str().unwrap())
+                        } else {
+                            KeyModifiers::empty()
+                        };
+
+                        self.copy_to_left = KeyBinding::with_modifiers(key_code, modifier);
+                    }
+                }
+
+                if let Some(copy_to_right) = keyboard_cfg.get("copy_to_right") {
+                    if let Value::Table(key_binding) = copy_to_right {
+                        let key_code = map_key(key_binding["key"].as_str().unwrap());
+                        let modifier = if key_binding.contains_key("modifier") {
+                            map_modifier(key_binding["modifier"].as_str().unwrap())
+                        } else {
+                            KeyModifiers::empty()
+                        };
+
+                        self.copy_to_right = KeyBinding::with_modifiers(key_code, modifier);
+                    }
+                }
             }
         }
     }
@@ -272,6 +300,8 @@ impl Default for KeyboardConfig {
             rename: KeyBinding::with_modifiers(KeyCode::Char('r'), KeyModifiers::CONTROL),
             create: KeyBinding::with_modifiers(KeyCode::Char('c'), KeyModifiers::CONTROL),
             accept: KeyBinding::new(KeyCode::Enter),
+            copy_to_right: KeyBinding::with_modifiers(KeyCode::Char('x'), KeyModifiers::CONTROL),
+            copy_to_left: KeyBinding::with_modifiers(KeyCode::Char('z'), KeyModifiers::CONTROL),
         }
     }
 }

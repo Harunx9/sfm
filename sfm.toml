@@ -42,6 +42,8 @@ move_right = { key = "l", modifier = "C" }
 rename = { key = "r", modifier = "C" }
 create = { key = "c", modifier = "C" }
 accept = { key = "enter" }
+copy_to_left = { key = "z", modifier = "C" }
+copy_to_right = { key = "x", modifier = "C" }
 
 [icons_dir]
 ".git" = ""

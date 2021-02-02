@@ -20,13 +20,13 @@ use super::{
 };
 
 #[cfg(unix)]
-pub fn create_link<TPath: AsRef<Path>>(symlink_path: &TPath, item_path: &TPath) -> io::Result<()> {
+pub fn create_link<TPath: AsRef<Path>>(symlink_path: TPath, item_path: TPath) -> io::Result<()> {
     let symlink_path = expand_if_contains_tilde(symlink_path).unwrap();
     fs::symlink(item_path, symlink_path)
 }
 
 #[cfg(windows)]
-pub fn create_link<TPath: AsRef<Path>>(symlink_path: &TPath, item_path: TPath) -> io::Result<()> {
+pub fn create_link<TPath: AsRef<Path>>(symlink_path: TPath, item_path: TPath) -> io::Result<()> {
     let symlink_path = expand_if_contains_tilde(symlink_path).unwrap();
     if item_path.is_dir() {
         fs::symlink_dir(item_path, symlink_path)

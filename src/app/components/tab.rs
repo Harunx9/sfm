@@ -355,6 +355,104 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem>
                     return true;
                 }
 
+                if state.config.keyboard_cfg.copy_to_left.is_pressed(key_evt)
+                    && props.is_focused
+                    && tab_side == PanelSide::Right
+                {
+                    match current_item {
+                        FileSystemItem::Directory(dir) => {
+                            let name = dir.get_name();
+                            let mut to_path = state.left_panel.tabs[state.left_panel.current_tab]
+                                .path
+                                .clone();
+                            to_path.push(name);
+                            store.dispatch(FileManagerActions::Directory(DirectoryAction::Copy {
+                                from: PanelInfo {
+                                    path: dir.get_path(),
+                                    tab: state.right_panel.current_tab,
+                                    side: PanelSide::Right,
+                                },
+                                to: PanelInfo {
+                                    path: to_path,
+                                    tab: state.left_panel.current_tab,
+                                    side: PanelSide::Left,
+                                },
+                            }));
+                        }
+                        FileSystemItem::File(file) => {
+                            let name = file.get_name();
+                            let mut to_path = state.left_panel.tabs[state.left_panel.current_tab]
+                                .path
+                                .clone();
+                            to_path.push(name);
+                            store.dispatch(FileManagerActions::File(FileAction::Copy {
+                                from: PanelInfo {
+                                    path: file.get_path(),
+                                    tab: state.right_panel.current_tab,
+                                    side: PanelSide::Right,
+                                },
+                                to: PanelInfo {
+                                    path: to_path,
+                                    tab: state.left_panel.current_tab,
+                                    side: PanelSide::Left,
+                                },
+                            }));
+                        }
+                        _ => {}
+                    };
+
+                    return true;
+                }
+
+                if state.config.keyboard_cfg.copy_to_right.is_pressed(key_evt)
+                    && props.is_focused
+                    && tab_side == PanelSide::Left
+                {
+                    match current_item {
+                        FileSystemItem::Directory(dir) => {
+                            let name = dir.get_name();
+                            let mut to_path = state.right_panel.tabs[state.right_panel.current_tab]
+                                .path
+                                .clone();
+                            to_path.push(name);
+                            store.dispatch(FileManagerActions::Directory(DirectoryAction::Copy {
+                                from: PanelInfo {
+                                    path: dir.get_path(),
+                                    tab: state.left_panel.current_tab,
+                                    side: PanelSide::Left,
+                                },
+                                to: PanelInfo {
+                                    path: to_path,
+                                    tab: state.right_panel.current_tab,
+                                    side: PanelSide::Right,
+                                },
+                            }));
+                        }
+                        FileSystemItem::File(file) => {
+                            let name = file.get_name();
+                            let mut to_path = state.right_panel.tabs[state.right_panel.current_tab]
+                                .path
+                                .clone();
+                            to_path.push(name);
+                            store.dispatch(FileManagerActions::File(FileAction::Copy {
+                                from: PanelInfo {
+                                    path: file.get_path(),
+                                    tab: state.left_panel.current_tab,
+                                    side: PanelSide::Left,
+                                },
+                                to: PanelInfo {
+                                    path: to_path,
+                                    tab: state.right_panel.current_tab,
+                                    side: PanelSide::Right,
+                                },
+                            }));
+                        }
+                        _ => {}
+                    };
+
+                    return true;
+                }
+
                 if state.config.keyboard_cfg.rename.is_pressed(key_evt) && props.is_focused {
                     let tab_idx = match tab_side {
                         PanelSide::Left => state.left_panel.current_tab,
