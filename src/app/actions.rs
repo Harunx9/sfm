@@ -10,6 +10,28 @@ pub enum FileManagerActions {
     App(AppAction),
     Panel(PanelAction),
     Tab(TabAction),
+    Search(SearchAction),
+}
+
+#[derive(Clone, Debug)]
+pub enum SearchAction {
+    Start {
+        tab: TabIdx,
+        panel_side: PanelSide,
+    },
+    Stop {
+        tab: TabIdx,
+        panel_side: PanelSide,
+    },
+    Input {
+        tab: TabIdx,
+        panel_side: PanelSide,
+        phrase: String,
+    },
+    ApplySearch {
+        tab: TabIdx,
+        panel_side: PanelSide,
+    },
 }
 
 #[derive(Clone, Debug)]

@@ -79,6 +79,8 @@ pub struct TabState<TFileSystem: Clone + Debug + Default + FileSystem> {
     pub items: Vec<FileSystemItem>,
     pub selected: Vec<usize>,
     pub tab_state: ListState,
+    pub search_mode: bool,
+    pub phrase: String,
     pub marker: std::marker::PhantomData<TFileSystem>,
 }
 
@@ -103,6 +105,8 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem> TabState<TFileSystem> {
             items,
             selected: Vec::new(),
             tab_state: ListState::default(),
+            search_mode: false,
+            phrase: String::from(""),
             marker: std::marker::PhantomData,
         }
     }

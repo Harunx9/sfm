@@ -167,60 +167,65 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem>
         store: &mut Store<AppState<TFileSystem>, FileManagerActions>,
     ) -> bool {
         let state = store.get_state();
-        if let Event::Keyboard(key_evt) = event {
-            if state.config.keyboard_cfg.quit.is_pressed(key_evt) {
-                store.dispatch(FileManagerActions::App(AppAction::Exit));
-                return true;
-            }
 
-            if let Some(ref mut error_modal) = self.error_modal {
-                let result = error_modal.handle_event(event, store);
-                self.map_state(store);
+        if self.left_panel.tab_in_search_mode() == false
+            && self.right_panel.tab_in_search_mode() == false
+        {
+            if let Event::Keyboard(key_evt) = event {
+                if state.config.keyboard_cfg.quit.is_pressed(key_evt) {
+                    store.dispatch(FileManagerActions::App(AppAction::Exit));
+                    return true;
+                }
 
-                return result;
-            }
+                if let Some(ref mut error_modal) = self.error_modal {
+                    let result = error_modal.handle_event(event, store);
+                    self.map_state(store);
 
-            if let Some(ref mut non_empty_dir_delete_modal) = self.non_empty_dir_delete_modal {
-                let result = non_empty_dir_delete_modal.handle_event(event, store);
-                self.map_state(store);
+                    return result;
+                }
 
-                return result;
-            }
+                if let Some(ref mut non_empty_dir_delete_modal) = self.non_empty_dir_delete_modal {
+                    let result = non_empty_dir_delete_modal.handle_event(event, store);
+                    self.map_state(store);
 
-            if let Some(ref mut create_modal) = self.create_modal {
-                let result = create_modal.handle_event(event, store);
-                self.map_state(store);
+                    return result;
+                }
 
-                return result;
-            }
+                if let Some(ref mut create_modal) = self.create_modal {
+                    let result = create_modal.handle_event(event, store);
+                    self.map_state(store);
 
-            if let Some(ref mut rename_modal) = self.rename_modal {
-                let result = rename_modal.handle_event(event, store);
-                self.map_state(store);
+                    return result;
+                }
 
-                return result;
-            }
+                if let Some(ref mut rename_modal) = self.rename_modal {
+                    let result = rename_modal.handle_event(event, store);
+                    self.map_state(store);
 
-            if state
-                .config
-                .keyboard_cfg
-                .focus_left_panel
-                .is_pressed(key_evt)
-            {
-                store.dispatch(FileManagerActions::App(AppAction::FocusLeft));
-                self.map_state(store);
-                return true;
-            }
+                    return result;
+                }
 
-            if state
-                .config
-                .keyboard_cfg
-                .focus_right_panel
-                .is_pressed(key_evt)
-            {
-                store.dispatch(FileManagerActions::App(AppAction::FocusRight));
-                self.map_state(store);
-                return true;
+                if state
+                    .config
+                    .keyboard_cfg
+                    .focus_left_panel
+                    .is_pressed(key_evt)
+                {
+                    store.dispatch(FileManagerActions::App(AppAction::FocusLeft));
+                    self.map_state(store);
+                    return true;
+                }
+
+                if state
+                    .config
+                    .keyboard_cfg
+                    .focus_right_panel
+                    .is_pressed(key_evt)
+                {
+                    store.dispatch(FileManagerActions::App(AppAction::FocusRight));
+                    self.map_state(store);
+                    return true;
+                }
             }
         }
 

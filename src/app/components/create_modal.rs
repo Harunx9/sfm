@@ -179,13 +179,13 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem>
                 if state.config.keyboard_cfg.accept.is_pressed(key_evt)
                     && local_state.input.is_empty() == false
                 {
-                    let panle_side = props.panel_side.unwrap();
+                    let panel_side = props.panel_side.unwrap();
                     match create_selection {
                         CreateOption::File => {
                             store.dispatch(FileManagerActions::File(FileAction::Create {
                                 file_name: local_state.input.clone(),
                                 panel: PanelInfo {
-                                    side: panle_side,
+                                    side: panel_side,
                                     tab: props.panel_tab,
                                     path: props.dir_path,
                                 },
@@ -195,7 +195,7 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem>
                             store.dispatch(FileManagerActions::Directory(DirectoryAction::Create {
                                 dir_name: local_state.input.clone(),
                                 panel: PanelInfo {
-                                    side: panle_side,
+                                    side: panel_side,
                                     tab: props.panel_tab,
                                     path: props.dir_path,
                                 },
@@ -215,7 +215,7 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem>
                                 symlink_path: PathBuf::from(local_state.input.clone()),
                                 panel: PanelInfo {
                                     path: item_path,
-                                    side: panle_side,
+                                    side: panel_side,
                                     tab: props.panel_tab,
                                 },
                             }))

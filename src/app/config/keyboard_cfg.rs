@@ -24,6 +24,7 @@ pub struct KeyboardConfig {
     pub accept: KeyBinding,
     pub copy_to_left: KeyBinding,
     pub copy_to_right: KeyBinding,
+    pub search_in_panel: KeyBinding,
 }
 
 impl KeyboardConfig {
@@ -302,6 +303,7 @@ impl Default for KeyboardConfig {
             accept: KeyBinding::new(KeyCode::Enter),
             copy_to_right: KeyBinding::with_modifiers(KeyCode::Char('x'), KeyModifiers::CONTROL),
             copy_to_left: KeyBinding::with_modifiers(KeyCode::Char('z'), KeyModifiers::CONTROL),
+            search_in_panel: KeyBinding::with_modifiers(KeyCode::Char('s'), KeyModifiers::CONTROL),
         }
     }
 }
