@@ -12,12 +12,14 @@ use std::{
 mod dir_reducer;
 mod file_reducer;
 mod panel_reducer;
+mod search_reducer;
 mod symlink_reducer;
 mod tab_reducer;
 
 use dir_reducer::dir_reducer;
 use file_reducer::file_reducer;
 use panel_reducer::panel_reducer;
+use search_reducer::search_reducer;
 use symlink_reducer::symlink_reducer;
 use tab_reducer::tab_reducer;
 
@@ -34,6 +36,7 @@ pub fn root_reducer<TFileSystem: Clone + Debug + Default + FileSystem>(
         }
         FileManagerActions::Panel(panel_action) => panel_reducer(state.clone(), panel_action),
         FileManagerActions::Tab(tab_action) => tab_reducer(state.clone(), tab_action),
+        FileManagerActions::Search(search_action) => search_reducer(state.clone(), search_action),
     }
 }
 

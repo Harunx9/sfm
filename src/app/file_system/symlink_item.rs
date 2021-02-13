@@ -54,12 +54,24 @@ impl ToSpans for SymlinkItem {
                 Span::from("  "),
                 Span::from(self.icon.clone()),
                 Span::from("  "),
+                Span::from(
+                    self.last_modification
+                        .format("%Y-%m-%d %H:%M:%S")
+                        .to_string(),
+                ),
+                Span::from("  "),
                 Span::from(self.name.clone()),
                 Span::from(" -> "),
                 Span::from(self.target.to_str().unwrap_or("")),
             ])
         } else {
             Spans::from(vec![
+                Span::from("  "),
+                Span::from(
+                    self.last_modification
+                        .format("%Y-%m-%d %H:%M:%S")
+                        .to_string(),
+                ),
                 Span::from("  "),
                 Span::from(self.name.clone()),
                 Span::from(" -> "),

@@ -51,10 +51,25 @@ impl ToSpans for FileItem {
                 Span::from("  "),
                 Span::from(self.icon.clone()),
                 Span::from("  "),
+                Span::from(
+                    self.last_modification
+                        .format("%Y-%m-%d %H:%M:%S")
+                        .to_string(),
+                ),
+                Span::from("  "),
                 Span::from(self.name.clone()),
             ])
         } else {
-            Spans::from(vec![Span::from("  "), Span::from(self.name.clone())])
+            Spans::from(vec![
+                Span::from("  "),
+                Span::from(
+                    self.last_modification
+                        .format("%Y-%m-%d %H:%M:%S")
+                        .to_string(),
+                ),
+                Span::from("  "),
+                Span::from(self.name.clone()),
+            ])
         }
     }
 }

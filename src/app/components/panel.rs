@@ -30,6 +30,7 @@ pub struct PanelComponentProps {
     current_tab: usize,
     is_focused: bool,
     show_icons: bool,
+    tab_search: bool,
 }
 
 #[derive(Clone, Default, Debug)]
@@ -108,12 +109,14 @@ impl<TFileSystem: Clone + Default + Debug + FileSystem> PanelComponent<TFileSyst
                 icon: icons.get_dir_icon(tab.name.clone()),
             })
             .collect();
+        let tab_state = panel_state.tabs[panel_state.current_tab].clone();
         let has_displayed_tabs = tabs.is_empty() == false;
         let panel_props = PanelComponentProps {
             tabs,
             current_tab: panel_state.current_tab,
             is_focused: panel_state.is_focused,
             show_icons: icons.use_icons,
+            tab_search: tab_state.search_mode,
         };
 
         let state = PanelComponentState {
@@ -122,7 +125,7 @@ impl<TFileSystem: Clone + Default + Debug + FileSystem> PanelComponent<TFileSyst
 
         let tab = TabComponent::new(
             Some(TabComponentProps::new(
-                panel_state.tabs[panel_state.current_tab].clone(),
+                tab_state,
                 has_displayed_tabs,
                 panel_state.is_focused,
                 side,
@@ -132,6 +135,10 @@ impl<TFileSystem: Clone + Default + Debug + FileSystem> PanelComponent<TFileSyst
         );
 
         PanelComponent::new(panel_props, state, tab)
+    }
+
+    pub fn tab_in_search_mode(&self) -> bool {
+        self.base.get_props().unwrap().tab_search
     }
 }
 
@@ -146,36 +153,38 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem>
         let state = store.get_state();
         let props = self.base.get_props().unwrap();
         let panel_side = self.base.get_state().unwrap().side.unwrap();
-        if let Event::Keyboard(key_evt) = event {
-            if state.config.keyboard_cfg.next_tab.is_pressed(key_evt)
-                && props.is_focused
-                && props.tabs.len() > 1
-            {
-                store.dispatch(FileManagerActions::Panel(PanelAction::Next {
-                    panel: panel_side,
-                }));
-                return true;
-            }
+        if props.tab_search == false {
+            if let Event::Keyboard(key_evt) = event {
+                if state.config.keyboard_cfg.next_tab.is_pressed(key_evt)
+                    && props.is_focused
+                    && props.tabs.len() > 1
+                {
+                    store.dispatch(FileManagerActions::Panel(PanelAction::Next {
+                        panel: panel_side,
+                    }));
+                    return true;
+                }
 
-            if state.config.keyboard_cfg.prev_tab.is_pressed(key_evt)
-                && props.is_focused
-                && props.tabs.len() > 1
-            {
-                store.dispatch(FileManagerActions::Panel(PanelAction::Previous {
-                    panel: panel_side,
-                }));
-                return true;
-            }
+                if state.config.keyboard_cfg.prev_tab.is_pressed(key_evt)
+                    && props.is_focused
+                    && props.tabs.len() > 1
+                {
+                    store.dispatch(FileManagerActions::Panel(PanelAction::Previous {
+                        panel: panel_side,
+                    }));
+                    return true;
+                }
 
-            if state.config.keyboard_cfg.close.is_pressed(key_evt)
-                && props.is_focused
-                && props.tabs.len() > 1
-            {
-                store.dispatch(FileManagerActions::Panel(PanelAction::CloseTab {
-                    panel: panel_side,
-                    tab: props.current_tab,
-                }));
-                return true;
+                if state.config.keyboard_cfg.close.is_pressed(key_evt)
+                    && props.is_focused
+                    && props.tabs.len() > 1
+                {
+                    store.dispatch(FileManagerActions::Panel(PanelAction::CloseTab {
+                        panel: panel_side,
+                        tab: props.current_tab,
+                    }));
+                    return true;
+                }
             }
         }
 

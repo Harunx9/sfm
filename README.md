@@ -12,11 +12,11 @@
 In order to get icons please install nerd font in your system (on screen Jetbrains Mono Nerd Font Mono)
 
 1. Current features
-    * Fies management
+    * File management
         - Add file or directory
         - Remove file or directory
         - Move file or dir between panels
-        - Open file in nvim
+        - Open file in vi or others editor
         - Rename file or dir
         - Copy file or dir
         - Create symlink
@@ -24,11 +24,8 @@ In order to get icons please install nerd font in your system (on screen Jetbrai
         - Open as tab (tabs are indicated on top of panel)
         - Navigate between tabs
         - Close tabs 
-2. ToDo
-    - Config file
-    - Symlink management(create, rename)
-    - Panel filtering
-    - File system information
+    * Easy toml config file
+    * Panel filtering
 
 ## Keyboard config
 - `h` - focus left panel
@@ -43,7 +40,8 @@ In order to get icons please install nerd font in your system (on screen Jetbrai
 - `ctrl + o` - open dir in tab 
 - `ctrl + x` - copy selected item from left panel to right panel
 - `ctrl + z` - copy selected item from right panel to left panel
-- `o` - open dir or file(right now it will open in neovim this will be configurable in future) 
+- `ctrl + s` - search in focused panel
+- `o` - open dir or file(default: vi) 
 - `n` - next tab 
 - `p` - prev tab 
 - `backspace` - navigate to dir parent 
@@ -51,14 +49,14 @@ In order to get icons please install nerd font in your system (on screen Jetbrai
 - `enter` - select modal option 
 
 ## Configuration File
-Configuration file should be named `sfm.toml` and shoudl be placed in `~/` or `~/.config` directories.
+Configuration file should be named `sfm.toml` and should be placed in `~/` or `~/.config` directories.
 * ### [core] section
     - tick_rate - update loop interval (default 240)
-    - use_icons - turn on/off icons. Icons requre NerdFonts to be intsalled (default false)
+    - use_icons - turn on/off icons. Icons require NerdFonts to be installed (default false)
 
 * ### [color_scheme] section
     * Color names:
-        -  foregorund
+        -  foreground
         - background 
         - normal_black 
         - normal_red 
@@ -131,7 +129,7 @@ Configuration file should be named `sfm.toml` and shoudl be placed in `~/` or `~
     * Key value pair with file extension and programs in default config all files will be opened in `vi`
         * eg. `rs = "nvim"`
 
-## Instalation 
+## Installation 
 
 * Via Cargo
 
