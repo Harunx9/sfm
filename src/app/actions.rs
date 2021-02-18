@@ -55,6 +55,9 @@ pub enum PanelAction {
 pub enum TabAction {
     Next,
     Previous,
+    SelectNext,
+    SelectPrev,
+    ClearSelection,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]

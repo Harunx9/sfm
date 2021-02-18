@@ -77,7 +77,7 @@ pub struct TabState<TFileSystem: Clone + Debug + Default + FileSystem> {
     pub icon: String,
     pub path: PathBuf,
     pub items: Vec<FileSystemItem>,
-    pub selected: Vec<usize>,
+    pub selected: Vec<FileSystemItem>,
     pub tab_state: ListState,
     pub search_mode: bool,
     pub phrase: String,
@@ -108,6 +108,21 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem> TabState<TFileSystem> {
             search_mode: false,
             phrase: String::from(""),
             marker: std::marker::PhantomData,
+        }
+    }
+
+    pub fn filtered_items(&self) -> Vec<&FileSystemItem> {
+        if self.phrase.is_empty() {
+            self.items.iter().collect()
+        } else {
+            self.items
+                .iter()
+                .filter(|item| {
+                    item.get_name()
+                        .to_lowercase()
+                        .contains(&self.phrase.to_lowercase())
+                })
+                .collect()
         }
     }
 }

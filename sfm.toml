@@ -45,6 +45,8 @@ accept = { key = "enter" }
 copy_to_left = { key = "z", modifier = "C" }
 copy_to_right = { key = "x", modifier = "C" }
 search_in_panel = { key = "s", modifier = "C" }
+select_prev = { key = "j", modifier = "C" }
+select_next = { key = "k", modifier = "C" }
 
 [icons_dir]
 ".git" = ""
