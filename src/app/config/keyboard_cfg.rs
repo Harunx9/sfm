@@ -25,6 +25,8 @@ pub struct KeyboardConfig {
     pub copy_to_left: KeyBinding,
     pub copy_to_right: KeyBinding,
     pub search_in_panel: KeyBinding,
+    pub select_prev: KeyBinding,
+    pub select_next: KeyBinding,
 }
 
 impl KeyboardConfig {
@@ -276,6 +278,45 @@ impl KeyboardConfig {
                         self.copy_to_right = KeyBinding::with_modifiers(key_code, modifier);
                     }
                 }
+
+                if let Some(search_in_panel) = keyboard_cfg.get("search_in_panel") {
+                    if let Value::Table(key_binding) = search_in_panel {
+                        let key_code = map_key(key_binding["key"].as_str().unwrap());
+                        let modifier = if key_binding.contains_key("modifier") {
+                            map_modifier(key_binding["modifier"].as_str().unwrap())
+                        } else {
+                            KeyModifiers::empty()
+                        };
+
+                        self.search_in_panel = KeyBinding::with_modifiers(key_code, modifier);
+                    }
+                }
+
+                if let Some(select_prev) = keyboard_cfg.get("select_prev") {
+                    if let Value::Table(key_binding) = select_prev {
+                        let key_code = map_key(key_binding["key"].as_str().unwrap());
+                        let modifier = if key_binding.contains_key("modifier") {
+                            map_modifier(key_binding["modifier"].as_str().unwrap())
+                        } else {
+                            KeyModifiers::empty()
+                        };
+
+                        self.select_prev = KeyBinding::with_modifiers(key_code, modifier);
+                    }
+                }
+
+                if let Some(select_next) = keyboard_cfg.get("select_next") {
+                    if let Value::Table(key_binding) = select_next {
+                        let key_code = map_key(key_binding["key"].as_str().unwrap());
+                        let modifier = if key_binding.contains_key("modifier") {
+                            map_modifier(key_binding["modifier"].as_str().unwrap())
+                        } else {
+                            KeyModifiers::empty()
+                        };
+
+                        self.select_next = KeyBinding::with_modifiers(key_code, modifier);
+                    }
+                }
             }
         }
     }
@@ -304,6 +345,8 @@ impl Default for KeyboardConfig {
             copy_to_right: KeyBinding::with_modifiers(KeyCode::Char('x'), KeyModifiers::CONTROL),
             copy_to_left: KeyBinding::with_modifiers(KeyCode::Char('z'), KeyModifiers::CONTROL),
             search_in_panel: KeyBinding::with_modifiers(KeyCode::Char('s'), KeyModifiers::CONTROL),
+            select_prev: KeyBinding::with_modifiers(KeyCode::Char('k'), KeyModifiers::CONTROL),
+            select_next: KeyBinding::with_modifiers(KeyCode::Char('j'), KeyModifiers::CONTROL),
         }
     }
 }

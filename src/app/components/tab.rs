@@ -104,19 +104,7 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem> TabComponent<TFileSystem
     fn current_item(&self) -> Option<FileSystemItem> {
         let props = self.base.get_props().unwrap();
         let state = props.state.unwrap();
-        let items: Vec<&FileSystemItem> = if state.phrase.is_empty() {
-            state.items.iter().collect()
-        } else {
-            state
-                .items
-                .iter()
-                .filter(|item| {
-                    item.get_name()
-                        .to_lowercase()
-                        .contains(&state.phrase.to_lowercase())
-                })
-                .collect()
-        };
+        let items = state.filtered_items();
         match state.tab_state.selected() {
             Some(idx) => Some(items[idx].clone()),
             None => None,
@@ -208,6 +196,23 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem>
                     return true;
                 }
 
+                if state.config.keyboard_cfg.select_next.is_pressed(key_evt) {
+                    store.dispatch(FileManagerActions::Tab(TabAction::SelectNext));
+                    return true;
+                }
+
+                if state.config.keyboard_cfg.select_prev.is_pressed(key_evt) {
+                    store.dispatch(FileManagerActions::Tab(TabAction::SelectPrev));
+                    return true;
+                }
+
+                if state.config.keyboard_cfg.close.is_pressed(key_evt)
+                    && tab_state.selected.is_empty() == false
+                {
+                    store.dispatch(FileManagerActions::Tab(TabAction::ClearSelection));
+                    return true;
+                }
+
                 if state.config.keyboard_cfg.navigate_up.is_pressed(key_evt) && props.is_focused {
                     let current_path = tab_state.path;
                     if let Some(parent) = current_path.parent() {
@@ -223,11 +228,9 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem>
 
                     return true;
                 }
-
-                if let Some(current_item) = self.current_item() {
-                    if state.config.keyboard_cfg.open_as_tab.is_pressed(key_evt) && props.is_focused
-                    {
-                        match current_item {
+                if state.config.keyboard_cfg.open_as_tab.is_pressed(key_evt) && props.is_focused {
+                    for item in tab_state.selected.iter() {
+                        match item {
                             FileSystemItem::Directory(dir) => {
                                 store.dispatch(FileManagerActions::Directory(
                                     DirectoryAction::Open {
@@ -252,12 +255,14 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem>
                             }
                             _ => {}
                         };
-
-                        return true;
                     }
+                    store.dispatch(FileManagerActions::Tab(TabAction::ClearSelection));
+                    return true;
+                }
 
-                    if state.config.keyboard_cfg.open.is_pressed(key_evt) && props.is_focused {
-                        match current_item {
+                if state.config.keyboard_cfg.open.is_pressed(key_evt) && props.is_focused {
+                    for item in tab_state.selected.iter() {
+                        match item {
                             FileSystemItem::Directory(dir) => {
                                 store.dispatch(FileManagerActions::Directory(
                                     DirectoryAction::Open {
@@ -291,12 +296,15 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem>
                             }
                             _ => {}
                         };
-
-                        return true;
                     }
+                    store.dispatch(FileManagerActions::Tab(TabAction::ClearSelection));
 
-                    if state.config.keyboard_cfg.delete.is_pressed(key_evt) && props.is_focused {
-                        match current_item {
+                    return true;
+                }
+
+                if state.config.keyboard_cfg.delete.is_pressed(key_evt) && props.is_focused {
+                    for item in tab_state.selected.iter() {
+                        match item {
                             FileSystemItem::Directory(dir) => {
                                 store.dispatch(FileManagerActions::Directory(
                                     DirectoryAction::Delete {
@@ -329,15 +337,18 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem>
                             }
                             _ => {}
                         };
-
-                        return true;
                     }
+                    store.dispatch(FileManagerActions::Tab(TabAction::ClearSelection));
 
-                    if state.config.keyboard_cfg.move_left.is_pressed(key_evt)
-                        && props.is_focused
-                        && tab_side == PanelSide::Right
-                    {
-                        match current_item {
+                    return true;
+                }
+
+                if state.config.keyboard_cfg.move_left.is_pressed(key_evt)
+                    && props.is_focused
+                    && tab_side == PanelSide::Right
+                {
+                    for item in tab_state.selected.iter() {
+                        match item {
                             FileSystemItem::Directory(dir) => {
                                 let name = dir.get_name();
                                 let mut to_path = state.left_panel.tabs
@@ -392,15 +403,18 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem>
                             }
                             _ => {}
                         };
-
-                        return true;
                     }
+                    store.dispatch(FileManagerActions::Tab(TabAction::ClearSelection));
 
-                    if state.config.keyboard_cfg.move_right.is_pressed(key_evt)
-                        && props.is_focused
-                        && tab_side == PanelSide::Left
-                    {
-                        match current_item {
+                    return true;
+                }
+
+                if state.config.keyboard_cfg.move_right.is_pressed(key_evt)
+                    && props.is_focused
+                    && tab_side == PanelSide::Left
+                {
+                    for item in tab_state.selected.iter() {
+                        match item {
                             FileSystemItem::Directory(dir) => {
                                 let name = dir.get_name();
                                 let mut to_path = state.right_panel.tabs
@@ -455,15 +469,18 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem>
                             }
                             _ => {}
                         };
-
-                        return true;
                     }
+                    store.dispatch(FileManagerActions::Tab(TabAction::ClearSelection));
 
-                    if state.config.keyboard_cfg.copy_to_left.is_pressed(key_evt)
-                        && props.is_focused
-                        && tab_side == PanelSide::Right
-                    {
-                        match current_item {
+                    return true;
+                }
+
+                if state.config.keyboard_cfg.copy_to_left.is_pressed(key_evt)
+                    && props.is_focused
+                    && tab_side == PanelSide::Right
+                {
+                    for item in tab_state.selected.iter() {
+                        match item {
                             FileSystemItem::Directory(dir) => {
                                 let name = dir.get_name();
                                 let mut to_path = state.left_panel.tabs
@@ -508,15 +525,18 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem>
                             }
                             _ => {}
                         };
-
-                        return true;
                     }
+                    store.dispatch(FileManagerActions::Tab(TabAction::ClearSelection));
 
-                    if state.config.keyboard_cfg.copy_to_right.is_pressed(key_evt)
-                        && props.is_focused
-                        && tab_side == PanelSide::Left
-                    {
-                        match current_item {
+                    return true;
+                }
+
+                if state.config.keyboard_cfg.copy_to_right.is_pressed(key_evt)
+                    && props.is_focused
+                    && tab_side == PanelSide::Left
+                {
+                    for item in tab_state.selected.iter() {
+                        match item {
                             FileSystemItem::Directory(dir) => {
                                 let name = dir.get_name();
                                 let mut to_path = state.right_panel.tabs
@@ -561,40 +581,46 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem>
                             }
                             _ => {}
                         };
+                    }
+                    store.dispatch(FileManagerActions::Tab(TabAction::ClearSelection));
 
-                        return true;
+                    return true;
+                }
+
+                if tab_state.selected.len() == 1 {
+                    if let Some(current_item) = self.current_item() {
+                        if state.config.keyboard_cfg.rename.is_pressed(key_evt) && props.is_focused
+                        {
+                            let tab_idx = match tab_side {
+                                PanelSide::Left => state.left_panel.current_tab,
+                                PanelSide::Right => state.right_panel.current_tab,
+                            };
+                            store.dispatch(FileManagerActions::App(AppAction::ShowModal(
+                                ModalType::RenameModal {
+                                    panel_side: tab_side,
+                                    panel_tab: tab_idx,
+                                    item: current_item,
+                                },
+                            )));
+                            return true;
+                        }
                     }
 
-                    if state.config.keyboard_cfg.rename.is_pressed(key_evt) && props.is_focused {
+                    if state.config.keyboard_cfg.create.is_pressed(key_evt) && props.is_focused {
                         let tab_idx = match tab_side {
                             PanelSide::Left => state.left_panel.current_tab,
                             PanelSide::Right => state.right_panel.current_tab,
                         };
                         store.dispatch(FileManagerActions::App(AppAction::ShowModal(
-                            ModalType::RenameModal {
+                            ModalType::CreateModal {
+                                item_index: tab_state.tab_state.selected(),
                                 panel_side: tab_side,
                                 panel_tab: tab_idx,
-                                item: current_item,
+                                panel_tab_path: tab_state.path.clone(),
                             },
                         )));
                         return true;
                     }
-                }
-
-                if state.config.keyboard_cfg.create.is_pressed(key_evt) && props.is_focused {
-                    let tab_idx = match tab_side {
-                        PanelSide::Left => state.left_panel.current_tab,
-                        PanelSide::Right => state.right_panel.current_tab,
-                    };
-                    store.dispatch(FileManagerActions::App(AppAction::ShowModal(
-                        ModalType::CreateModal {
-                            item_index: tab_state.tab_state.selected(),
-                            panel_side: tab_side,
-                            panel_tab: tab_idx,
-                            panel_tab_path: tab_state.path.clone(),
-                        },
-                    )));
-                    return true;
                 }
             }
         }
@@ -620,7 +646,24 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem>
                         .items
                         .iter()
                         .map(|item| {
-                            ListItem::new(item.to_spans(area.unwrap_or(frame.size()), show_icons))
+                            if state
+                                .selected
+                                .iter()
+                                .any(|i| i.get_path() == item.get_path())
+                            {
+                                ListItem::new(
+                                    item.to_spans(area.unwrap_or(frame.size()), show_icons),
+                                )
+                                .style(
+                                    Style::default()
+                                        .bg(self.style.selected_element_background)
+                                        .fg(self.style.selected_element_foreground),
+                                )
+                            } else {
+                                ListItem::new(
+                                    item.to_spans(area.unwrap_or(frame.size()), show_icons),
+                                )
+                            }
                         })
                         .collect()
                 } else {
@@ -633,7 +676,24 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem>
                                 .contains(&state.phrase.to_lowercase())
                         })
                         .map(|item| {
-                            ListItem::new(item.to_spans(area.unwrap_or(frame.size()), show_icons))
+                            if state
+                                .selected
+                                .iter()
+                                .any(|i| i.get_path() == item.get_path())
+                            {
+                                ListItem::new(
+                                    item.to_spans(area.unwrap_or(frame.size()), show_icons),
+                                )
+                                .style(
+                                    Style::default()
+                                        .bg(self.style.selected_element_background)
+                                        .fg(self.style.selected_element_foreground),
+                                )
+                            } else {
+                                ListItem::new(
+                                    item.to_spans(area.unwrap_or(frame.size()), show_icons),
+                                )
+                            }
                         })
                         .collect()
                 };
