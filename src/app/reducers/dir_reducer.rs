@@ -432,7 +432,12 @@ fn rename_dir_in_tab<TFileSystem: Clone + Debug + Default + FileSystem>(
                     file_system,
                     icons,
                 )),
-                Err(_) => {} //TODO: Add error handling
+                Err(_) => result.push(TabState::with_dir(
+                    //TODO: temporary fix add proper error handling in reducers
+                    tab_state.path.as_path(),
+                    file_system,
+                    icons,
+                )),
             }
         } else {
             result.push(tab_state.clone());

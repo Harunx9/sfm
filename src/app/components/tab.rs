@@ -587,7 +587,7 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem>
                     return true;
                 }
 
-                if tab_state.selected.len() == 1 {
+                if tab_state.selected.len() == 1 || tab_state.tab_state.selected().is_none() {
                     if let Some(current_item) = self.current_item() {
                         if state.config.keyboard_cfg.rename.is_pressed(key_evt) && props.is_focused
                         {
