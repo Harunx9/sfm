@@ -145,6 +145,10 @@ impl<TFileSystem: Clone + Default + Debug + FileSystem> PanelComponent<TFileSyst
 impl<TFileSystem: Clone + Debug + Default + FileSystem>
     Component<Event, AppState<TFileSystem>, FileManagerActions> for PanelComponent<TFileSystem>
 {
+    fn on_tick(&mut self, store: &mut Store<AppState<TFileSystem>, FileManagerActions>) {
+        self.tab.on_tick(store);
+    }
+
     fn handle_event(
         &mut self,
         event: Event,

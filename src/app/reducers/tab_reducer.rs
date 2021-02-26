@@ -1,9 +1,11 @@
 use crate::app::{
-    actions::TabAction,
+    actions::{PanelSide, TabAction},
     file_system::FileSystem,
     state::{AppState, PanelState, TabState},
 };
-use std::fmt::Debug;
+use std::{fmt::Debug, path::PathBuf};
+
+use super::reload_tab_with_path;
 
 pub fn tab_reducer<TFileSystem: Clone + Debug + Default + FileSystem>(
     state: AppState<TFileSystem>,
@@ -15,6 +17,40 @@ pub fn tab_reducer<TFileSystem: Clone + Debug + Default + FileSystem>(
         TabAction::SelectNext => select_multiple_next(state),
         TabAction::SelectPrev => select_multiple_prev(state),
         TabAction::ClearSelection => clear_selections(state),
+        TabAction::ReloadTab { panel_side, path } => reload_state_tab(state, panel_side, path),
+    }
+}
+
+fn reload_state_tab<TFileSystem: Clone + Debug + Default + FileSystem>(
+    state: AppState<TFileSystem>,
+    panel_side: PanelSide,
+    path: PathBuf,
+) -> AppState<TFileSystem> {
+    match panel_side {
+        PanelSide::Left => AppState {
+            left_panel: PanelState {
+                tabs: reload_tab_with_path(
+                    path.as_ref(),
+                    state.left_panel.tabs,
+                    &state.file_system,
+                    &state.config.icons,
+                ),
+                ..state.left_panel
+            },
+            ..state
+        },
+        PanelSide::Right => AppState {
+            right_panel: PanelState {
+                tabs: reload_tab_with_path(
+                    path.as_ref(),
+                    state.right_panel.tabs,
+                    &state.file_system,
+                    &state.config.icons,
+                ),
+                ..state.right_panel
+            },
+            ..state
+        },
     }
 }
 

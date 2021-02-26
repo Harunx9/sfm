@@ -58,6 +58,10 @@ pub enum TabAction {
     SelectNext,
     SelectPrev,
     ClearSelection,
+    ReloadTab {
+        panel_side: PanelSide,
+        path: PathBuf,
+    },
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]

@@ -3,6 +3,7 @@ where
     TState: Default + Clone,
     TAction: Clone,
 {
+    is_dirty: bool,
     state: TState,
     root_reducer: RootReducer<TState, TAction>,
     listeners: Vec<Listener<TState>>,
@@ -20,11 +21,24 @@ where
 
     pub fn with_state(root_reducer: RootReducer<TState, TAction>, state: TState) -> Self {
         Store {
+            is_dirty: false,
             state,
             root_reducer,
             listeners: Vec::new(),
             middlewares: Vec::new(),
         }
+    }
+
+    pub fn mark_as_dirty(&mut self) {
+        self.is_dirty = true
+    }
+
+    pub fn clean(&mut self) {
+        self.is_dirty = false
+    }
+
+    pub fn is_dirty(&self) -> bool {
+        self.is_dirty
     }
 
     pub fn get_state(&self) -> TState {
@@ -37,6 +51,7 @@ where
         } else {
             self.state = self.dispatch_reducer(action);
         }
+        self.mark_as_dirty();
     }
 
     pub fn register_listener(&mut self, listener: Listener<TState>) {

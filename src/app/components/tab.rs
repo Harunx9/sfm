@@ -115,6 +115,22 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem> TabComponent<TFileSystem
 impl<TFileSystem: Clone + Debug + Default + FileSystem>
     Component<Event, AppState<TFileSystem>, FileManagerActions> for TabComponent<TFileSystem>
 {
+    fn on_tick(&mut self, store: &mut Store<AppState<TFileSystem>, FileManagerActions>) {
+        let props = self.base.get_props().unwrap();
+        let local_state = props.state.unwrap();
+        let global_state = store.get_state();
+
+        for item in local_state.items.iter() {
+            if global_state.file_system.exist(item.get_path().as_path()) == false {
+                store.dispatch(FileManagerActions::Tab(TabAction::ReloadTab {
+                    panel_side: props.panel_side.unwrap(),
+                    path: local_state.path.clone(),
+                }));
+                return;
+            }
+        }
+    }
+
     fn handle_event(
         &mut self,
         event: Event,

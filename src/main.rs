@@ -15,6 +15,7 @@ use app::{
     reducers::root_reducer,
     state::AppState,
 };
+
 use crossterm::{
     event::{DisableMouseCapture, EnableMouseCapture},
     execute,
@@ -63,7 +64,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
         if let Ok(event) = event_queue.pool() {
             if let Event::Tick = event {
-                root_component.on_tick();
+                root_component.on_tick(&mut store);
             } else {
                 root_component.handle_event(event, &mut store);
             }

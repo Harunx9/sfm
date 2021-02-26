@@ -18,6 +18,7 @@ pub mod functions;
 pub mod symlink_item;
 
 pub trait FileSystem {
+    fn exist<TPath: AsRef<Path>>(&self, path: TPath) -> bool;
     fn get_dir_info<TPath: AsRef<Path>>(&self, path: TPath) -> Option<DirInfo>;
     fn list_dir<TPath: AsRef<Path>>(&self, path: TPath, icons: &IconsConfig)
         -> Vec<FileSystemItem>;
@@ -122,6 +123,10 @@ impl FileSystem for PhysicalFileSystem {
             }
         }
         Ok(0)
+    }
+
+    fn exist<TPath: AsRef<Path>>(&self, path: TPath) -> bool {
+        path.as_ref().exists()
     }
 }
 
