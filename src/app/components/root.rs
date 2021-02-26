@@ -157,6 +157,16 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem> RootComponent<TFileSyste
 impl<TFileSystem: Clone + Debug + Default + FileSystem>
     Component<Event, AppState<TFileSystem>, FileManagerActions> for RootComponent<TFileSystem>
 {
+    fn on_tick(&mut self, store: &mut Store<AppState<TFileSystem>, FileManagerActions>) {
+        self.left_panel.on_tick(store);
+        self.right_panel.on_tick(store);
+
+        if store.is_dirty() {
+            self.map_state(store);
+            store.clean();
+        }
+    }
+
     fn on_init(&mut self, store: &Store<AppState<TFileSystem>, FileManagerActions>) {
         self.map_state(store);
     }
@@ -180,6 +190,7 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem>
                 if let Some(ref mut error_modal) = self.error_modal {
                     let result = error_modal.handle_event(event, store);
                     self.map_state(store);
+                    store.clean();
 
                     return result;
                 }
@@ -187,6 +198,7 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem>
                 if let Some(ref mut non_empty_dir_delete_modal) = self.non_empty_dir_delete_modal {
                     let result = non_empty_dir_delete_modal.handle_event(event, store);
                     self.map_state(store);
+                    store.clean();
 
                     return result;
                 }
@@ -201,6 +213,7 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem>
                 if let Some(ref mut rename_modal) = self.rename_modal {
                     let result = rename_modal.handle_event(event, store);
                     self.map_state(store);
+                    store.clean();
 
                     return result;
                 }
@@ -213,6 +226,8 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem>
                 {
                     store.dispatch(FileManagerActions::App(AppAction::FocusLeft));
                     self.map_state(store);
+                    store.clean();
+
                     return true;
                 }
 
@@ -224,6 +239,8 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem>
                 {
                     store.dispatch(FileManagerActions::App(AppAction::FocusRight));
                     self.map_state(store);
+                    store.clean();
+
                     return true;
                 }
             }
@@ -232,10 +249,13 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem>
         let mut result = self.left_panel.handle_event(event, store);
         if result == true {
             self.map_state(store);
+            store.clean();
+
             return result;
         }
         result = self.right_panel.handle_event(event, store);
         self.map_state(store);
+        store.clean();
 
         result
     }

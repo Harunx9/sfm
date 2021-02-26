@@ -71,8 +71,8 @@ impl EventQueue {
                     continue;
                 }
 
-                match event::poll(timeout) {
-                    Ok(_pool) => match event::read() {
+                if event::poll(timeout).unwrap() {
+                    match event::read() {
                         Ok(event) => {
                             match event {
                                 event::Event::Key(key) => {
@@ -89,11 +89,8 @@ impl EventQueue {
                         Err(_err) => {
                             sender.send(Event::Error(Error::EventReadError)).unwrap();
                         }
-                    },
-                    Err(_err) => {
-                        sender.send(Event::Error(Error::MessagePoolError)).unwrap();
-                    }
-                };
+                    };
+                }
 
                 if last_tick.elapsed() >= tick_rate {
                     sender.send(Event::Tick).unwrap();

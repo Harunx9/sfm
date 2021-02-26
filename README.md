@@ -28,6 +28,7 @@ In order to get icons please install nerd font in your system (on screen Jetbrai
    - Easy toml config file
    - Panel filtering
    - Select multiple items
+   - Auto-reload on dir content change
 
 ## Keyboard config
 

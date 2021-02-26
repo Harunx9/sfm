@@ -12,6 +12,6 @@ where
     fn handle_event(&mut self, _event: TEvent, _store: &mut Store<TGlobalState, TAction>) -> bool {
         true
     }
-    fn on_tick(&mut self) {}
+    fn on_tick(&mut self, _store: &mut Store<TGlobalState, TAction>) {}
     fn render<TBackend: Backend>(&self, frame: &mut Frame<TBackend>, area: Option<Rect>);
 }
