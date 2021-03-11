@@ -31,6 +31,10 @@ pub struct CreateModalProps {
     item_to_symlink: Option<usize>,
     panel_tab: TabIdx,
     dir_path: PathBuf,
+    show_icons: bool,
+    file_icon: String,
+    dir_icon: String,
+    symlink_icon: String,
 }
 
 impl CreateModalProps {
@@ -39,12 +43,20 @@ impl CreateModalProps {
         panel_tab: TabIdx,
         dir_path: PathBuf,
         item_to_symlink: Option<usize>,
+        show_icons: bool,
+        file_icon: String,
+        dir_icon: String,
+        symlink_icon: String,
     ) -> Self {
         Self {
             item_to_symlink,
             panel_side: Some(panel_side),
             panel_tab,
             dir_path,
+            show_icons,
+            file_icon,
+            dir_icon,
+            symlink_icon,
         }
     }
 }

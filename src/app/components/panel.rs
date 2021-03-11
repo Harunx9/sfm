@@ -16,6 +16,7 @@ use crate::{
         state::{AppState, PanelState},
     },
     core::{
+        config::CoreConfig,
         events::Event,
         store::Store,
         ui::{component::Component, component_base::ComponentBase},
@@ -100,6 +101,7 @@ impl<TFileSystem: Clone + Default + Debug + FileSystem> PanelComponent<TFileSyst
         panel_state: PanelState<TFileSystem>,
         side: PanelSide,
         icons: &IconsConfig,
+        core: &CoreConfig,
     ) -> Self {
         let tabs: Vec<_> = panel_state
             .tabs
@@ -130,6 +132,7 @@ impl<TFileSystem: Clone + Default + Debug + FileSystem> PanelComponent<TFileSyst
                 panel_state.is_focused,
                 side,
                 icons.use_icons,
+                core.list_arrow.clone(),
             )),
             None,
         );

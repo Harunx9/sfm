@@ -56,6 +56,8 @@ fn get_default_files_icons() -> HashMap<String, String> {
     icon_map.insert("java".to_string(), "".to_string());
     icon_map.insert("lock".to_string(), "".to_string());
     icon_map.insert("default".to_string(), "".to_string());
+    icon_map.insert("symlink".to_string(), "".to_string());
+    icon_map.insert("warn".to_string(), "".to_string());
 
     icon_map
 }
