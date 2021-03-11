@@ -126,7 +126,11 @@ impl FileSystem for PhysicalFileSystem {
     }
 
     fn exist<TPath: AsRef<Path>>(&self, path: TPath) -> bool {
-        path.as_ref().exists()
+        let path = path.as_ref();
+        if path.is_dir() || path.is_file() {
+            return path.exists();
+        }
+        return true;
     }
 }
 
