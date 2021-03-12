@@ -25,6 +25,7 @@ use super::{
     },
     panel::PanelComponent,
     rename_modal::{RenameModalComponent, RenameModalComponentProps},
+    ModalStyle,
 };
 
 #[derive(Clone, Default)]
@@ -103,6 +104,12 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem> RootComponent<TFileSyste
                                 state.config.icons.get_file_icon("default".to_string()),
                                 state.config.icons.get_dir_icon("default".to_string()),
                                 state.config.icons.get_file_icon("symlink".to_string()),
+                                state.config.core_cfg.list_arrow.clone(),
+                                ModalStyle::new(
+                                    state.config.core_cfg.color_scheme.normal_yellow,
+                                    state.config.core_cfg.color_scheme.light_cyan,
+                                    state.config.core_cfg.color_scheme.normal_black,
+                                ),
                             )));
                     }
                 }
@@ -124,7 +131,16 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem> RootComponent<TFileSyste
                 } => {
                     if self.rename_modal.is_none() {
                         self.rename_modal = Some(RenameModalComponent::with_props(
-                            RenameModalComponentProps::new(Some(item), Some(panel_side), panel_tab),
+                            RenameModalComponentProps::new(
+                                Some(item),
+                                Some(panel_side),
+                                panel_tab,
+                                ModalStyle::new(
+                                    state.config.core_cfg.color_scheme.normal_yellow,
+                                    state.config.core_cfg.color_scheme.light_cyan,
+                                    state.config.core_cfg.color_scheme.normal_black,
+                                ),
+                            ),
                         ));
                     }
                 }
@@ -140,6 +156,12 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem> RootComponent<TFileSyste
                                     Some(panel_side),
                                     panel_tab,
                                     path,
+                                    state.config.core_cfg.list_arrow.clone(),
+                                    ModalStyle::new(
+                                        state.config.core_cfg.color_scheme.normal_yellow,
+                                        state.config.core_cfg.color_scheme.light_cyan,
+                                        state.config.core_cfg.color_scheme.normal_black,
+                                    ),
                                 ),
                             ));
                     }

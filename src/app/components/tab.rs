@@ -74,7 +74,6 @@ pub struct TabStyle {
     active_border_color: Color,
     selected_element_background: Color,
     selected_element_foreground: Color,
-    selected_element_indicator: String,
 }
 
 impl Default for TabStyle {
@@ -83,7 +82,6 @@ impl Default for TabStyle {
             active_border_color: Color::Blue,
             selected_element_background: Color::Red,
             selected_element_foreground: Color::Black,
-            selected_element_indicator: ">>".to_string(),
         }
     }
 }

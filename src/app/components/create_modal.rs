@@ -23,7 +23,7 @@ use crate::{
     },
 };
 
-use super::create_modal_layout;
+use super::{create_modal_layout, ModalStyle};
 
 #[derive(Clone, Default)]
 pub struct CreateModalProps {
@@ -35,6 +35,8 @@ pub struct CreateModalProps {
     file_icon: String,
     dir_icon: String,
     symlink_icon: String,
+    list_selector: String,
+    modal_style: ModalStyle,
 }
 
 impl CreateModalProps {
@@ -47,6 +49,8 @@ impl CreateModalProps {
         file_icon: String,
         dir_icon: String,
         symlink_icon: String,
+        list_selector: String,
+        modal_style: ModalStyle,
     ) -> Self {
         Self {
             item_to_symlink,
@@ -57,6 +61,8 @@ impl CreateModalProps {
             file_icon,
             dir_icon,
             symlink_icon,
+            list_selector,
+            modal_style,
         }
     }
 }
@@ -306,7 +312,7 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem>
                     Span::from(" |"),
                 ]))
                 .borders(Borders::ALL)
-                .border_style(Style::default())
+                .border_style(Style::default().fg(props.modal_style.border_color))
                 .border_type(tui::widgets::BorderType::Thick)
                 .style(Style::default());
 
@@ -317,17 +323,40 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem>
             frame.render_widget(Clear, layout);
             frame.render_widget(paragraph, layout);
         } else {
-            let mut items = vec![
-                ListItem::new(Spans::from(vec![Span::from(
-                    CreateOption::File.to_string(),
-                )])),
-                ListItem::new(Spans::from(vec![Span::from(CreateOption::Dir.to_string())])),
-            ];
+            let mut items = if props.show_icons {
+                vec![
+                    ListItem::new(Spans::from(vec![
+                        Span::from(props.file_icon),
+                        Span::from(" "),
+                        Span::from(CreateOption::File.to_string()),
+                    ])),
+                    ListItem::new(Spans::from(vec![
+                        Span::from(props.dir_icon),
+                        Span::from(" "),
+                        Span::from(CreateOption::Dir.to_string()),
+                    ])),
+                ]
+            } else {
+                vec![
+                    ListItem::new(Spans::from(vec![Span::from(
+                        CreateOption::File.to_string(),
+                    )])),
+                    ListItem::new(Spans::from(vec![Span::from(CreateOption::Dir.to_string())])),
+                ]
+            };
 
             if props.item_to_symlink.is_some() {
-                items.push(ListItem::new(Spans::from(vec![Span::from(
-                    CreateOption::Symlink.to_string(),
-                )])));
+                if props.show_icons {
+                    items.push(ListItem::new(Spans::from(vec![
+                        Span::from(props.symlink_icon),
+                        Span::from(" "),
+                        Span::from(CreateOption::Symlink.to_string()),
+                    ])));
+                } else {
+                    items.push(ListItem::new(Spans::from(vec![Span::from(
+                        CreateOption::Symlink.to_string(),
+                    )])));
+                }
             }
 
             let block = Block::default()
@@ -337,14 +366,18 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem>
                     Span::from(" |"),
                 ]))
                 .borders(Borders::ALL)
-                .border_style(Style::default())
+                .border_style(Style::default().fg(props.modal_style.border_color))
                 .border_type(tui::widgets::BorderType::Thick)
                 .style(Style::default().bg(tui::style::Color::Reset));
 
             let list = List::new(items)
                 .block(block)
-                .highlight_style(Style::default())
-                .highlight_symbol(">>");
+                .highlight_style(
+                    Style::default()
+                        .fg(props.modal_style.selected_element_foreground)
+                        .bg(props.modal_style.selected_element_background),
+                )
+                .highlight_symbol(props.list_selector.as_str());
 
             frame.render_widget(Clear, layout);
             frame.render_stateful_widget(list, layout, &mut local_state.list_state);

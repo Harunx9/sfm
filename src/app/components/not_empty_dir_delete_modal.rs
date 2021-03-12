@@ -24,21 +24,31 @@ use crate::{
 };
 use std::{fmt::Debug, marker::PhantomData, path::PathBuf};
 
-use super::create_modal_layout;
+use super::{create_modal_layout, ModalStyle};
 
 #[derive(Clone, Default)]
 pub struct NotEmptyDirDeleteModalComponentProps {
     panel_side: Option<PanelSide>,
     panel_tab: TabIdx,
     path: PathBuf,
+    list_selector: String,
+    modal_style: ModalStyle,
 }
 
 impl NotEmptyDirDeleteModalComponentProps {
-    pub fn new(panel_side: Option<PanelSide>, panel_tab: TabIdx, path: PathBuf) -> Self {
+    pub fn new(
+        panel_side: Option<PanelSide>,
+        panel_tab: TabIdx,
+        path: PathBuf,
+        list_selector: String,
+        modal_style: ModalStyle,
+    ) -> Self {
         NotEmptyDirDeleteModalComponentProps {
             panel_side,
             panel_tab,
             path,
+            list_selector,
+            modal_style,
         }
     }
 }
@@ -191,6 +201,7 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem>
             create_modal_layout(50, 10, frame.size())
         };
 
+        let props = self.base.get_props().unwrap();
         let mut local_state = self.base.get_state().unwrap();
 
         let items = vec![
@@ -205,14 +216,18 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem>
                 Span::from(" |"),
             ]))
             .borders(Borders::ALL)
-            .border_style(Style::default())
+            .border_style(Style::default().fg(props.modal_style.border_color))
             .border_type(tui::widgets::BorderType::Thick)
             .style(Style::default().bg(tui::style::Color::Reset));
 
         let list = List::new(items)
             .block(block)
-            .highlight_style(Style::default())
-            .highlight_symbol(">>");
+            .highlight_style(
+                Style::default()
+                    .bg(props.modal_style.selected_element_background)
+                    .fg(props.modal_style.selected_element_foreground),
+            )
+            .highlight_symbol(props.list_selector.as_str());
 
         frame.render_widget(Clear, layout);
         frame.render_stateful_widget(list, layout, &mut local_state.list_state);

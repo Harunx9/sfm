@@ -1,4 +1,7 @@
-use tui::layout::{Constraint, Direction, Layout, Rect};
+use tui::{
+    layout::{Constraint, Direction, Layout, Rect},
+    style::Color,
+};
 
 pub mod create_modal;
 pub mod error_modal;
@@ -32,4 +35,35 @@ fn create_modal_layout(x_percent: u16, y_percent: u16, rect: Rect) -> Rect {
             .as_ref(),
         )
         .split(vertical_slice[1])[1]
+}
+
+#[derive(Clone)]
+pub struct ModalStyle {
+    pub border_color: Color,
+    pub selected_element_background: Color,
+    pub selected_element_foreground: Color,
+}
+
+impl ModalStyle {
+    pub fn new(
+        border_color: Color,
+        selected_element_background: Color,
+        selected_element_foreground: Color,
+    ) -> Self {
+        Self {
+            border_color,
+            selected_element_background,
+            selected_element_foreground,
+        }
+    }
+}
+
+impl Default for ModalStyle {
+    fn default() -> Self {
+        ModalStyle {
+            border_color: Color::Red,
+            selected_element_background: Color::Yellow,
+            selected_element_foreground: Color::Black,
+        }
+    }
 }
