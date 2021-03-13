@@ -22,13 +22,14 @@ use crate::{
     },
 };
 
-use super::create_modal_layout;
+use super::{create_modal_layout, ModalStyle};
 
-#[derive(Clone, Default, Debug)]
+#[derive(Clone, Default)]
 pub struct RenameModalComponentProps {
     item_to_rename: Option<FileSystemItem>,
     panel_side: Option<PanelSide>,
     panel_tab: TabIdx,
+    modal_style: ModalStyle,
 }
 
 impl RenameModalComponentProps {
@@ -36,11 +37,13 @@ impl RenameModalComponentProps {
         item_to_rename: Option<FileSystemItem>,
         panel_side: Option<PanelSide>,
         panel_tab: TabIdx,
+        modal_style: ModalStyle,
     ) -> Self {
         Self {
             item_to_rename,
             panel_side,
             panel_tab,
+            modal_style,
         }
     }
 }

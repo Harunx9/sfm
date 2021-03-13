@@ -34,6 +34,7 @@ pub struct TabComponentProps<TFileSystem: Clone + Debug + Default + FileSystem> 
     is_focused: bool,
     panel_side: Option<PanelSide>,
     show_icons: bool,
+    list_arrow: String,
 }
 
 impl<TFileSystem: Clone + Debug + Default + FileSystem> Default for TabComponentProps<TFileSystem> {
@@ -44,6 +45,7 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem> Default for TabComponent
             is_focused: false,
             panel_side: None,
             show_icons: false,
+            list_arrow: ">>".to_string(),
         }
     }
 }
@@ -55,6 +57,7 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem> TabComponentProps<TFileS
         is_focused: bool,
         panel_side: PanelSide,
         show_icons: bool,
+        list_arrow: String,
     ) -> Self {
         TabComponentProps {
             state: Some(state),
@@ -62,6 +65,7 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem> TabComponentProps<TFileS
             is_focused,
             panel_side: Some(panel_side),
             show_icons,
+            list_arrow,
         }
     }
 }
@@ -70,7 +74,6 @@ pub struct TabStyle {
     active_border_color: Color,
     selected_element_background: Color,
     selected_element_foreground: Color,
-    selected_element_indicator: String,
 }
 
 impl Default for TabStyle {
@@ -79,7 +82,6 @@ impl Default for TabStyle {
             active_border_color: Color::Blue,
             selected_element_background: Color::Red,
             selected_element_foreground: Color::Black,
-            selected_element_indicator: ">>".to_string(),
         }
     }
 }
@@ -750,7 +752,7 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem>
                                 .bg(self.style.selected_element_background)
                                 .fg(self.style.selected_element_foreground),
                         )
-                        .highlight_symbol(self.style.selected_element_indicator.as_str());
+                        .highlight_symbol(tab_props.list_arrow.as_str());
 
                     frame.render_stateful_widget(focused_list, layout[0], &mut state.tab_state);
                 } else {

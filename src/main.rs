@@ -42,7 +42,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let backend = CrosstermBackend::new(stdout);
 
     let mut terminal = Terminal::new(backend)?;
-    let mut event_queue = EventQueue::start_with_config(cfg.core_cfg);
+    let mut event_queue = EventQueue::start_with_config(cfg.core_cfg.clone());
 
     let mut store = Store::<AppState<PhysicalFileSystem>, FileManagerActions>::with_state(
         root_reducer,

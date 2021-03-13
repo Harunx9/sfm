@@ -22,12 +22,16 @@ use super::create_modal_layout;
 #[derive(Clone, Default)]
 pub struct ErrorModalComponentProps {
     message: Option<String>,
+    show_icons: bool,
+    error_icon: String,
 }
 
 impl ErrorModalComponentProps {
-    pub fn new(message: String) -> Self {
+    pub fn new(message: String, show_icons: bool, error_icon: String) -> Self {
         ErrorModalComponentProps {
             message: Some(message),
+            show_icons,
+            error_icon,
         }
     }
 }
