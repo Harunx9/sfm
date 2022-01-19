@@ -45,7 +45,7 @@ impl<TFileSystem: Clone + Debug + Default + FileSystem> Default for TabComponent
             is_focused: false,
             panel_side: None,
             show_icons: false,
-            list_arrow: ">>".to_string(),
+            list_arrow: "".to_string(),
         }
     }
 }

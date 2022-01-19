@@ -14,7 +14,7 @@ impl Default for CoreConfig {
         CoreConfig {
             tick_rate: 240,
             color_scheme: ColorScheme::default(),
-            list_arrow: ">>".to_string(),
+            list_arrow: "".to_string(),
         }
     }
 }
