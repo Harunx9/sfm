@@ -19,6 +19,13 @@ impl KeyBinding {
     }
 
     pub fn is_pressed(&self, key_evt: KeyEvent) -> bool {
-        self.modifiers == key_evt.modifiers && self.key == key_evt.code
+        match key_evt.code {
+            KeyCode::Char(ch) => {
+                self.modifiers == key_evt.modifiers
+                    && self.key
+                        == KeyCode::Char(ch.to_lowercase().to_string().chars().next().unwrap())
+            }
+            _ => self.modifiers == key_evt.modifiers && self.key == key_evt.code,
+        }
     }
 }
